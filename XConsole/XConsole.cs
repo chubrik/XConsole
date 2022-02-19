@@ -45,7 +45,7 @@ namespace System
                         if (key == ConsoleKey.Backspace && pass.Length > 0)
                         {
                             Console.Write("\b \b");
-                            pass = pass[0..^1];
+                            pass = pass.Substring(0, pass.Length - 1);
                         }
                         else if (!char.IsControl(keyInfo.KeyChar))
                         {
@@ -132,7 +132,7 @@ namespace System
                 return new(string.Empty, _noColor, _noColor);
 
             if (value[0] == '`')
-                return new(value[1..], _noColor, _noColor);
+                return new(value.Substring(1), _noColor, _noColor);
 
             if (value.Length == 1)
                 return new(value, _noColor, _noColor);
@@ -140,22 +140,22 @@ namespace System
             if (value[1] == '`')
                 return value[0] switch
                 {
-                    'W' => new(value[2..], _noColor, ConsoleColor.White),
-                    'Y' => new(value[2..], _noColor, ConsoleColor.Yellow),
-                    'C' => new(value[2..], _noColor, ConsoleColor.Cyan),
-                    'G' => new(value[2..], _noColor, ConsoleColor.Green),
-                    'M' => new(value[2..], _noColor, ConsoleColor.Magenta),
-                    'R' => new(value[2..], _noColor, ConsoleColor.Red),
-                    'B' => new(value[2..], _noColor, ConsoleColor.Blue),
-                    'w' => new(value[2..], _noColor, ConsoleColor.Gray),
-                    'y' => new(value[2..], _noColor, ConsoleColor.DarkYellow),
-                    'c' => new(value[2..], _noColor, ConsoleColor.DarkCyan),
-                    'g' => new(value[2..], _noColor, ConsoleColor.DarkGreen),
-                    'm' => new(value[2..], _noColor, ConsoleColor.DarkMagenta),
-                    'r' => new(value[2..], _noColor, ConsoleColor.DarkRed),
-                    'b' => new(value[2..], _noColor, ConsoleColor.DarkBlue),
-                    'd' => new(value[2..], _noColor, ConsoleColor.DarkGray),
-                    'n' => new(value[2..], _noColor, ConsoleColor.Black),
+                    'W' => new(value.Substring(2), _noColor, ConsoleColor.White),
+                    'Y' => new(value.Substring(2), _noColor, ConsoleColor.Yellow),
+                    'C' => new(value.Substring(2), _noColor, ConsoleColor.Cyan),
+                    'G' => new(value.Substring(2), _noColor, ConsoleColor.Green),
+                    'M' => new(value.Substring(2), _noColor, ConsoleColor.Magenta),
+                    'R' => new(value.Substring(2), _noColor, ConsoleColor.Red),
+                    'B' => new(value.Substring(2), _noColor, ConsoleColor.Blue),
+                    'w' => new(value.Substring(2), _noColor, ConsoleColor.Gray),
+                    'y' => new(value.Substring(2), _noColor, ConsoleColor.DarkYellow),
+                    'c' => new(value.Substring(2), _noColor, ConsoleColor.DarkCyan),
+                    'g' => new(value.Substring(2), _noColor, ConsoleColor.DarkGreen),
+                    'm' => new(value.Substring(2), _noColor, ConsoleColor.DarkMagenta),
+                    'r' => new(value.Substring(2), _noColor, ConsoleColor.DarkRed),
+                    'b' => new(value.Substring(2), _noColor, ConsoleColor.DarkBlue),
+                    'd' => new(value.Substring(2), _noColor, ConsoleColor.DarkGray),
+                    'n' => new(value.Substring(2), _noColor, ConsoleColor.Black),
                     _ => new(value, _noColor, _noColor),
                 };
 
@@ -189,23 +189,23 @@ namespace System
 
                 return value[1] switch
                 {
-                    'W' => new(value[3..], bgColor, ConsoleColor.White),
-                    'Y' => new(value[3..], bgColor, ConsoleColor.Yellow),
-                    'C' => new(value[3..], bgColor, ConsoleColor.Cyan),
-                    'G' => new(value[3..], bgColor, ConsoleColor.Green),
-                    'M' => new(value[3..], bgColor, ConsoleColor.Magenta),
-                    'R' => new(value[3..], bgColor, ConsoleColor.Red),
-                    'B' => new(value[3..], bgColor, ConsoleColor.Blue),
-                    'w' => new(value[3..], bgColor, ConsoleColor.Gray),
-                    'y' => new(value[3..], bgColor, ConsoleColor.DarkYellow),
-                    'c' => new(value[3..], bgColor, ConsoleColor.DarkCyan),
-                    'g' => new(value[3..], bgColor, ConsoleColor.DarkGreen),
-                    'm' => new(value[3..], bgColor, ConsoleColor.DarkMagenta),
-                    'r' => new(value[3..], bgColor, ConsoleColor.DarkRed),
-                    'b' => new(value[3..], bgColor, ConsoleColor.DarkBlue),
-                    'd' => new(value[3..], bgColor, ConsoleColor.DarkGray),
-                    'n' => new(value[3..], bgColor, ConsoleColor.Black),
-                    ' ' => new(value[3..], bgColor, _noColor),
+                    'W' => new(value.Substring(3), bgColor, ConsoleColor.White),
+                    'Y' => new(value.Substring(3), bgColor, ConsoleColor.Yellow),
+                    'C' => new(value.Substring(3), bgColor, ConsoleColor.Cyan),
+                    'G' => new(value.Substring(3), bgColor, ConsoleColor.Green),
+                    'M' => new(value.Substring(3), bgColor, ConsoleColor.Magenta),
+                    'R' => new(value.Substring(3), bgColor, ConsoleColor.Red),
+                    'B' => new(value.Substring(3), bgColor, ConsoleColor.Blue),
+                    'w' => new(value.Substring(3), bgColor, ConsoleColor.Gray),
+                    'y' => new(value.Substring(3), bgColor, ConsoleColor.DarkYellow),
+                    'c' => new(value.Substring(3), bgColor, ConsoleColor.DarkCyan),
+                    'g' => new(value.Substring(3), bgColor, ConsoleColor.DarkGreen),
+                    'm' => new(value.Substring(3), bgColor, ConsoleColor.DarkMagenta),
+                    'r' => new(value.Substring(3), bgColor, ConsoleColor.DarkRed),
+                    'b' => new(value.Substring(3), bgColor, ConsoleColor.DarkBlue),
+                    'd' => new(value.Substring(3), bgColor, ConsoleColor.DarkGray),
+                    'n' => new(value.Substring(3), bgColor, ConsoleColor.Black),
+                    ' ' => new(value.Substring(3), bgColor, _noColor),
                     _ => new(value, _noColor, _noColor),
                 };
             }
