@@ -5,7 +5,22 @@
 	<LangVersion>latest</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>0.1.0</Version>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <Authors>Arkadi Chubrik</Authors>
+    <Copyright>© 2022 Arkadi Chubrik</Copyright>
+    <Description>Colored .NET console with microsyntax</Description>
+    <PackageTags>colored dotnet console microsyntax</PackageTags>
+    <PackageProjectUrl>https://github.com/chubrik/XConsole</PackageProjectUrl>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <Version>0.1.1</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\icon.png" Pack="true" PackagePath="" />
+    <None Include="..\LICENSE" Pack="true" PackagePath="" />
+  </ItemGroup>
 
 </Project>
