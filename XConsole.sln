@@ -5,12 +5,7 @@ VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XConsole", "XConsole\XConsole.csproj", "{3677A761-606C-4EFC-81B5-5D3F6CDCF3D4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XConsole.Tests", "XConsole.Tests\XConsole.Tests.csproj", "{36539157-A00F-4882-8940-37F2E7262790}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{68F4BA00-87D6-4B0D-BD61-3548343C0EEB}"
-	ProjectSection(SolutionItems) = preProject
-		.editorconfig = .editorconfig
-	EndProjectSection
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XConsole.Demo", "XConsole.Demo\XConsole.Demo.csproj", "{36539157-A00F-4882-8940-37F2E7262790}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

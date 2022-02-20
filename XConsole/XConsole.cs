@@ -1,11 +1,12 @@
 ﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace System
 {
     public static class XConsole
     {
         private static readonly object _lock = new();
-        private static readonly ConsoleColor _noColor = (ConsoleColor)(-1);
+        private static readonly bool _isWindows = OperatingSystem.IsWindows();
 
         public static ConsoleColor BackgroundColor
         {
@@ -21,7 +22,7 @@ namespace System
 
         public static int WindowWidth => Console.WindowWidth;
 
-        #region ReadKey, ReadLine
+        #region Read
 
         public static ConsoleKeyInfo ReadKey() { lock (_lock) return Console.ReadKey(); }
         public static ConsoleKeyInfo ReadKey(bool intercept) { lock (_lock) return Console.ReadKey(intercept); }
@@ -45,7 +46,7 @@ namespace System
                         if (key == ConsoleKey.Backspace && pass.Length > 0)
                         {
                             Console.Write("\b \b");
-                            pass = pass.Substring(0, pass.Length - 1);
+                            pass = pass[0..^1];
                         }
                         else if (!char.IsControl(keyInfo.KeyChar))
                         {
@@ -63,40 +64,110 @@ namespace System
 
         #endregion
 
-        #region Write, WriteLine
+        #region Write
 
-        public static void Write(params string[] values) => Write(values, isNewLineOnEnd: false);
-
-        public static void WriteLine(params string[] values) => Write(values, isNewLineOnEnd: true);
-
-        private static void Write(IReadOnlyList<string> values, bool isNewLineOnEnd)
+        public static (XConsolePosition Start, XConsolePosition End) Write(params string[] values)
         {
-            if (values.Count > 0)
-            {
-                var logItems = values.Select(Parse).Where(i => i.Value.Length > 0).ToList();
+            if (values.Length > 0)
+                return Write(values, isWriteLine: false);
 
-                lock (_lock)
-                {
-                    if (logItems.Count > 0)
-                        foreach (var logItem in logItems)
-                            WriteCore(logItem);
-
-                    if (isNewLineOnEnd)
-                        Console.WriteLine();
-                }
-            }
-            else if (isNewLineOnEnd)
-                lock (_lock)
-                    Console.WriteLine();
+            var (left, top) = Console.GetCursorPosition();
+            return (new(left: left, top: top), new(left: left, top: top));
         }
 
-        private static void WriteCore(Item item)
+        public static (XConsolePosition Start, XConsolePosition End) WriteLine(params string[] values)
+        {
+            if (values.Length > 0)
+                return Write(values, isWriteLine: true);
+
+            int left, top;
+
+            lock (_lock)
+            {
+                (left, top) = Console.GetCursorPosition();
+                Console.WriteLine();
+            }
+
+            return (new(left: left, top: top), new(left: 0, top: top + 1));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static (XConsolePosition Start, XConsolePosition End) Write(IReadOnlyList<string> values, bool isWriteLine)
+        {
+            Debug.Assert(values.Count > 0);
+
+            var items = values.Select(XConsoleItem.Parse).Where(i => i.Value.Length > 0).ToList();
+
+            lock (_lock)
+            {
+#pragma warning disable CA1416 // Validate platform compatibility
+                var origVisible = _isWindows && Console.CursorVisible;
+#pragma warning restore CA1416 // Validate platform compatibility
+
+                var (startLeft, startTop) = Console.GetCursorPosition();
+                Console.CursorVisible = false;
+
+                try
+                {
+                    foreach (var item in items)
+                        WriteItem(item);
+
+                    if (isWriteLine)
+                        Console.WriteLine();
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    // do nothing
+                }
+
+                var (endLeft, endTop) = Console.GetCursorPosition();
+                Console.CursorVisible = origVisible;
+                return (new(left: startLeft, top: startTop), new(left: endLeft, top: endTop));
+            }
+        }
+
+        internal static XConsolePosition WriteToPosition(IReadOnlyList<string> values, int left, int top)
+        {
+            Debug.Assert(values.Count > 0);
+
+            var items = values.Select(XConsoleItem.Parse).Where(i => i.Value.Length > 0).ToList();
+
+            lock (_lock)
+            {
+#pragma warning disable CA1416 // Validate platform compatibility
+                var origVisible = _isWindows && Console.CursorVisible;
+#pragma warning restore CA1416 // Validate platform compatibility
+
+                var (origLeft, origTop) = Console.GetCursorPosition();
+                Console.CursorVisible = false;
+
+                try
+                {
+                    Console.SetCursorPosition(left, top);
+
+                    foreach (var item in items)
+                        WriteItem(item);
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    // do nothing
+                }
+
+                var (endLeft, endTop) = Console.GetCursorPosition();
+                Console.SetCursorPosition(origLeft, origTop);
+                Console.CursorVisible = origVisible;
+                return new(left: endLeft, top: endTop);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void WriteItem(XConsoleItem item)
         {
             Debug.Assert(item.Value.Length > 0);
 
-            if (item.BgColor != _noColor)
+            if (item.BgColor != XConsoleItem.NoColor)
             {
-                if (item.FgColor != _noColor)
+                if (item.FgColor != XConsoleItem.NoColor)
                 {
                     var origBgColor = Console.BackgroundColor;
                     var origFgColor = Console.ForegroundColor;
@@ -114,8 +185,7 @@ namespace System
                     Console.BackgroundColor = origBgColor;
                 }
             }
-            else
-            if (item.FgColor != _noColor)
+            else if (item.FgColor != XConsoleItem.NoColor)
             {
                 var origFgColor = Console.ForegroundColor;
                 Console.ForegroundColor = item.FgColor;
@@ -124,107 +194,6 @@ namespace System
             }
             else
                 Console.Write(item.Value);
-        }
-
-        private static Item Parse(string value)
-        {
-            if (value.Length == 0)
-                return new(string.Empty, _noColor, _noColor);
-
-            if (value[0] == '`')
-                return new(value.Substring(1), _noColor, _noColor);
-
-            if (value.Length == 1)
-                return new(value, _noColor, _noColor);
-
-            if (value[1] == '`')
-                return value[0] switch
-                {
-                    'W' => new(value.Substring(2), _noColor, ConsoleColor.White),
-                    'Y' => new(value.Substring(2), _noColor, ConsoleColor.Yellow),
-                    'C' => new(value.Substring(2), _noColor, ConsoleColor.Cyan),
-                    'G' => new(value.Substring(2), _noColor, ConsoleColor.Green),
-                    'M' => new(value.Substring(2), _noColor, ConsoleColor.Magenta),
-                    'R' => new(value.Substring(2), _noColor, ConsoleColor.Red),
-                    'B' => new(value.Substring(2), _noColor, ConsoleColor.Blue),
-                    'w' => new(value.Substring(2), _noColor, ConsoleColor.Gray),
-                    'y' => new(value.Substring(2), _noColor, ConsoleColor.DarkYellow),
-                    'c' => new(value.Substring(2), _noColor, ConsoleColor.DarkCyan),
-                    'g' => new(value.Substring(2), _noColor, ConsoleColor.DarkGreen),
-                    'm' => new(value.Substring(2), _noColor, ConsoleColor.DarkMagenta),
-                    'r' => new(value.Substring(2), _noColor, ConsoleColor.DarkRed),
-                    'b' => new(value.Substring(2), _noColor, ConsoleColor.DarkBlue),
-                    'd' => new(value.Substring(2), _noColor, ConsoleColor.DarkGray),
-                    'n' => new(value.Substring(2), _noColor, ConsoleColor.Black),
-                    _ => new(value, _noColor, _noColor),
-                };
-
-            if (value.Length == 2)
-                return new(value, _noColor, _noColor);
-
-            if (value[2] == '`')
-            {
-                ConsoleColor bgColor;
-
-                switch (value[0])
-                {
-                    case 'W': bgColor = ConsoleColor.White; break;
-                    case 'Y': bgColor = ConsoleColor.Yellow; break;
-                    case 'C': bgColor = ConsoleColor.Cyan; break;
-                    case 'G': bgColor = ConsoleColor.Green; break;
-                    case 'M': bgColor = ConsoleColor.Magenta; break;
-                    case 'R': bgColor = ConsoleColor.Red; break;
-                    case 'B': bgColor = ConsoleColor.Blue; break;
-                    case 'w': bgColor = ConsoleColor.Gray; break;
-                    case 'y': bgColor = ConsoleColor.DarkYellow; break;
-                    case 'c': bgColor = ConsoleColor.DarkCyan; break;
-                    case 'g': bgColor = ConsoleColor.DarkGreen; break;
-                    case 'm': bgColor = ConsoleColor.DarkMagenta; break;
-                    case 'r': bgColor = ConsoleColor.DarkRed; break;
-                    case 'b': bgColor = ConsoleColor.DarkBlue; break;
-                    case 'd': bgColor = ConsoleColor.DarkGray; break;
-                    case 'n': bgColor = ConsoleColor.Black; break;
-                    default: return new(value, _noColor, _noColor);
-                }
-
-                return value[1] switch
-                {
-                    'W' => new(value.Substring(3), bgColor, ConsoleColor.White),
-                    'Y' => new(value.Substring(3), bgColor, ConsoleColor.Yellow),
-                    'C' => new(value.Substring(3), bgColor, ConsoleColor.Cyan),
-                    'G' => new(value.Substring(3), bgColor, ConsoleColor.Green),
-                    'M' => new(value.Substring(3), bgColor, ConsoleColor.Magenta),
-                    'R' => new(value.Substring(3), bgColor, ConsoleColor.Red),
-                    'B' => new(value.Substring(3), bgColor, ConsoleColor.Blue),
-                    'w' => new(value.Substring(3), bgColor, ConsoleColor.Gray),
-                    'y' => new(value.Substring(3), bgColor, ConsoleColor.DarkYellow),
-                    'c' => new(value.Substring(3), bgColor, ConsoleColor.DarkCyan),
-                    'g' => new(value.Substring(3), bgColor, ConsoleColor.DarkGreen),
-                    'm' => new(value.Substring(3), bgColor, ConsoleColor.DarkMagenta),
-                    'r' => new(value.Substring(3), bgColor, ConsoleColor.DarkRed),
-                    'b' => new(value.Substring(3), bgColor, ConsoleColor.DarkBlue),
-                    'd' => new(value.Substring(3), bgColor, ConsoleColor.DarkGray),
-                    'n' => new(value.Substring(3), bgColor, ConsoleColor.Black),
-                    ' ' => new(value.Substring(3), bgColor, _noColor),
-                    _ => new(value, _noColor, _noColor),
-                };
-            }
-
-            return new(value, _noColor, _noColor);
-        }
-
-        private struct Item
-        {
-            public string Value;
-            public readonly ConsoleColor BgColor;
-            public readonly ConsoleColor FgColor;
-
-            public Item(string value, ConsoleColor bgColor, ConsoleColor fgColor)
-            {
-                Value = value;
-                BgColor = bgColor;
-                FgColor = fgColor;
-            }
         }
 
         #endregion
