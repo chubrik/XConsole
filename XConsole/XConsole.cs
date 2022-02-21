@@ -58,8 +58,8 @@ namespace System
 
                 return pass;
             }
-            else
-                return ReadLine();
+
+            return Console.ReadLine() ?? string.Empty;
         }
 
         #endregion
@@ -68,27 +68,39 @@ namespace System
 
         public static (XConsolePosition Start, XConsolePosition End) Write(params string[] values)
         {
-            if (values.Length > 0)
-                return Write(values, isWriteLine: false);
+            if (values.Length == 0)
+            {
+                int left, top;
 
-            var (left, top) = Console.GetCursorPosition();
-            return (new(left: left, top: top), new(left: left, top: top));
+                lock (_lock)
+                {
+                    left = Console.CursorLeft;
+                    top = Console.WindowTop;
+                }
+
+                return (new(left: left, top: top), new(left: left, top: top));
+            }
+
+            return Write(values, isWriteLine: false);
         }
 
         public static (XConsolePosition Start, XConsolePosition End) WriteLine(params string[] values)
         {
-            if (values.Length > 0)
-                return Write(values, isWriteLine: true);
-
-            int left, top;
-
-            lock (_lock)
+            if (values.Length == 0)
             {
-                (left, top) = Console.GetCursorPosition();
-                Console.WriteLine();
+                int left, top;
+
+                lock (_lock)
+                {
+                    left = Console.CursorLeft;
+                    top = Console.WindowTop;
+                    Console.WriteLine();
+                }
+
+                return (new(left: left, top: top), new(left: 0, top: top + 1));
             }
 
-            return (new(left: left, top: top), new(left: 0, top: top + 1));
+            return Write(values, isWriteLine: true);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -104,24 +116,19 @@ namespace System
                 var origVisible = _isWindows && Console.CursorVisible;
 #pragma warning restore CA1416 // Validate platform compatibility
 
-                var (startLeft, startTop) = Console.GetCursorPosition();
+                var startLeft = Console.CursorLeft;
+                var startTop = Console.CursorTop;
                 Console.CursorVisible = false;
 
-                try
-                {
-                    foreach (var item in items)
-                        WriteItem(item);
+                foreach (var item in items)
+                    WriteItem(item);
 
-                    if (isWriteLine)
-                        Console.WriteLine();
-                }
-                catch (ArgumentOutOfRangeException)
-                {
-                    // do nothing
-                }
+                if (isWriteLine)
+                    Console.WriteLine();
 
-                var (endLeft, endTop) = Console.GetCursorPosition();
                 Console.CursorVisible = origVisible;
+                var endLeft = Console.CursorLeft;
+                var endTop = Console.CursorTop;
                 return (new(left: startLeft, top: startTop), new(left: endLeft, top: endTop));
             }
         }
@@ -138,22 +145,24 @@ namespace System
                 var origVisible = _isWindows && Console.CursorVisible;
 #pragma warning restore CA1416 // Validate platform compatibility
 
-                var (origLeft, origTop) = Console.GetCursorPosition();
+                var origLeft = Console.CursorLeft;
+                var origTop = Console.CursorTop;
                 Console.CursorVisible = false;
 
                 try
                 {
                     Console.SetCursorPosition(left, top);
-
-                    foreach (var item in items)
-                        WriteItem(item);
                 }
                 catch (ArgumentOutOfRangeException)
                 {
                     // do nothing
                 }
 
-                var (endLeft, endTop) = Console.GetCursorPosition();
+                foreach (var item in items)
+                    WriteItem(item);
+
+                var endLeft = Console.CursorLeft;
+                var endTop = Console.CursorTop;
                 Console.SetCursorPosition(origLeft, origTop);
                 Console.CursorVisible = origVisible;
                 return new(left: endLeft, top: endTop);
@@ -165,9 +174,30 @@ namespace System
         {
             Debug.Assert(item.Value.Length > 0);
 
-            if (item.BgColor != XConsoleItem.NoColor)
+            if (item.BgColor == XConsoleItem.NoColor)
             {
-                if (item.FgColor != XConsoleItem.NoColor)
+                if (item.FgColor == XConsoleItem.NoColor)
+                {
+                    Console.Write(item.Value);
+                }
+                else
+                {
+                    var origFgColor = Console.ForegroundColor;
+                    Console.ForegroundColor = item.FgColor;
+                    Console.Write(item.Value);
+                    Console.ForegroundColor = origFgColor;
+                }
+            }
+            else
+            {
+                if (item.FgColor == XConsoleItem.NoColor)
+                {
+                    var origBgColor = Console.BackgroundColor;
+                    Console.BackgroundColor = item.BgColor;
+                    Console.Write(item.Value);
+                    Console.BackgroundColor = origBgColor;
+                }
+                else
                 {
                     var origBgColor = Console.BackgroundColor;
                     var origFgColor = Console.ForegroundColor;
@@ -177,23 +207,7 @@ namespace System
                     Console.BackgroundColor = origBgColor;
                     Console.ForegroundColor = origFgColor;
                 }
-                else
-                {
-                    var origBgColor = Console.BackgroundColor;
-                    Console.BackgroundColor = item.BgColor;
-                    Console.Write(item.Value);
-                    Console.BackgroundColor = origBgColor;
-                }
             }
-            else if (item.FgColor != XConsoleItem.NoColor)
-            {
-                var origFgColor = Console.ForegroundColor;
-                Console.ForegroundColor = item.FgColor;
-                Console.Write(item.Value);
-                Console.ForegroundColor = origFgColor;
-            }
-            else
-                Console.Write(item.Value);
         }
 
         #endregion

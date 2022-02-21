@@ -7,6 +7,10 @@ Console.WriteLine();
 
 Console.WriteLine("d`##########");
 var (start, end) = Console.Write("d`##########");
-Console.WriteLine();
+Console.WriteLine(); 
 start.Write("Start");
 end.Write("End");
+
+//
+
+new XConsolePosition(5, 10).Write("Custom position");
