@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Runtime.CompilerServices;
 
 namespace System
 {
@@ -7,6 +6,7 @@ namespace System
     {
         private static readonly object _lock = new();
         private static readonly bool _isWindows = OperatingSystem.IsWindows();
+        private static readonly string _newLine = Environment.NewLine;
 
         public static ConsoleColor BackgroundColor
         {
@@ -81,7 +81,7 @@ namespace System
                 return (new(left: left, top: top), new(left: left, top: top));
             }
 
-            return Write(values, isWriteLine: false);
+            return WriteBase(values);
         }
 
         public static (XConsolePosition Start, XConsolePosition End) WriteLine(params string[] values)
@@ -100,11 +100,11 @@ namespace System
                 return (new(left: left, top: top), new(left: 0, top: top + 1));
             }
 
-            return Write(values, isWriteLine: true);
+            values[^1] += _newLine;
+            return WriteBase(values);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static (XConsolePosition Start, XConsolePosition End) Write(IReadOnlyList<string> values, bool isWriteLine)
+        private static (XConsolePosition Start, XConsolePosition End) WriteBase(IReadOnlyList<string> values)
         {
             Debug.Assert(values.Count > 0);
 
@@ -122,9 +122,6 @@ namespace System
 
                 foreach (var item in items)
                     WriteItem(item);
-
-                if (isWriteLine)
-                    Console.WriteLine();
 
                 Console.CursorVisible = origVisible;
                 var endLeft = Console.CursorLeft;
@@ -169,7 +166,6 @@ namespace System
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void WriteItem(XConsoleItem item)
         {
             Debug.Assert(item.Value.Length > 0);
