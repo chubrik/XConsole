@@ -66,68 +66,122 @@ namespace System
 
         #region Write
 
-        public static (XConsolePosition Start, XConsolePosition End) Write(params string[] values)
+        public static (XConsolePosition Begin, XConsolePosition End) Write(params string[] values)
         {
-            if (values.Length == 0)
-            {
-                int left, top;
-
-                lock (_lock)
-                {
-                    left = Console.CursorLeft;
-                    top = Console.WindowTop;
-                }
-
-                return (new(left: left, top: top), new(left: left, top: top));
-            }
-
-            return WriteBase(values);
+            return WriteBase(values, isWriteLine: false);
         }
 
-        public static (XConsolePosition Start, XConsolePosition End) WriteLine(params string[] values)
+        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(params string[] values)
         {
-            if (values.Length == 0)
-            {
-                int left, top;
-
-                lock (_lock)
-                {
-                    left = Console.CursorLeft;
-                    top = Console.WindowTop;
-                    Console.WriteLine();
-                }
-
-                return (new(left: left, top: top), new(left: 0, top: top + 1));
-            }
-
-            values[^1] += _newLine;
-            return WriteBase(values);
+            return WriteBase(values, isWriteLine: true);
         }
 
-        private static (XConsolePosition Start, XConsolePosition End) WriteBase(IReadOnlyList<string> values)
+        private static (XConsolePosition Begin, XConsolePosition End) WriteBase(IReadOnlyList<string> logValues, bool isWriteLine)
         {
-            Debug.Assert(values.Count > 0);
+            var logItems = logValues.Count > 0
+                ? logValues.Select(XConsoleItem.Parse).Where(i => i.Value.Length > 0).ToList()
+                : _noItems;
 
-            var items = values.Select(XConsoleItem.Parse).Where(i => i.Value.Length > 0).ToList();
+            int beginLeft, beginTop, endLeft, endTop;
+            var getPinValues = _getPinValues;
 
-            lock (_lock)
+            if (getPinValues == null)
             {
+                lock (_lock)
+                {
 #pragma warning disable CA1416 // Validate platform compatibility
-                var origVisible = _isWindows && Console.CursorVisible;
+                    var origVisible = _isWindows && Console.CursorVisible;
 #pragma warning restore CA1416 // Validate platform compatibility
 
-                var startLeft = Console.CursorLeft;
-                var startTop = Console.CursorTop;
-                Console.CursorVisible = false;
+                    beginLeft = Console.CursorLeft;
+                    beginTop = Console.CursorTop;
+                    Console.CursorVisible = false;
 
-                foreach (var item in items)
-                    WriteItem(item);
+                    foreach (var logItem in logItems)
+                        WriteItem(logItem);
 
-                Console.CursorVisible = origVisible;
-                var endLeft = Console.CursorLeft;
-                var endTop = Console.CursorTop;
-                return (new(left: startLeft, top: startTop), new(left: endLeft, top: endTop));
+                    endLeft = Console.CursorLeft;
+                    endTop = Console.CursorTop;
+
+                    if (isWriteLine)
+                        Console.WriteLine();
+
+                    Console.CursorVisible = origVisible;
+                }
             }
+            else
+            {
+                var pinValues = getPinValues();
+
+                var pinItems = pinValues.Count > 0
+                    ? pinValues.Select(XConsoleItem.Parse).Where(i => i.Value.Length > 0).ToList()
+                    : _noItems;
+
+                var spaces = _newLine + new string(' ', Console.BufferWidth);
+
+                lock (_lock)
+                {
+#pragma warning disable CA1416 // Validate platform compatibility
+                    var origVisible = _isWindows && Console.CursorVisible;
+#pragma warning restore CA1416 // Validate platform compatibility
+
+                    beginLeft = Console.CursorLeft;
+                    beginTop = Console.CursorTop;
+                    Console.CursorVisible = false;
+
+                    if (_getPinValues == null)
+                    {
+                        foreach (var logItem in logItems)
+                            WriteItem(logItem);
+
+                        endLeft = Console.CursorLeft;
+                        endTop = Console.CursorTop;
+
+                        if (isWriteLine)
+                            Console.WriteLine();
+                    }
+                    else
+                    {
+                        for (var i = 0; i < _pinHeight; i++)
+                            Console.Write(spaces);
+
+                        Console.SetCursorPosition(beginLeft, beginTop);
+
+                        foreach (var logItem in logItems)
+                            WriteItem(logItem);
+
+                        endLeft = Console.CursorLeft;
+                        endTop = Console.CursorTop;
+                        Console.WriteLine();
+
+                        if (isWriteLine)
+                        {
+                            Console.WriteLine();
+
+                            foreach (var pinItem in pinItems)
+                                WriteItem(pinItem);
+
+                            _pinHeight = Console.CursorTop - (endTop + 1);
+                            Console.SetCursorPosition(0, endTop + 1);
+                        }
+                        else
+                        {
+                            foreach (var pinItem in pinItems)
+                                WriteItem(pinItem);
+
+                            _pinHeight = Console.CursorTop - endTop;
+                            Console.SetCursorPosition(endLeft, endTop);
+                        }
+                    }
+
+                    Console.CursorVisible = origVisible;
+                }
+            }
+
+            return (
+                new(left: beginLeft, top: beginTop),
+                new(left: endLeft, top: endTop)
+            );
         }
 
         internal static XConsolePosition WriteToPosition(IReadOnlyList<string> values, int left, int top)
@@ -203,6 +257,109 @@ namespace System
                     Console.BackgroundColor = origBgColor;
                     Console.ForegroundColor = origFgColor;
                 }
+            }
+        }
+
+        #endregion
+
+        #region Pin
+
+        private static int _pinHeight = 0;
+        private static Func<IReadOnlyList<string>>? _getPinValues = null;
+        private static readonly IReadOnlyList<XConsoleItem> _noItems = Array.Empty<XConsoleItem>();
+
+        public static void Pin(params string[] values)
+        {
+            if (values.Length == 0)
+            {
+                Unpin();
+            }
+            else
+            {
+                _getPinValues = () => values;
+                UpdatePin();
+            }
+        }
+
+        public static void Pin(Func<string> getValue)
+        {
+            _getPinValues = () => new[] { getValue() };
+            UpdatePin();
+        }
+
+        public static void Pin(Func<IReadOnlyList<string>> getValues)
+        {
+            _getPinValues = getValues;
+            UpdatePin();
+        }
+
+        public static void UpdatePin()
+        {
+            var getPinValues = _getPinValues;
+
+            if (getPinValues == null)
+                return;
+
+            var pinValues = getPinValues();
+
+            var pinItems = pinValues.Count > 0
+                ? pinValues.Select(XConsoleItem.Parse).Where(i => i.Value.Length > 0).ToList()
+                : _noItems;
+
+            var spaces = _newLine + new string(' ', Console.BufferWidth);
+
+            lock (_lock)
+            {
+                if (_getPinValues == null)
+                    return;
+
+#pragma warning disable CA1416 // Validate platform compatibility
+                var origVisible = _isWindows && Console.CursorVisible;
+#pragma warning restore CA1416 // Validate platform compatibility
+
+                var origLeft = Console.CursorLeft;
+                var origTop = Console.CursorTop;
+                Console.CursorVisible = false;
+
+                for (var i = 0; i < _pinHeight; i++)
+                    Console.Write(spaces);
+
+                Console.SetCursorPosition(0, origTop + 1);
+
+                foreach (var pinItem in pinItems)
+                    WriteItem(pinItem);
+
+                _pinHeight = Console.CursorTop - origTop;
+                Console.SetCursorPosition(origLeft, origTop);
+                Console.CursorVisible = origVisible;
+            }
+        }
+
+        public static void Unpin()
+        {
+            var spaces = _newLine + new string(' ', Console.BufferWidth);
+
+            lock (_lock)
+            {
+                if (_getPinValues == null)
+                    return;
+
+                _getPinValues = null;
+
+#pragma warning disable CA1416 // Validate platform compatibility
+                var origVisible = _isWindows && Console.CursorVisible;
+#pragma warning restore CA1416 // Validate platform compatibility
+
+                var origLeft = Console.CursorLeft;
+                var origTop = Console.CursorTop;
+                Console.CursorVisible = false;
+
+                for (var i = 0; i < _pinHeight; i++)
+                    Console.Write(spaces);
+
+                Console.SetCursorPosition(origLeft, origTop);
+                Console.CursorVisible = origVisible;
+                _pinHeight = 0;
             }
         }
 
