@@ -5,8 +5,9 @@ namespace System
     public static class XConsole
     {
         private static readonly object _lock = new();
-        private static readonly bool _isWindows = OperatingSystem.IsWindows();
         private static readonly string _newLine = Environment.NewLine;
+        private static bool _cursorVisible = OperatingSystem.IsWindows() && Console.CursorVisible;
+        private static int _maxTop = Console.BufferHeight - 1;
 
         public static ConsoleColor BackgroundColor
         {
@@ -89,10 +90,6 @@ namespace System
             {
                 lock (_lock)
                 {
-#pragma warning disable CA1416 // Validate platform compatibility
-                    var origVisible = _isWindows && Console.CursorVisible;
-#pragma warning restore CA1416 // Validate platform compatibility
-
                     beginLeft = Console.CursorLeft;
                     beginTop = Console.CursorTop;
                     Console.CursorVisible = false;
@@ -106,7 +103,7 @@ namespace System
                     if (isWriteLine)
                         Console.WriteLine();
 
-                    Console.CursorVisible = origVisible;
+                    Console.CursorVisible = _cursorVisible;
                 }
             }
             else
@@ -121,10 +118,6 @@ namespace System
 
                 lock (_lock)
                 {
-#pragma warning disable CA1416 // Validate platform compatibility
-                    var origVisible = _isWindows && Console.CursorVisible;
-#pragma warning restore CA1416 // Validate platform compatibility
-
                     beginLeft = Console.CursorLeft;
                     beginTop = Console.CursorTop;
                     Console.CursorVisible = false;
@@ -161,20 +154,36 @@ namespace System
                             foreach (var pinItem in pinItems)
                                 WriteItem(pinItem);
 
-                            _pinHeight = Console.CursorTop - (endTop + 1);
-                            Console.SetCursorPosition(0, endTop + 1);
+                            if (Console.CursorTop == _maxTop)
+                            {
+                                _pinHeight = 1 + pinItems.SelectMany(i => i.Value).Count(i => i == '\n');
+                                Console.SetCursorPosition(0, _maxTop - _pinHeight);
+                            }
+                            else
+                            {
+                                _pinHeight = Console.CursorTop - (endTop + 1);
+                                Console.SetCursorPosition(0, endTop + 1);
+                            }
                         }
                         else
                         {
                             foreach (var pinItem in pinItems)
                                 WriteItem(pinItem);
 
-                            _pinHeight = Console.CursorTop - endTop;
-                            Console.SetCursorPosition(endLeft, endTop);
+                            if (Console.CursorTop == _maxTop)
+                            {
+                                _pinHeight = 1 + pinItems.SelectMany(i => i.Value).Count(i => i == '\n');
+                                Console.SetCursorPosition(endLeft, _maxTop - _pinHeight);
+                            }
+                            else
+                            {
+                                _pinHeight = Console.CursorTop - endTop;
+                                Console.SetCursorPosition(endLeft, endTop);
+                            }
                         }
                     }
 
-                    Console.CursorVisible = origVisible;
+                    Console.CursorVisible = _cursorVisible;
                 }
             }
 
@@ -192,10 +201,6 @@ namespace System
 
             lock (_lock)
             {
-#pragma warning disable CA1416 // Validate platform compatibility
-                var origVisible = _isWindows && Console.CursorVisible;
-#pragma warning restore CA1416 // Validate platform compatibility
-
                 var origLeft = Console.CursorLeft;
                 var origTop = Console.CursorTop;
                 Console.CursorVisible = false;
@@ -215,7 +220,7 @@ namespace System
                 var endLeft = Console.CursorLeft;
                 var endTop = Console.CursorTop;
                 Console.SetCursorPosition(origLeft, origTop);
-                Console.CursorVisible = origVisible;
+                Console.CursorVisible = _cursorVisible;
                 return new(left: endLeft, top: endTop);
             }
         }
@@ -313,10 +318,6 @@ namespace System
                 if (_getPinValues == null)
                     return;
 
-#pragma warning disable CA1416 // Validate platform compatibility
-                var origVisible = _isWindows && Console.CursorVisible;
-#pragma warning restore CA1416 // Validate platform compatibility
-
                 var origLeft = Console.CursorLeft;
                 var origTop = Console.CursorTop;
                 Console.CursorVisible = false;
@@ -331,7 +332,7 @@ namespace System
 
                 _pinHeight = Console.CursorTop - origTop;
                 Console.SetCursorPosition(origLeft, origTop);
-                Console.CursorVisible = origVisible;
+                Console.CursorVisible = _cursorVisible;
             }
         }
 
@@ -345,11 +346,6 @@ namespace System
                     return;
 
                 _getPinValues = null;
-
-#pragma warning disable CA1416 // Validate platform compatibility
-                var origVisible = _isWindows && Console.CursorVisible;
-#pragma warning restore CA1416 // Validate platform compatibility
-
                 var origLeft = Console.CursorLeft;
                 var origTop = Console.CursorTop;
                 Console.CursorVisible = false;
@@ -358,7 +354,7 @@ namespace System
                     Console.Write(spaces);
 
                 Console.SetCursorPosition(origLeft, origTop);
-                Console.CursorVisible = origVisible;
+                Console.CursorVisible = _cursorVisible;
                 _pinHeight = 0;
             }
         }

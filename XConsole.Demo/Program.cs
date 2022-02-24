@@ -1,8 +1,9 @@
 ﻿using Console = System.XConsole;
 
 Console.WriteLine("bC`Hello", "R`, ", "mY`World", "G`!");
-Console.WriteLine();
 
+//
+Console.WriteLine();
 //
 
 Console.WriteLine("d`##########");
@@ -27,6 +28,8 @@ if (!yes) return;
 //
 Console.WriteLine();
 //
+
+//System.Console.SetCursorPosition(0, 8950);
 
 var sysFolder = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.System));
 var files = sysFolder.GetFiles("*.exe");
