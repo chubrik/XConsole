@@ -326,8 +326,17 @@ namespace System
                 foreach (var pinItem in pinItems)
                     WriteItem(pinItem);
 
-                _pinHeight = Console.CursorTop - origTop;
-                Console.SetCursorPosition(origLeft, origTop);
+                if (Console.CursorTop == _maxTop)
+                {
+                    _pinHeight = 1 + pinItems.SelectMany(i => i.Value).Count(i => i == '\n');
+                    Console.SetCursorPosition(origLeft, _maxTop - _pinHeight);
+                }
+                else
+                {
+                    _pinHeight = Console.CursorTop - origTop;
+                    Console.SetCursorPosition(origLeft, origTop);
+                }
+
                 Console.CursorVisible = _cursorVisible;
             }
         }
