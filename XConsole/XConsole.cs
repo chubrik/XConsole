@@ -212,6 +212,8 @@ namespace System
                 catch (ArgumentOutOfRangeException)
                 {
                     // do nothing
+                    Console.CursorVisible = _cursorVisible;
+                    return new(left: origLeft, top: origTop);
                 }
 
                 foreach (var item in items)
@@ -275,15 +277,8 @@ namespace System
 
         public static void Pin(params string[] values)
         {
-            if (values.Length == 0)
-            {
-                Unpin();
-            }
-            else
-            {
-                _getPinValues = () => values;
-                UpdatePin();
-            }
+            _getPinValues = () => values;
+            UpdatePin();
         }
 
         public static void Pin(Func<string> getValue)
@@ -325,7 +320,8 @@ namespace System
                 for (var i = 0; i < _pinHeight; i++)
                     Console.Write(spaces);
 
-                Console.SetCursorPosition(0, origTop + 1);
+                Console.SetCursorPosition(origLeft, origTop);
+                Console.WriteLine();
 
                 foreach (var pinItem in pinItems)
                     WriteItem(pinItem);
