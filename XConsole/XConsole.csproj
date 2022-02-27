@@ -10,13 +10,13 @@
   <PropertyGroup>
     <Authors>Arkadi Chubrik</Authors>
     <Copyright>© 2022 Arkadi Chubrik</Copyright>
-    <Description>Extended .NET console with very simple usage. Contains microsyntax for coloring, multi-line pinning, writing to position, etc. Safe for multitasking. Safe for >9000 lines.</Description>
+    <Description>Easy-to-use .NET console with coloring microsyntax, multi-line pinning, write-to-position, etc. Safe for multitasking, safe for &gt;9000 lines.</Description>
     <PackageTags>console color coloring pin pinning position positioning microsyntax multitasking</PackageTags>
     <PackageProjectUrl>https://github.com/chubrik/XConsole</PackageProjectUrl>
     <PackageIcon>icon.png</PackageIcon>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <Version>0.1.9</Version>
+    <Version>0.2.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

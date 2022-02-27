@@ -8,6 +8,7 @@ namespace System
         private static readonly string _newLine = Environment.NewLine;
         private static bool _cursorVisible = OperatingSystem.IsWindows() && Console.CursorVisible;
         private static int _maxTop = Console.BufferHeight - 1;
+        internal static long ShiftTop = 0;
 
         public static ConsoleColor BackgroundColor
         {
@@ -104,6 +105,19 @@ namespace System
                         Console.WriteLine();
 
                     Console.CursorVisible = _cursorVisible;
+
+                    if (endTop == _maxTop)
+                    {
+                        var logNewLineCount = logItems.SelectMany(i => i.Value).Count(i => i == '\n');
+
+                        var shift = isWriteLine
+                            ? beginTop + logNewLineCount + 1 - endTop
+                            : beginTop + logNewLineCount - endTop;
+
+                        ShiftTop += shift;
+                        beginTop -= shift;
+                        endTop -= shift;
+                    }
                 }
             }
             else
@@ -132,6 +146,19 @@ namespace System
 
                         if (isWriteLine)
                             Console.WriteLine();
+
+                        if (endTop == _maxTop)
+                        {
+                            var logNewLineCount = logItems.SelectMany(i => i.Value).Count(i => i == '\n');
+
+                            var shift = isWriteLine
+                                ? beginTop + logNewLineCount + 1 - endTop
+                                : beginTop + logNewLineCount - endTop;
+
+                            ShiftTop += shift;
+                            beginTop -= shift;
+                            endTop -= shift;
+                        }
                     }
                     else
                     {
@@ -156,14 +183,17 @@ namespace System
 
                             if (Console.CursorTop == _maxTop)
                             {
+                                var logNewLineCount = logItems.SelectMany(i => i.Value).Count(i => i == '\n');
                                 _pinHeight = 1 + pinItems.SelectMany(i => i.Value).Count(i => i == '\n');
-                                Console.SetCursorPosition(0, _maxTop - _pinHeight);
+                                var shift = beginTop + logNewLineCount + 1 + _pinHeight - _maxTop;
+                                ShiftTop += shift;
+                                beginTop -= shift;
+                                endTop -= shift;
                             }
                             else
-                            {
                                 _pinHeight = Console.CursorTop - (endTop + 1);
-                                Console.SetCursorPosition(0, endTop + 1);
-                            }
+
+                            Console.SetCursorPosition(0, endTop + 1);
                         }
                         else
                         {
@@ -172,14 +202,17 @@ namespace System
 
                             if (Console.CursorTop == _maxTop)
                             {
+                                var logNewLineCount = logItems.SelectMany(i => i.Value).Count(i => i == '\n');
                                 _pinHeight = 1 + pinItems.SelectMany(i => i.Value).Count(i => i == '\n');
-                                Console.SetCursorPosition(endLeft, _maxTop - _pinHeight);
+                                var shift = beginTop + logNewLineCount + _pinHeight - _maxTop;
+                                ShiftTop += shift;
+                                beginTop -= shift;
+                                endTop -= shift;
                             }
                             else
-                            {
                                 _pinHeight = Console.CursorTop - endTop;
-                                Console.SetCursorPosition(endLeft, endTop);
-                            }
+
+                            Console.SetCursorPosition(endLeft, endTop);
                         }
                     }
 
@@ -193,7 +226,7 @@ namespace System
             );
         }
 
-        internal static XConsolePosition WriteToPosition(IReadOnlyList<string> values, int left, int top)
+        internal static XConsolePosition WriteToPosition(IReadOnlyList<string> values, XConsolePosition position)
         {
             Debug.Assert(values.Count > 0);
 
@@ -204,16 +237,17 @@ namespace System
                 var origLeft = Console.CursorLeft;
                 var origTop = Console.CursorTop;
                 Console.CursorVisible = false;
+                var shiftedTop = (int)(position.Top + position.ShiftTop - ShiftTop);
 
                 try
                 {
-                    Console.SetCursorPosition(left, top);
+                    Console.SetCursorPosition(position.Left, shiftedTop);
                 }
                 catch (ArgumentOutOfRangeException)
                 {
                     // do nothing
                     Console.CursorVisible = _cursorVisible;
-                    return new(left: origLeft, top: origTop);
+                    return position;
                 }
 
                 foreach (var item in items)
@@ -221,6 +255,16 @@ namespace System
 
                 var endLeft = Console.CursorLeft;
                 var endTop = Console.CursorTop;
+
+                if (endTop == _maxTop)
+                {
+                    var newLineCount = items.SelectMany(i => i.Value).Count(i => i == '\n');
+                    var shift = origTop + newLineCount - endTop;
+                    ShiftTop += shift;
+                    origTop -= shift;
+                    endTop -= shift;
+                }
+
                 Console.SetCursorPosition(origLeft, origTop);
                 Console.CursorVisible = _cursorVisible;
                 return new(left: endLeft, top: endTop);
@@ -329,14 +373,14 @@ namespace System
                 if (Console.CursorTop == _maxTop)
                 {
                     _pinHeight = 1 + pinItems.SelectMany(i => i.Value).Count(i => i == '\n');
-                    Console.SetCursorPosition(origLeft, _maxTop - _pinHeight);
+                    var shift = origTop + _pinHeight - _maxTop;
+                    ShiftTop += shift;
+                    origTop -= shift;
                 }
                 else
-                {
                     _pinHeight = Console.CursorTop - origTop;
-                    Console.SetCursorPosition(origLeft, origTop);
-                }
 
+                Console.SetCursorPosition(origLeft, origTop);
                 Console.CursorVisible = _cursorVisible;
             }
         }

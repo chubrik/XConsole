@@ -3,4 +3,4 @@
 # XConsole
 [![NuGet](https://img.shields.io/nuget/v/XConsole)](https://www.nuget.org/packages/XConsole/) [![MIT licensed](https://img.shields.io/github/license/chubrik/XConsole?color=blue)](https://github.com/chubrik/XConsole/blob/main/LICENSE)
 
-Extended .NET console with very simple usage. Contains microsyntax for coloring, multi-line pinning, writing to position, etc. Safe for multitasking. Safe for >9000 lines.
+Easy-to-use .NET console with coloring microsyntax, multi-line pinning, write-to-position, etc. Safe for multitasking, safe for &gt;9000 lines.
