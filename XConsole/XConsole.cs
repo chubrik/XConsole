@@ -85,6 +85,7 @@ namespace System
                 : _noItems;
 
             int beginLeft, beginTop, endLeft, endTop;
+            long beginShiftTop, endShiftTop;
             var getPinValues = _getPinValues;
 
             if (getPinValues == null)
@@ -93,6 +94,7 @@ namespace System
                 {
                     beginLeft = Console.CursorLeft;
                     beginTop = Console.CursorTop;
+                    beginShiftTop = ShiftTop;
                     Console.CursorVisible = false;
 
                     foreach (var logItem in logItems)
@@ -118,6 +120,8 @@ namespace System
                         beginTop -= shift;
                         endTop -= shift;
                     }
+
+                    endShiftTop = ShiftTop;
                 }
             }
             else
@@ -134,6 +138,7 @@ namespace System
                 {
                     beginLeft = Console.CursorLeft;
                     beginTop = Console.CursorTop;
+                    beginShiftTop = ShiftTop;
                     Console.CursorVisible = false;
 
                     if (_getPinValues == null)
@@ -217,12 +222,13 @@ namespace System
                     }
 
                     Console.CursorVisible = _cursorVisible;
+                    endShiftTop = ShiftTop;
                 }
             }
 
             return (
-                new(left: beginLeft, top: beginTop),
-                new(left: endLeft, top: endTop)
+                new(left: beginLeft, top: beginTop, shiftTop: beginShiftTop),
+                new(left: endLeft, top: endTop, shiftTop: endShiftTop)
             );
         }
 
@@ -231,6 +237,8 @@ namespace System
             Debug.Assert(values.Count > 0);
 
             var items = values.Select(XConsoleItem.Parse).Where(i => i.Value.Length > 0).ToList();
+            int endLeft, endTop;
+            long endShiftTop;
 
             lock (_lock)
             {
@@ -253,8 +261,8 @@ namespace System
                 foreach (var item in items)
                     WriteItem(item);
 
-                var endLeft = Console.CursorLeft;
-                var endTop = Console.CursorTop;
+                endLeft = Console.CursorLeft;
+                endTop = Console.CursorTop;
 
                 if (endTop == _maxTop)
                 {
@@ -267,8 +275,10 @@ namespace System
 
                 Console.SetCursorPosition(origLeft, origTop);
                 Console.CursorVisible = _cursorVisible;
-                return new(left: endLeft, top: endTop);
+                endShiftTop = ShiftTop;
             }
+
+            return new(left: endLeft, top: endTop, shiftTop: endShiftTop);
         }
 
         private static void WriteItem(XConsoleItem item)

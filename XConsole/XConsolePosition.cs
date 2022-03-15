@@ -13,6 +13,13 @@
             ShiftTop = XConsole.ShiftTop;
         }
 
+        internal XConsolePosition(int left, int top, long shiftTop)
+        {
+            Left = left;
+            Top = top;
+            ShiftTop = shiftTop;
+        }
+
         public XConsolePosition Write(params string[] values)
         {
             return values.Length > 0
