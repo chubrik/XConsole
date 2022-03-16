@@ -10,6 +10,12 @@ namespace System
         private static int _maxTop = Console.BufferHeight - 1;
         internal static long ShiftTop = 0;
 
+        public static void Lock(Action action)
+        {
+            lock (_lock)
+                action();
+        }
+
         public static ConsoleColor BackgroundColor
         {
             get { lock (_lock) return Console.BackgroundColor; }
@@ -29,39 +35,56 @@ namespace System
         public static ConsoleKeyInfo ReadKey() { lock (_lock) return Console.ReadKey(); }
         public static ConsoleKeyInfo ReadKey(bool intercept) { lock (_lock) return Console.ReadKey(intercept); }
 
-        public static string ReadLine() { lock (_lock) return Console.ReadLine() ?? string.Empty; }
-
-        public static string ReadLine(bool secure)
+        public static string ReadLine()
         {
-            if (secure)
+            lock (_lock)
+                return Console.ReadLine() ?? string.Empty;
+        }
+
+        public static string ReadLine(XConsoleReadLineMode mode, char maskChar = '*')
+        {
+            switch (mode)
             {
-                var pass = string.Empty;
-                ConsoleKeyInfo keyInfo;
-                ConsoleKey key;
+                case XConsoleReadLineMode.Default:
+                    return ReadLine();
 
-                lock (_lock)
-                    do
+                case XConsoleReadLineMode.Masked:
+                case XConsoleReadLineMode.Hidden:
+                    var isMaskedMode = mode == XConsoleReadLineMode.Masked;
+                    var text = string.Empty;
+                    ConsoleKeyInfo keyInfo;
+
+                    lock (_lock)
                     {
-                        keyInfo = Console.ReadKey(intercept: true);
-                        key = keyInfo.Key;
+                        do
+                        {
+                            keyInfo = Console.ReadKey(intercept: true);
 
-                        if (key == ConsoleKey.Backspace && pass.Length > 0)
-                        {
-                            Console.Write("\b \b");
-                            pass = pass[0..^1];
+                            if (keyInfo.Key == ConsoleKey.Backspace && text.Length > 0)
+                            {
+                                if (isMaskedMode)
+                                    Console.Write("\b \b");
+
+                                text = text[0..^1];
+                            }
+                            else if (!char.IsControl(keyInfo.KeyChar))
+                            {
+                                if (isMaskedMode)
+                                    Console.Write(maskChar);
+
+                                text += keyInfo.KeyChar;
+                            }
                         }
-                        else if (!char.IsControl(keyInfo.KeyChar))
-                        {
-                            Console.Write('*');
-                            pass += keyInfo.KeyChar;
-                        }
+                        while (keyInfo.Key != ConsoleKey.Enter);
+
+                        Console.WriteLine();
                     }
-                    while (key != ConsoleKey.Enter);
 
-                return pass;
+                    return text;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(mode));
             }
-
-            return Console.ReadLine() ?? string.Empty;
         }
 
         #endregion
