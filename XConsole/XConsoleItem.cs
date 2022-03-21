@@ -5,14 +5,14 @@
         public const ConsoleColor NoColor = (ConsoleColor)(-1);
 
         public string Value;
-        public readonly ConsoleColor BgColor;
-        public readonly ConsoleColor FgColor;
+        public readonly ConsoleColor BackColor;
+        public readonly ConsoleColor ForeColor;
 
-        private XConsoleItem(string value, ConsoleColor bgColor, ConsoleColor fgColor)
+        private XConsoleItem(string value, ConsoleColor backColor, ConsoleColor foreColor)
         {
             Value = value;
-            BgColor = bgColor;
-            FgColor = fgColor;
+            BackColor = backColor;
+            ForeColor = foreColor;
         }
 
         public static XConsoleItem Parse(string value)
@@ -53,48 +53,48 @@
 
             if (value[2] == '`')
             {
-                ConsoleColor bgColor;
+                ConsoleColor backColor;
 
                 switch (value[0])
                 {
-                    case 'W': bgColor = ConsoleColor.White; break;
-                    case 'Y': bgColor = ConsoleColor.Yellow; break;
-                    case 'C': bgColor = ConsoleColor.Cyan; break;
-                    case 'G': bgColor = ConsoleColor.Green; break;
-                    case 'M': bgColor = ConsoleColor.Magenta; break;
-                    case 'R': bgColor = ConsoleColor.Red; break;
-                    case 'B': bgColor = ConsoleColor.Blue; break;
-                    case 'w': bgColor = ConsoleColor.Gray; break;
-                    case 'y': bgColor = ConsoleColor.DarkYellow; break;
-                    case 'c': bgColor = ConsoleColor.DarkCyan; break;
-                    case 'g': bgColor = ConsoleColor.DarkGreen; break;
-                    case 'm': bgColor = ConsoleColor.DarkMagenta; break;
-                    case 'r': bgColor = ConsoleColor.DarkRed; break;
-                    case 'b': bgColor = ConsoleColor.DarkBlue; break;
-                    case 'd': bgColor = ConsoleColor.DarkGray; break;
-                    case 'n': bgColor = ConsoleColor.Black; break;
+                    case 'W': backColor = ConsoleColor.White; break;
+                    case 'Y': backColor = ConsoleColor.Yellow; break;
+                    case 'C': backColor = ConsoleColor.Cyan; break;
+                    case 'G': backColor = ConsoleColor.Green; break;
+                    case 'M': backColor = ConsoleColor.Magenta; break;
+                    case 'R': backColor = ConsoleColor.Red; break;
+                    case 'B': backColor = ConsoleColor.Blue; break;
+                    case 'w': backColor = ConsoleColor.Gray; break;
+                    case 'y': backColor = ConsoleColor.DarkYellow; break;
+                    case 'c': backColor = ConsoleColor.DarkCyan; break;
+                    case 'g': backColor = ConsoleColor.DarkGreen; break;
+                    case 'm': backColor = ConsoleColor.DarkMagenta; break;
+                    case 'r': backColor = ConsoleColor.DarkRed; break;
+                    case 'b': backColor = ConsoleColor.DarkBlue; break;
+                    case 'd': backColor = ConsoleColor.DarkGray; break;
+                    case 'n': backColor = ConsoleColor.Black; break;
                     default: return new(value, NoColor, NoColor);
                 }
 
                 return value[1] switch
                 {
-                    'W' => new(value[3..], bgColor, ConsoleColor.White),
-                    'Y' => new(value[3..], bgColor, ConsoleColor.Yellow),
-                    'C' => new(value[3..], bgColor, ConsoleColor.Cyan),
-                    'G' => new(value[3..], bgColor, ConsoleColor.Green),
-                    'M' => new(value[3..], bgColor, ConsoleColor.Magenta),
-                    'R' => new(value[3..], bgColor, ConsoleColor.Red),
-                    'B' => new(value[3..], bgColor, ConsoleColor.Blue),
-                    'w' => new(value[3..], bgColor, ConsoleColor.Gray),
-                    'y' => new(value[3..], bgColor, ConsoleColor.DarkYellow),
-                    'c' => new(value[3..], bgColor, ConsoleColor.DarkCyan),
-                    'g' => new(value[3..], bgColor, ConsoleColor.DarkGreen),
-                    'm' => new(value[3..], bgColor, ConsoleColor.DarkMagenta),
-                    'r' => new(value[3..], bgColor, ConsoleColor.DarkRed),
-                    'b' => new(value[3..], bgColor, ConsoleColor.DarkBlue),
-                    'd' => new(value[3..], bgColor, ConsoleColor.DarkGray),
-                    'n' => new(value[3..], bgColor, ConsoleColor.Black),
-                    ' ' => new(value[3..], bgColor, NoColor),
+                    'W' => new(value[3..], backColor, ConsoleColor.White),
+                    'Y' => new(value[3..], backColor, ConsoleColor.Yellow),
+                    'C' => new(value[3..], backColor, ConsoleColor.Cyan),
+                    'G' => new(value[3..], backColor, ConsoleColor.Green),
+                    'M' => new(value[3..], backColor, ConsoleColor.Magenta),
+                    'R' => new(value[3..], backColor, ConsoleColor.Red),
+                    'B' => new(value[3..], backColor, ConsoleColor.Blue),
+                    'w' => new(value[3..], backColor, ConsoleColor.Gray),
+                    'y' => new(value[3..], backColor, ConsoleColor.DarkYellow),
+                    'c' => new(value[3..], backColor, ConsoleColor.DarkCyan),
+                    'g' => new(value[3..], backColor, ConsoleColor.DarkGreen),
+                    'm' => new(value[3..], backColor, ConsoleColor.DarkMagenta),
+                    'r' => new(value[3..], backColor, ConsoleColor.DarkRed),
+                    'b' => new(value[3..], backColor, ConsoleColor.DarkBlue),
+                    'd' => new(value[3..], backColor, ConsoleColor.DarkGray),
+                    'n' => new(value[3..], backColor, ConsoleColor.Black),
+                    ' ' => new(value[3..], backColor, NoColor),
                     _ => new(value, NoColor, NoColor),
                 };
             }

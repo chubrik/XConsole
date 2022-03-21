@@ -297,38 +297,38 @@ namespace System
         {
             Debug.Assert(item.Value.Length > 0);
 
-            if (item.BgColor == XConsoleItem.NoColor)
+            if (item.BackColor == XConsoleItem.NoColor)
             {
-                if (item.FgColor == XConsoleItem.NoColor)
+                if (item.ForeColor == XConsoleItem.NoColor)
                 {
                     Console.Write(item.Value);
                 }
                 else
                 {
-                    var origFgColor = Console.ForegroundColor;
-                    Console.ForegroundColor = item.FgColor;
+                    var origForeColor = Console.ForegroundColor;
+                    Console.ForegroundColor = item.ForeColor;
                     Console.Write(item.Value);
-                    Console.ForegroundColor = origFgColor;
+                    Console.ForegroundColor = origForeColor;
                 }
             }
             else
             {
-                if (item.FgColor == XConsoleItem.NoColor)
+                if (item.ForeColor == XConsoleItem.NoColor)
                 {
-                    var origBgColor = Console.BackgroundColor;
-                    Console.BackgroundColor = item.BgColor;
+                    var origBackColor = Console.BackgroundColor;
+                    Console.BackgroundColor = item.BackColor;
                     Console.Write(item.Value);
-                    Console.BackgroundColor = origBgColor;
+                    Console.BackgroundColor = origBackColor;
                 }
                 else
                 {
-                    var origBgColor = Console.BackgroundColor;
-                    var origFgColor = Console.ForegroundColor;
-                    Console.BackgroundColor = item.BgColor;
-                    Console.ForegroundColor = item.FgColor;
+                    var origBackColor = Console.BackgroundColor;
+                    var origForeColor = Console.ForegroundColor;
+                    Console.BackgroundColor = item.BackColor;
+                    Console.ForegroundColor = item.ForeColor;
                     Console.Write(item.Value);
-                    Console.BackgroundColor = origBgColor;
-                    Console.ForegroundColor = origFgColor;
+                    Console.BackgroundColor = origBackColor;
+                    Console.ForegroundColor = origForeColor;
                 }
             }
         }
