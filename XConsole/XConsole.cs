@@ -144,7 +144,7 @@ namespace System
                     ? pinValues.Select(XConsoleItem.Parse).Where(i => i.Value.Length > 0).ToList()
                     : _noItems;
 
-                var spaces = _newLine + new string(' ', Console.BufferWidth);
+                var spaces = _newLine + new string(' ', Console.BufferWidth - 1);
 
                 lock (_lock)
                 {
@@ -416,7 +416,7 @@ namespace System
                 ? pinValues.Select(XConsoleItem.Parse).Where(i => i.Value.Length > 0).ToList()
                 : _noItems;
 
-            var spaces = _newLine + new string(' ', Console.BufferWidth);
+            var spaces = _newLine + new string(' ', Console.BufferWidth - 1);
 
             lock (_lock)
             {
@@ -453,7 +453,7 @@ namespace System
 
         public static void Unpin()
         {
-            var spaces = _newLine + new string(' ', Console.BufferWidth);
+            var spaces = _newLine + new string(' ', Console.BufferWidth - 1);
 
             lock (_lock)
             {
