@@ -21,7 +21,7 @@
                 return new(string.Empty, NoColor, NoColor);
 
             if (value[0] == '`')
-                return new(value[1..], NoColor, NoColor);
+                return new(value.Substring(1), NoColor, NoColor);
 
             if (value.Length == 1)
                 return new(value, NoColor, NoColor);
@@ -29,22 +29,22 @@
             if (value[1] == '`')
                 return value[0] switch
                 {
-                    'W' => new(value[2..], NoColor, ConsoleColor.White),
-                    'Y' => new(value[2..], NoColor, ConsoleColor.Yellow),
-                    'C' => new(value[2..], NoColor, ConsoleColor.Cyan),
-                    'G' => new(value[2..], NoColor, ConsoleColor.Green),
-                    'M' => new(value[2..], NoColor, ConsoleColor.Magenta),
-                    'R' => new(value[2..], NoColor, ConsoleColor.Red),
-                    'B' => new(value[2..], NoColor, ConsoleColor.Blue),
-                    'w' => new(value[2..], NoColor, ConsoleColor.Gray),
-                    'y' => new(value[2..], NoColor, ConsoleColor.DarkYellow),
-                    'c' => new(value[2..], NoColor, ConsoleColor.DarkCyan),
-                    'g' => new(value[2..], NoColor, ConsoleColor.DarkGreen),
-                    'm' => new(value[2..], NoColor, ConsoleColor.DarkMagenta),
-                    'r' => new(value[2..], NoColor, ConsoleColor.DarkRed),
-                    'b' => new(value[2..], NoColor, ConsoleColor.DarkBlue),
-                    'd' => new(value[2..], NoColor, ConsoleColor.DarkGray),
-                    'n' => new(value[2..], NoColor, ConsoleColor.Black),
+                    'W' => new(value.Substring(2), NoColor, ConsoleColor.White),
+                    'Y' => new(value.Substring(2), NoColor, ConsoleColor.Yellow),
+                    'C' => new(value.Substring(2), NoColor, ConsoleColor.Cyan),
+                    'G' => new(value.Substring(2), NoColor, ConsoleColor.Green),
+                    'M' => new(value.Substring(2), NoColor, ConsoleColor.Magenta),
+                    'R' => new(value.Substring(2), NoColor, ConsoleColor.Red),
+                    'B' => new(value.Substring(2), NoColor, ConsoleColor.Blue),
+                    'w' => new(value.Substring(2), NoColor, ConsoleColor.Gray),
+                    'y' => new(value.Substring(2), NoColor, ConsoleColor.DarkYellow),
+                    'c' => new(value.Substring(2), NoColor, ConsoleColor.DarkCyan),
+                    'g' => new(value.Substring(2), NoColor, ConsoleColor.DarkGreen),
+                    'm' => new(value.Substring(2), NoColor, ConsoleColor.DarkMagenta),
+                    'r' => new(value.Substring(2), NoColor, ConsoleColor.DarkRed),
+                    'b' => new(value.Substring(2), NoColor, ConsoleColor.DarkBlue),
+                    'd' => new(value.Substring(2), NoColor, ConsoleColor.DarkGray),
+                    'n' => new(value.Substring(2), NoColor, ConsoleColor.Black),
                     _ => new(value, NoColor, NoColor),
                 };
 
@@ -78,23 +78,23 @@
 
                 return value[1] switch
                 {
-                    'W' => new(value[3..], backColor, ConsoleColor.White),
-                    'Y' => new(value[3..], backColor, ConsoleColor.Yellow),
-                    'C' => new(value[3..], backColor, ConsoleColor.Cyan),
-                    'G' => new(value[3..], backColor, ConsoleColor.Green),
-                    'M' => new(value[3..], backColor, ConsoleColor.Magenta),
-                    'R' => new(value[3..], backColor, ConsoleColor.Red),
-                    'B' => new(value[3..], backColor, ConsoleColor.Blue),
-                    'w' => new(value[3..], backColor, ConsoleColor.Gray),
-                    'y' => new(value[3..], backColor, ConsoleColor.DarkYellow),
-                    'c' => new(value[3..], backColor, ConsoleColor.DarkCyan),
-                    'g' => new(value[3..], backColor, ConsoleColor.DarkGreen),
-                    'm' => new(value[3..], backColor, ConsoleColor.DarkMagenta),
-                    'r' => new(value[3..], backColor, ConsoleColor.DarkRed),
-                    'b' => new(value[3..], backColor, ConsoleColor.DarkBlue),
-                    'd' => new(value[3..], backColor, ConsoleColor.DarkGray),
-                    'n' => new(value[3..], backColor, ConsoleColor.Black),
-                    ' ' => new(value[3..], backColor, NoColor),
+                    'W' => new(value.Substring(3), backColor, ConsoleColor.White),
+                    'Y' => new(value.Substring(3), backColor, ConsoleColor.Yellow),
+                    'C' => new(value.Substring(3), backColor, ConsoleColor.Cyan),
+                    'G' => new(value.Substring(3), backColor, ConsoleColor.Green),
+                    'M' => new(value.Substring(3), backColor, ConsoleColor.Magenta),
+                    'R' => new(value.Substring(3), backColor, ConsoleColor.Red),
+                    'B' => new(value.Substring(3), backColor, ConsoleColor.Blue),
+                    'w' => new(value.Substring(3), backColor, ConsoleColor.Gray),
+                    'y' => new(value.Substring(3), backColor, ConsoleColor.DarkYellow),
+                    'c' => new(value.Substring(3), backColor, ConsoleColor.DarkCyan),
+                    'g' => new(value.Substring(3), backColor, ConsoleColor.DarkGreen),
+                    'm' => new(value.Substring(3), backColor, ConsoleColor.DarkMagenta),
+                    'r' => new(value.Substring(3), backColor, ConsoleColor.DarkRed),
+                    'b' => new(value.Substring(3), backColor, ConsoleColor.DarkBlue),
+                    'd' => new(value.Substring(3), backColor, ConsoleColor.DarkGray),
+                    'n' => new(value.Substring(3), backColor, ConsoleColor.Black),
+                    ' ' => new(value.Substring(3), backColor, NoColor),
                     _ => new(value, NoColor, NoColor),
                 };
             }

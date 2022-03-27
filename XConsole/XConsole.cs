@@ -1,6 +1,9 @@
 ﻿using System.Diagnostics;
-using System.Runtime.Versioning;
 using System.Text;
+
+#if !NETSTANDARD
+using System.Runtime.Versioning;
+#endif
 
 namespace System
 {
@@ -8,7 +11,13 @@ namespace System
     {
         private static readonly object _lock = new();
         private static readonly string _newLine = Environment.NewLine;
+
+#if !NETSTANDARD
         private static bool _cursorVisible = OperatingSystem.IsWindows() && Console.CursorVisible;
+#else
+        private static bool _cursorVisible = Console.CursorVisible;
+#endif
+
         private static int _maxTop = Console.BufferHeight - 1;
         internal static long ShiftTop = 0;
 
@@ -20,16 +29,20 @@ namespace System
 
         #region ReadLine
 
+#if !NETSTANDARD
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]
+#endif
         public static string ReadLine()
         {
             lock (_lock)
                 return Console.ReadLine() ?? string.Empty;
         }
 
+#if !NETSTANDARD
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]
+#endif
         public static string ReadLine(XConsoleReadLineMode mode, char maskChar = '*')
         {
             switch (mode)
@@ -54,7 +67,7 @@ namespace System
                                 if (isMaskedMode)
                                     Console.Write("\b \b");
 
-                                text = text[0..^1];
+                                text = text.Substring(0, text.Length - 1);
                             }
                             else if (!char.IsControl(keyInfo.KeyChar))
                             {
@@ -478,10 +491,14 @@ namespace System
 
         #region Proxy
 
+#pragma warning disable IDE0079 // Remove unnecessary suppression
+
+#if !NETSTANDARD
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
+#endif
         public static ConsoleColor BackgroundColor
         {
             get
@@ -498,16 +515,20 @@ namespace System
 
         public static int BufferHeight
         {
+#if !NETSTANDARD
             [UnsupportedOSPlatform("android")]
             [UnsupportedOSPlatform("browser")]
             [UnsupportedOSPlatform("ios")]
             [UnsupportedOSPlatform("tvos")]
+#endif
             get
             {
                 lock (_lock)
                     return Console.BufferHeight;
             }
+#if !NETSTANDARD
             [SupportedOSPlatform("windows")]
+#endif
             set
             {
                 lock (_lock)
@@ -522,16 +543,20 @@ namespace System
 
         public static int BufferWidth
         {
+#if !NETSTANDARD
             [UnsupportedOSPlatform("android")]
             [UnsupportedOSPlatform("browser")]
             [UnsupportedOSPlatform("ios")]
             [UnsupportedOSPlatform("tvos")]
+#endif
             get
             {
                 lock (_lock)
                     return Console.BufferWidth;
             }
+#if !NETSTANDARD
             [SupportedOSPlatform("windows")]
+#endif
             set
             {
                 lock (_lock)
@@ -541,13 +566,17 @@ namespace System
             }
         }
 
+#if !NETSTANDARD
         [SupportedOSPlatform("windows")]
+#endif
         public static bool CapsLock => Console.CapsLock;
 
+#if !NETSTANDARD
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
+#endif
         public static int CursorLeft
         {
             get
@@ -564,21 +593,27 @@ namespace System
 
         public static int CursorSize
         {
+#if !NETSTANDARD
             [UnsupportedOSPlatform("android")]
             [UnsupportedOSPlatform("browser")]
             [UnsupportedOSPlatform("ios")]
             [UnsupportedOSPlatform("tvos")]
+#endif
             get => Console.CursorSize;
+#if !NETSTANDARD
             [SupportedOSPlatform("windows")]
+#endif
 #pragma warning disable CA1416 // Validate platform compatibility
             set => Console.CursorSize = value;
 #pragma warning restore CA1416 // Validate platform compatibility
         }
 
+#if !NETSTANDARD
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
+#endif
         public static int CursorTop
         {
             get
@@ -595,16 +630,20 @@ namespace System
 
         public static bool CursorVisible
         {
+#if !NETSTANDARD
             [SupportedOSPlatform("windows")]
+#endif
             get
             {
                 lock (_lock)
                     return _cursorVisible;
             }
+#if !NETSTANDARD
             [UnsupportedOSPlatform("android")]
             [UnsupportedOSPlatform("browser")]
             [UnsupportedOSPlatform("ios")]
             [UnsupportedOSPlatform("tvos")]
+#endif
             set
             {
                 lock (_lock)
@@ -617,10 +656,12 @@ namespace System
 
         public static TextWriter Error => Console.Error;
 
+#if !NETSTANDARD
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
+#endif
         public static ConsoleColor ForegroundColor
         {
             get
@@ -635,16 +676,20 @@ namespace System
             }
         }
 
+#if !NETSTANDARD
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
+#endif
         public static TextReader In => Console.In;
 
+#if !NETSTANDARD
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
+#endif
         public static Encoding InputEncoding
         {
             get
@@ -667,19 +712,25 @@ namespace System
 
         public static bool KeyAvailable => Console.KeyAvailable;
 
+#if !NETSTANDARD
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
+#endif
         public static int LargestWindowHeight => Console.LargestWindowHeight;
 
+#if !NETSTANDARD
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
+#endif
         public static int LargestWindowWidth => Console.LargestWindowWidth;
 
+#if !NETSTANDARD
         [SupportedOSPlatform("windows")]
+#endif
         public static bool NumberLock => Console.NumberLock;
 
         public static TextWriter Out => Console.Out;
@@ -691,9 +742,11 @@ namespace System
                 lock (_lock)
                     return Console.OutputEncoding;
             }
+#if !NETSTANDARD
             [UnsupportedOSPlatform("android")]
             [UnsupportedOSPlatform("ios")]
             [UnsupportedOSPlatform("tvos")]
+#endif
             set
             {
                 lock (_lock)
@@ -703,21 +756,27 @@ namespace System
 
         public static string Title
         {
+#if !NETSTANDARD
             [SupportedOSPlatform("windows")]
+#endif
 #pragma warning disable CA1416 // Validate platform compatibility
             get => Console.Title;
 #pragma warning restore CA1416 // Validate platform compatibility
+#if !NETSTANDARD
             [UnsupportedOSPlatform("android")]
             [UnsupportedOSPlatform("browser")]
             [UnsupportedOSPlatform("ios")]
             [UnsupportedOSPlatform("tvos")]
+#endif
             set => Console.Title = value;
         }
+
+#if !NETSTANDARD
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
-
+#endif
         public static bool TreatControlCAsInput
         {
             get => Console.TreatControlCAsInput;
@@ -726,12 +785,16 @@ namespace System
 
         public static int WindowHeight
         {
+#if !NETSTANDARD
             [UnsupportedOSPlatform("android")]
             [UnsupportedOSPlatform("browser")]
             [UnsupportedOSPlatform("ios")]
             [UnsupportedOSPlatform("tvos")]
+#endif
             get => Console.WindowHeight;
+#if !NETSTANDARD
             [SupportedOSPlatform("windows")]
+#endif
 #pragma warning disable CA1416 // Validate platform compatibility
             set => Console.WindowHeight = value;
 #pragma warning restore CA1416 // Validate platform compatibility
@@ -740,7 +803,9 @@ namespace System
         public static int WindowLeft
         {
             get => Console.WindowLeft;
+#if !NETSTANDARD
             [SupportedOSPlatform("windows")]
+#endif
 #pragma warning disable CA1416 // Validate platform compatibility
             set => Console.WindowLeft = value;
 #pragma warning restore CA1416 // Validate platform compatibility
@@ -749,7 +814,9 @@ namespace System
         public static int WindowTop
         {
             get => Console.WindowTop;
+#if !NETSTANDARD
             [SupportedOSPlatform("windows")]
+#endif
 #pragma warning disable CA1416 // Validate platform compatibility
             set => Console.WindowTop = value;
 #pragma warning restore CA1416 // Validate platform compatibility
@@ -757,21 +824,27 @@ namespace System
 
         public static int WindowWidth
         {
+#if !NETSTANDARD
             [UnsupportedOSPlatform("android")]
             [UnsupportedOSPlatform("browser")]
             [UnsupportedOSPlatform("ios")]
             [UnsupportedOSPlatform("tvos")]
+#endif
             get => Console.WindowWidth;
+#if !NETSTANDARD
             [SupportedOSPlatform("windows")]
+#endif
 #pragma warning disable CA1416 // Validate platform compatibility
             set => Console.WindowWidth = value;
 #pragma warning restore CA1416 // Validate platform compatibility
         }
 
+#if !NETSTANDARD
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
+#endif
         public static event ConsoleCancelEventHandler? CancelKeyPress
         {
             //[System.Runtime.CompilerServices.NullableContext(2)]
@@ -780,35 +853,49 @@ namespace System
             remove => Console.CancelKeyPress -= value;
         }
 
+#if !NETSTANDARD
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
+#endif
         public static void Beep() => Console.Beep();
 
+#if !NETSTANDARD
         [SupportedOSPlatform("windows")]
+#endif
         public static void Beep(int frequency, int duration) => Console.Beep(frequency: frequency, duration: duration);
 
+#if !NETSTANDARD
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
+#endif
         public static void Clear()
         {
             lock (_lock)
                 Console.Clear();
         }
 
+#if !NETSTANDARD
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
+#endif
         public static (int Left, int Top) GetCursorPosition()
         {
             lock (_lock)
+#if !NETSTANDARD
                 return Console.GetCursorPosition();
+#else
+                return (Console.CursorLeft, Console.CursorTop);
+#endif
         }
 
+#if !NETSTANDARD
         [SupportedOSPlatform("windows")]
+#endif
         public static void MoveBufferArea(
             int sourceLeft, int sourceTop, int sourceWidth, int sourceHeight, int targetLeft, int targetTop)
         {
@@ -819,7 +906,9 @@ namespace System
                     targetLeft: targetLeft, targetTop: targetTop);
         }
 
+#if !NETSTANDARD
         [SupportedOSPlatform("windows")]
+#endif
         public static void MoveBufferArea(
             int sourceLeft, int sourceTop, int sourceWidth, int sourceHeight, int targetLeft, int targetTop,
             char sourceChar, ConsoleColor sourceForeColor, ConsoleColor sourceBackColor)
@@ -836,69 +925,85 @@ namespace System
 
         public static Stream OpenStandardError(int bufferSize) => Console.OpenStandardError(bufferSize: bufferSize);
 
+#if !NETSTANDARD
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
+#endif
         public static Stream OpenStandardInput() => Console.OpenStandardInput();
 
+#if !NETSTANDARD
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]
+#endif
         public static Stream OpenStandardInput(int bufferSize) => Console.OpenStandardInput(bufferSize: bufferSize);
 
         public static Stream OpenStandardOutput() => Console.OpenStandardOutput();
 
         public static Stream OpenStandardOutput(int bufferSize) => Console.OpenStandardOutput(bufferSize: bufferSize);
 
+#if !NETSTANDARD
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]
+#endif
         public static int Read()
         {
             lock (_lock)
                 return Console.Read();
         }
 
+#if !NETSTANDARD
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
+#endif
         public static ConsoleKeyInfo ReadKey()
         {
             lock (_lock)
                 return Console.ReadKey();
         }
 
+#if !NETSTANDARD
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
+#endif
         public static ConsoleKeyInfo ReadKey(bool intercept)
         {
             lock (_lock)
                 return Console.ReadKey(intercept);
         }
 
+#if !NETSTANDARD
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
+#endif
         public static void ResetColor()
         {
             lock (_lock)
                 Console.ResetColor();
         }
 
+#if !NETSTANDARD
         [SupportedOSPlatform("windows")]
+#endif
         public static void SetBufferSize(int width, int height)
         {
             lock (_lock)
                 Console.SetBufferSize(width: width, height: height);
         }
 
+#if !NETSTANDARD
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
+#endif
         public static void SetCursorPosition(int left, int top)
         {
             lock (_lock)
@@ -907,23 +1012,31 @@ namespace System
 
         public static void SetError(TextWriter newError) => Console.SetError(newError: newError);
 
+#if !NETSTANDARD
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
+#endif
         public static void SetIn(TextReader newIn) => Console.SetIn(newIn: newIn);
 
         public static void SetOut(TextWriter newOut) => Console.SetOut(newOut: newOut);
 
+#if !NETSTANDARD
         [SupportedOSPlatform("windows")]
+#endif
         public static void SetWindowPosition(int left, int top) => Console.SetWindowPosition(left: left, top: top);
 
+#if !NETSTANDARD
         [SupportedOSPlatform("windows")]
+#endif
         public static void SetWindowSize(int width, int height)
         {
             lock (_lock)
                 Console.SetWindowSize(width: width, height: height);
         }
+
+#pragma warning restore IDE0079 // Remove unnecessary suppression
 
         #endregion
     }
