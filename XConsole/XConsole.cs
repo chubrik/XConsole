@@ -93,17 +93,27 @@ namespace System
 
         #region Write, WriteLine
 
-        public static (XConsolePosition Begin, XConsolePosition End) Write(params string[] values)
+        public static (XConsolePosition Begin, XConsolePosition End) Write(string? value)
+        {
+            return WriteBase(new[] { value }, isWriteLine: false);
+        }
+
+        public static (XConsolePosition Begin, XConsolePosition End) Write(params string?[] values)
         {
             return WriteBase(values, isWriteLine: false);
         }
 
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(params string[] values)
+        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(string? value)
+        {
+            return WriteBase(new[] { value }, isWriteLine: true);
+        }
+
+        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(params string?[] values)
         {
             return WriteBase(values, isWriteLine: true);
         }
 
-        private static (XConsolePosition Begin, XConsolePosition End) WriteBase(IReadOnlyList<string> logValues, bool isWriteLine)
+        private static (XConsolePosition Begin, XConsolePosition End) WriteBase(IReadOnlyList<string?> logValues, bool isWriteLine)
         {
             var logItems = logValues.Count > 0
                 ? logValues.Select(XConsoleItem.Parse).Where(i => i.Value.Length > 0).ToList()
@@ -257,7 +267,7 @@ namespace System
             );
         }
 
-        internal static XConsolePosition WriteToPosition(IReadOnlyList<string> values, XConsolePosition position)
+        internal static XConsolePosition WriteToPosition(IReadOnlyList<string?> values, XConsolePosition position)
         {
             Debug.Assert(values.Count > 0);
 
@@ -356,17 +366,14 @@ namespace System
         public static (XConsolePosition Begin, XConsolePosition End) Write(long value) => Write(value.ToString());
         public static (XConsolePosition Begin, XConsolePosition End) Write(object? value) => Write(value?.ToString());
         public static (XConsolePosition Begin, XConsolePosition End) Write(float value) => Write(value.ToString());
-        public static (XConsolePosition Begin, XConsolePosition End) Write(string? value) => Write(new[] { value ?? string.Empty });
-
-        //public static void Write(string format, object? arg0) { }
-        //public static void Write(string format, object? arg0, object? arg1) { }
-        //public static void Write(string format, object? arg0, object? arg1, object? arg2) { }
-        //public static void Write(string format, params object?[]? arg) { }
-
+        public static (XConsolePosition Begin, XConsolePosition End) Write(string format, object? arg0) => Write(string.Format(format, arg0));
+        public static (XConsolePosition Begin, XConsolePosition End) Write(string format, object? arg0, object? arg1) => Write(string.Format(format, arg0, arg1));
+        public static (XConsolePosition Begin, XConsolePosition End) Write(string format, object? arg0, object? arg1, object? arg2) => Write(string.Format(format, arg0, arg1, arg2));
+        public static (XConsolePosition Begin, XConsolePosition End) Write(string format, params object?[]? arg) => Write(string.Format(format, arg ?? Array.Empty<object?>()));
         //[CLSCompliant(false)]
-        public static void Write(uint value) => Write(value.ToString());
+        public static (XConsolePosition Begin, XConsolePosition End) Write(uint value) => Write(value.ToString());
         //[CLSCompliant(false)]
-        public static void Write(ulong value) => Write(value.ToString());
+        public static (XConsolePosition Begin, XConsolePosition End) Write(ulong value) => Write(value.ToString());
 
         public static (XConsolePosition Begin, XConsolePosition End) WriteLine(bool value) => WriteLine(value.ToString());
         public static (XConsolePosition Begin, XConsolePosition End) WriteLine(char value) => WriteLine(value.ToString());
@@ -378,39 +385,36 @@ namespace System
         public static (XConsolePosition Begin, XConsolePosition End) WriteLine(long value) => WriteLine(value.ToString());
         public static (XConsolePosition Begin, XConsolePosition End) WriteLine(object? value) => WriteLine(value?.ToString());
         public static (XConsolePosition Begin, XConsolePosition End) WriteLine(float value) => WriteLine(value.ToString());
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(string? value) => WriteLine(new[] { value ?? string.Empty });
-
-        //public static void WriteLine(string format, object? arg0) { }
-        //public static void WriteLine(string format, object? arg0, object? arg1) { }
-        //public static void WriteLine(string format, object? arg0, object? arg1, object? arg2) { }
-        //public static void WriteLine(string format, params object?[]? arg) { }
-
+        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(string format, object? arg0) => WriteLine(string.Format(format, arg0));
+        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(string format, object? arg0, object? arg1) => WriteLine(string.Format(format, arg0, arg1));
+        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(string format, object? arg0, object? arg1, object? arg2) => WriteLine(string.Format(format, arg0, arg1, arg2));
+        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(string format, params object?[]? arg) => WriteLine(string.Format(format, arg ?? Array.Empty<object?>()));
         //[CLSCompliant(false)]
-        public static void WriteLine(uint value) => WriteLine(value.ToString());
+        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(uint value) => WriteLine(value.ToString());
         //[CLSCompliant(false)]
-        public static void WriteLine(ulong value) => WriteLine(value.ToString());
+        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(ulong value) => WriteLine(value.ToString());
 
         #endregion
 
         #region Pin
 
         private static int _pinHeight = 0;
-        private static Func<IReadOnlyList<string>>? _getPinValues = null;
+        private static Func<IReadOnlyList<string?>>? _getPinValues = null;
         private static readonly IReadOnlyList<XConsoleItem> _noItems = Array.Empty<XConsoleItem>();
 
-        public static void Pin(params string[] values)
+        public static void Pin(params string?[] values)
         {
             _getPinValues = () => values;
             UpdatePin();
         }
 
-        public static void Pin(Func<string> getValue)
+        public static void Pin(Func<string?> getValue)
         {
             _getPinValues = () => new[] { getValue() };
             UpdatePin();
         }
 
-        public static void Pin(Func<IReadOnlyList<string>> getValues)
+        public static void Pin(Func<IReadOnlyList<string?>> getValues)
         {
             _getPinValues = getValues;
             UpdatePin();

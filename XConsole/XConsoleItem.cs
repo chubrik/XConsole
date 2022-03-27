@@ -15,9 +15,9 @@
             ForeColor = foreColor;
         }
 
-        public static XConsoleItem Parse(string value)
+        public static XConsoleItem Parse(string? value)
         {
-            if (value.Length == 0)
+            if (string.IsNullOrEmpty(value))
                 return new(string.Empty, NoColor, NoColor);
 
             if (value[0] == '`')
