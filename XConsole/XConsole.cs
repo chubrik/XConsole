@@ -115,9 +115,11 @@ namespace System
 
         private static (XConsolePosition Begin, XConsolePosition End) WriteBase(IReadOnlyList<string?> logValues, bool isWriteLine)
         {
-            var logItems = logValues.Count > 0
-                ? logValues.Select(XConsoleItem.Parse).Where(i => i.Value.Length > 0).ToList()
-                : _noItems;
+            var logItems = new List<XConsoleItem>(logValues.Count);
+
+            foreach (var logValue in logValues)
+                if (!string.IsNullOrEmpty(logValue))
+                    logItems.Add(XConsoleItem.Parse(logValue));
 
             int beginLeft, beginTop, endLeft, endTop;
             long beginShiftTop, endShiftTop;
@@ -162,10 +164,11 @@ namespace System
             else
             {
                 var pinValues = getPinValues();
+                var pinItems = new List<XConsoleItem>(pinValues.Count);
 
-                var pinItems = pinValues.Count > 0
-                    ? pinValues.Select(XConsoleItem.Parse).Where(i => i.Value.Length > 0).ToList()
-                    : _noItems;
+                foreach (var pinValue in pinValues)
+                    if (!string.IsNullOrEmpty(pinValue))
+                        pinItems.Add(XConsoleItem.Parse(pinValue));
 
                 var spaces = _newLine + new string(' ', Console.BufferWidth - 1);
 
@@ -270,8 +273,12 @@ namespace System
         internal static XConsolePosition WriteToPosition(IReadOnlyList<string?> values, XConsolePosition position)
         {
             Debug.Assert(values.Count > 0);
+            var items = new List<XConsoleItem>(values.Count);
 
-            var items = values.Select(XConsoleItem.Parse).Where(i => i.Value.Length > 0).ToList();
+            foreach (var value in values)
+                if (!string.IsNullOrEmpty(value))
+                    items.Add(XConsoleItem.Parse(value));
+
             int endLeft, endTop;
             long endShiftTop;
 
@@ -400,7 +407,6 @@ namespace System
 
         private static int _pinHeight = 0;
         private static Func<IReadOnlyList<string?>>? _getPinValues = null;
-        private static readonly IReadOnlyList<XConsoleItem> _noItems = Array.Empty<XConsoleItem>();
 
         public static void Pin(params string?[] values)
         {
@@ -428,10 +434,11 @@ namespace System
                 return;
 
             var pinValues = getPinValues();
+            var pinItems = new List<XConsoleItem>(pinValues.Count);
 
-            var pinItems = pinValues.Count > 0
-                ? pinValues.Select(XConsoleItem.Parse).Where(i => i.Value.Length > 0).ToList()
-                : _noItems;
+            foreach (var pinValue in pinValues)
+                if (!string.IsNullOrEmpty(pinValue))
+                    pinItems.Add(XConsoleItem.Parse(pinValue));
 
             var spaces = _newLine + new string(' ', Console.BufferWidth - 1);
 

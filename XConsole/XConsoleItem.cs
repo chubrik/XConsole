@@ -1,10 +1,12 @@
-﻿namespace System
+﻿using System.Diagnostics;
+
+namespace System
 {
     internal struct XConsoleItem
     {
         public const ConsoleColor NoColor = (ConsoleColor)(-1);
 
-        public string Value;
+        public readonly string Value;
         public readonly ConsoleColor BackColor;
         public readonly ConsoleColor ForeColor;
 
@@ -15,91 +17,61 @@
             ForeColor = foreColor;
         }
 
-        public static XConsoleItem Parse(string? value)
+        public static XConsoleItem Parse(string value)
         {
-            if (string.IsNullOrEmpty(value))
-                return new(string.Empty, NoColor, NoColor);
+            Debug.Assert(!string.IsNullOrEmpty(value));
+            var char0 = value[0];
 
-            if (value[0] == '`')
+            if (char0 == '`')
                 return new(value.Substring(1), NoColor, NoColor);
 
             if (value.Length == 1)
                 return new(value, NoColor, NoColor);
 
             if (value[1] == '`')
-                return value[0] switch
-                {
-                    'W' => new(value.Substring(2), NoColor, ConsoleColor.White),
-                    'Y' => new(value.Substring(2), NoColor, ConsoleColor.Yellow),
-                    'C' => new(value.Substring(2), NoColor, ConsoleColor.Cyan),
-                    'G' => new(value.Substring(2), NoColor, ConsoleColor.Green),
-                    'M' => new(value.Substring(2), NoColor, ConsoleColor.Magenta),
-                    'R' => new(value.Substring(2), NoColor, ConsoleColor.Red),
-                    'B' => new(value.Substring(2), NoColor, ConsoleColor.Blue),
-                    'w' => new(value.Substring(2), NoColor, ConsoleColor.Gray),
-                    'y' => new(value.Substring(2), NoColor, ConsoleColor.DarkYellow),
-                    'c' => new(value.Substring(2), NoColor, ConsoleColor.DarkCyan),
-                    'g' => new(value.Substring(2), NoColor, ConsoleColor.DarkGreen),
-                    'm' => new(value.Substring(2), NoColor, ConsoleColor.DarkMagenta),
-                    'r' => new(value.Substring(2), NoColor, ConsoleColor.DarkRed),
-                    'b' => new(value.Substring(2), NoColor, ConsoleColor.DarkBlue),
-                    'd' => new(value.Substring(2), NoColor, ConsoleColor.DarkGray),
-                    'n' => new(value.Substring(2), NoColor, ConsoleColor.Black),
-                    _ => new(value, NoColor, NoColor),
-                };
-
-            if (value.Length == 2)
-                return new(value, NoColor, NoColor);
-
-            if (value[2] == '`')
             {
-                ConsoleColor backColor;
-
-                switch (value[0])
+                if (char0 <= 121)
                 {
-                    case 'W': backColor = ConsoleColor.White; break;
-                    case 'Y': backColor = ConsoleColor.Yellow; break;
-                    case 'C': backColor = ConsoleColor.Cyan; break;
-                    case 'G': backColor = ConsoleColor.Green; break;
-                    case 'M': backColor = ConsoleColor.Magenta; break;
-                    case 'R': backColor = ConsoleColor.Red; break;
-                    case 'B': backColor = ConsoleColor.Blue; break;
-                    case 'w': backColor = ConsoleColor.Gray; break;
-                    case 'y': backColor = ConsoleColor.DarkYellow; break;
-                    case 'c': backColor = ConsoleColor.DarkCyan; break;
-                    case 'g': backColor = ConsoleColor.DarkGreen; break;
-                    case 'm': backColor = ConsoleColor.DarkMagenta; break;
-                    case 'r': backColor = ConsoleColor.DarkRed; break;
-                    case 'b': backColor = ConsoleColor.DarkBlue; break;
-                    case 'd': backColor = ConsoleColor.DarkGray; break;
-                    case 'n': backColor = ConsoleColor.Black; break;
-                    default: return new(value, NoColor, NoColor);
+                    var foreColor = (ConsoleColor)_colorMap[char0];
+
+                    if (foreColor != NoColor)
+                        return new(value.Substring(2), NoColor, foreColor);
                 }
 
-                return value[1] switch
+                return new(value, NoColor, NoColor);
+            }
+
+            if (value.Length > 2 && value[2] == '`' && char0 <= 121)
+            {
+                var backColor = (ConsoleColor)_colorMap[char0];
+
+                if (backColor != NoColor)
                 {
-                    'W' => new(value.Substring(3), backColor, ConsoleColor.White),
-                    'Y' => new(value.Substring(3), backColor, ConsoleColor.Yellow),
-                    'C' => new(value.Substring(3), backColor, ConsoleColor.Cyan),
-                    'G' => new(value.Substring(3), backColor, ConsoleColor.Green),
-                    'M' => new(value.Substring(3), backColor, ConsoleColor.Magenta),
-                    'R' => new(value.Substring(3), backColor, ConsoleColor.Red),
-                    'B' => new(value.Substring(3), backColor, ConsoleColor.Blue),
-                    'w' => new(value.Substring(3), backColor, ConsoleColor.Gray),
-                    'y' => new(value.Substring(3), backColor, ConsoleColor.DarkYellow),
-                    'c' => new(value.Substring(3), backColor, ConsoleColor.DarkCyan),
-                    'g' => new(value.Substring(3), backColor, ConsoleColor.DarkGreen),
-                    'm' => new(value.Substring(3), backColor, ConsoleColor.DarkMagenta),
-                    'r' => new(value.Substring(3), backColor, ConsoleColor.DarkRed),
-                    'b' => new(value.Substring(3), backColor, ConsoleColor.DarkBlue),
-                    'd' => new(value.Substring(3), backColor, ConsoleColor.DarkGray),
-                    'n' => new(value.Substring(3), backColor, ConsoleColor.Black),
-                    ' ' => new(value.Substring(3), backColor, NoColor),
-                    _ => new(value, NoColor, NoColor),
-                };
+                    var char1 = value[1];
+
+                    if (char1 <= 121)
+                    {
+                        var foreColor = (ConsoleColor)_colorMap[char1];
+
+                        if (foreColor != NoColor || char1 == ' ')
+                            return new(value.Substring(3), backColor, foreColor);
+                    }
+                }
             }
 
             return new(value, NoColor, NoColor);
         }
+
+        private static readonly int[] _colorMap = new[]
+        {
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1,  9, 11, -1, -1, -1, 10, -1, -1, -1, -1, -1, 13, -1, -1,
+            -1, -1, 12, -1, -1, -1, -1, 15, -1, 14, -1, -1, -1, -1, -1, -1,
+            -1, -1,  1,  3,  8, -1, -1,  2, -1, -1, -1, -1, -1,  5,  0, -1,
+            -1, -1,  4, -1, -1, -1, -1,  7, -1,  6
+        };
     }
 }
