@@ -17,16 +17,23 @@ namespace System
             ForeColor = foreColor;
         }
 
+        public XConsoleItem(string value)
+        {
+            Value = value;
+            BackColor = NoColor;
+            ForeColor = NoColor;
+        }
+
         public static XConsoleItem Parse(string value)
         {
             Debug.Assert(!string.IsNullOrEmpty(value));
             var char0 = value[0];
 
             if (char0 == '`')
-                return new(value.Substring(1), NoColor, NoColor);
+                return new(value.Substring(1));
 
             if (value.Length == 1)
-                return new(value, NoColor, NoColor);
+                return new(value);
 
             if (value[1] == '`')
             {
@@ -38,7 +45,7 @@ namespace System
                         return new(value.Substring(2), NoColor, foreColor);
                 }
 
-                return new(value, NoColor, NoColor);
+                return new(value);
             }
 
             if (value.Length > 2 && value[2] == '`' && char0 <= 121)
@@ -59,7 +66,7 @@ namespace System
                 }
             }
 
-            return new(value, NoColor, NoColor);
+            return new(value);
         }
 
         private static readonly int[] _colorMap = new[]
