@@ -298,19 +298,9 @@ namespace System
             {
                 var origLeft = Console.CursorLeft;
                 var origTop = Console.CursorTop;
+                var shiftedTop = checked((int)(position.Top + position.ShiftTop - ShiftTop));
                 Console.CursorVisible = false;
-                var shiftedTop = (int)(position.Top + position.ShiftTop - ShiftTop);
-
-                try
-                {
-                    Console.SetCursorPosition(position.Left, shiftedTop);
-                }
-                catch (ArgumentOutOfRangeException)
-                {
-                    // do nothing
-                    Console.CursorVisible = _cursorVisible;
-                    return position;
-                }
+                Console.SetCursorPosition(position.Left, shiftedTop);
 
                 foreach (var item in items)
                     WriteItem(item);

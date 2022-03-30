@@ -20,6 +20,9 @@
             ShiftTop = shiftTop;
         }
 
+        [Obsolete("Arguments should be specified", error: true)]
+        public void Write() => throw new NotSupportedException();
+
         public XConsolePosition Write(params string?[] values)
         {
             return values.Length > 0
