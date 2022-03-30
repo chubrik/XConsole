@@ -13,13 +13,13 @@
     <PackageIcon>icon.png</PackageIcon>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\icon.png" Pack="true" PackagePath="" />
-    <None Include="..\LICENSE" Pack="true" PackagePath="" />
-    <None Include="..\README.md" Pack="true" PackagePath="" />
+    <None Include="..\icon.png" Link="Pack\icon.png" Pack="true" PackagePath="" />
+    <None Include="..\LICENSE" Link="Pack\LICENSE" Pack="true" PackagePath="" />
+    <None Include="..\README.md" Link="Pack\README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
 </Project>
