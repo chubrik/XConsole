@@ -2,7 +2,6 @@
   <PropertyGroup>
     <NetTargetFrameworks>net6.0;net5.0;netstandard2.0</NetTargetFrameworks>
     <LangVersion>latest</LangVersion>
-    <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 </Project>
