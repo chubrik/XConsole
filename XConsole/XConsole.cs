@@ -29,6 +29,23 @@ namespace System
                 action();
         }
 
+        public static XConsolePosition CursorPosition
+        {
+            get
+            {
+                lock (_lock)
+                    return new(left: Console.CursorLeft, top: Console.CursorTop, shiftTop: ShiftTop);
+            }
+            set
+            {
+                lock (_lock)
+                {
+                    var shiftedTop = checked((int)(value.Top + value.ShiftTop - ShiftTop));
+                    Console.SetCursorPosition(value.Left, shiftedTop);
+                }
+            }
+        }
+
         #region ReadLine
 
         public static string ReadLine()
@@ -597,15 +614,12 @@ namespace System
             get
             {
                 lock (_lock)
-                    return _cursorVisible;
+                    return Console.CursorVisible;
             }
             set
             {
                 lock (_lock)
-                {
-                    Console.CursorVisible = value;
-                    _cursorVisible = value;
-                }
+                    Console.CursorVisible = _cursorVisible = value;
             }
         }
 
@@ -784,7 +798,7 @@ namespace System
         public static ConsoleKeyInfo ReadKey(bool intercept)
         {
             lock (_lock)
-                return Console.ReadKey(intercept);
+                return Console.ReadKey(intercept: intercept);
         }
 
         public static void ResetColor()
