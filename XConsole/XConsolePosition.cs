@@ -20,8 +20,8 @@
             ShiftTop = shiftTop;
         }
 
-        [Obsolete("Arguments should be specified", error: true)]
-        public void Write() => throw new NotSupportedException();
+        [Obsolete("At least one argument should be specified", error: true)]
+        public void Write() => throw new NotSupportedException("At least one argument should be specified");
 
         public XConsolePosition Write(params string?[] values)
         {

@@ -104,8 +104,8 @@ namespace System
 
         #region Write, WriteLine
 
-        [Obsolete("Arguments should be specified", error: true)]
-        public static void Write() => throw new NotSupportedException();
+        [Obsolete("At least one argument should be specified", error: true)]
+        public static void Write() => throw new NotSupportedException("At least one argument should be specified");
 
         public static (XConsolePosition Begin, XConsolePosition End) Write(string? value)
         {
@@ -144,7 +144,7 @@ namespace System
         private static (XConsolePosition Begin, XConsolePosition End) WriteBase(IReadOnlyList<XConsoleItem> logItems, bool isWriteLine)
         {
             int beginLeft, beginTop, endLeft, endTop;
-            long beginShiftTop, endShiftTop;
+            long shiftTop;
             var getPinValues = _getPinValues;
 
             if (getPinValues == null)
@@ -153,7 +153,6 @@ namespace System
                 {
                     beginLeft = Console.CursorLeft;
                     beginTop = Console.CursorTop;
-                    beginShiftTop = ShiftTop;
                     Console.CursorVisible = false;
 
                     foreach (var logItem in logItems)
@@ -163,24 +162,33 @@ namespace System
                     endTop = Console.CursorTop;
 
                     if (isWriteLine)
-                        Console.WriteLine();
-
-                    Console.CursorVisible = _cursorVisible;
-
-                    if (endTop == _maxTop)
                     {
-                        var logNewLineCount = logItems.SelectMany(i => i.Value).Count(i => i == '\n');
+                        Console.WriteLine();
+                        Console.CursorVisible = _cursorVisible;
 
-                        var shift = isWriteLine
-                            ? beginTop + logNewLineCount + 1 - endTop
-                            : beginTop + logNewLineCount - endTop;
+                        if (endTop == _maxTop)
+                        {
+                            var logNewLineCount = logItems.SelectMany(i => i.Value).Count(i => i == '\n');
+                            var shift = beginTop + logNewLineCount + 1 - endTop;
+                            ShiftTop += shift;
+                            beginTop -= shift;
+                            endTop--;
+                        }
+                    }
+                    else
+                    {
+                        Console.CursorVisible = _cursorVisible;
 
-                        ShiftTop += shift;
-                        beginTop -= shift;
-                        endTop -= shift;
+                        if (endTop == _maxTop)
+                        {
+                            var logNewLineCount = logItems.SelectMany(i => i.Value).Count(i => i == '\n');
+                            var shift = beginTop + logNewLineCount - endTop;
+                            ShiftTop += shift;
+                            beginTop -= shift;
+                        }
                     }
 
-                    endShiftTop = ShiftTop;
+                    shiftTop = ShiftTop;
                 }
             }
             else
@@ -198,7 +206,6 @@ namespace System
                 {
                     beginLeft = Console.CursorLeft;
                     beginTop = Console.CursorTop;
-                    beginShiftTop = ShiftTop;
                     Console.CursorVisible = false;
 
                     if (_getPinValues == null)
@@ -210,19 +217,30 @@ namespace System
                         endTop = Console.CursorTop;
 
                         if (isWriteLine)
-                            Console.WriteLine();
-
-                        if (endTop == _maxTop)
                         {
-                            var logNewLineCount = logItems.SelectMany(i => i.Value).Count(i => i == '\n');
+                            Console.WriteLine();
+                            Console.CursorVisible = _cursorVisible;
 
-                            var shift = isWriteLine
-                                ? beginTop + logNewLineCount + 1 - endTop
-                                : beginTop + logNewLineCount - endTop;
+                            if (endTop == _maxTop)
+                            {
+                                var logNewLineCount = logItems.SelectMany(i => i.Value).Count(i => i == '\n');
+                                var shift = beginTop + logNewLineCount + 1 - endTop;
+                                ShiftTop += shift;
+                                beginTop -= shift;
+                                endTop--;
+                            }
+                        }
+                        else
+                        {
+                            Console.CursorVisible = _cursorVisible;
 
-                            ShiftTop += shift;
-                            beginTop -= shift;
-                            endTop -= shift;
+                            if (endTop == _maxTop)
+                            {
+                                var logNewLineCount = logItems.SelectMany(i => i.Value).Count(i => i == '\n');
+                                var shift = beginTop + logNewLineCount - endTop;
+                                ShiftTop += shift;
+                                beginTop -= shift;
+                            }
                         }
                     }
                     else
@@ -253,7 +271,7 @@ namespace System
                                 var shift = beginTop + logNewLineCount + 1 + _pinHeight - _maxTop;
                                 ShiftTop += shift;
                                 beginTop -= shift;
-                                endTop -= shift;
+                                endTop = _maxTop - _pinHeight - 1;
                             }
                             else
                                 _pinHeight = Console.CursorTop - (endTop + 1);
@@ -272,23 +290,24 @@ namespace System
                                 var shift = beginTop + logNewLineCount + _pinHeight - _maxTop;
                                 ShiftTop += shift;
                                 beginTop -= shift;
-                                endTop -= shift;
+                                endTop = _maxTop - _pinHeight;
                             }
                             else
                                 _pinHeight = Console.CursorTop - endTop;
 
                             Console.SetCursorPosition(endLeft, endTop);
                         }
+
+                        Console.CursorVisible = _cursorVisible;
                     }
 
-                    Console.CursorVisible = _cursorVisible;
-                    endShiftTop = ShiftTop;
+                    shiftTop = ShiftTop;
                 }
             }
 
             return (
-                new(left: beginLeft, top: beginTop, shiftTop: beginShiftTop),
-                new(left: endLeft, top: endTop, shiftTop: endShiftTop)
+                new(left: beginLeft, top: beginTop, shiftTop: shiftTop),
+                new(left: endLeft, top: endTop, shiftTop: shiftTop)
             );
         }
 
@@ -302,7 +321,7 @@ namespace System
                     items.Add(XConsoleItem.Parse(value));
 
             int endLeft, endTop;
-            long endShiftTop;
+            long shiftTop;
 
             lock (_lock)
             {
@@ -324,15 +343,14 @@ namespace System
                     var shift = origTop + newLineCount - endTop;
                     ShiftTop += shift;
                     origTop -= shift;
-                    endTop -= shift;
                 }
 
                 Console.SetCursorPosition(origLeft, origTop);
                 Console.CursorVisible = _cursorVisible;
-                endShiftTop = ShiftTop;
+                shiftTop = ShiftTop;
             }
 
-            return new(left: endLeft, top: endTop, shiftTop: endShiftTop);
+            return new(left: endLeft, top: endTop, shiftTop: shiftTop);
         }
 
         private static void WriteItem(XConsoleItem item)
@@ -389,9 +407,7 @@ namespace System
         public static (XConsolePosition Begin, XConsolePosition End) Write(string format, object? arg0, object? arg1) => Write(string.Format(format, arg0, arg1));
         public static (XConsolePosition Begin, XConsolePosition End) Write(string format, object? arg0, object? arg1, object? arg2) => Write(string.Format(format, arg0, arg1, arg2));
         public static (XConsolePosition Begin, XConsolePosition End) Write(string format, params object?[]? arg) => Write(string.Format(format, arg ?? Array.Empty<object?>()));
-        //[CLSCompliant(false)]
         public static (XConsolePosition Begin, XConsolePosition End) Write(uint value) => WriteNoParse(value.ToString());
-        //[CLSCompliant(false)]
         public static (XConsolePosition Begin, XConsolePosition End) Write(ulong value) => WriteNoParse(value.ToString());
 
         public static (XConsolePosition Begin, XConsolePosition End) WriteLine(bool value) => WriteLineNoParse(value.ToString());
@@ -408,9 +424,7 @@ namespace System
         public static (XConsolePosition Begin, XConsolePosition End) WriteLine(string format, object? arg0, object? arg1) => WriteLine(string.Format(format, arg0, arg1));
         public static (XConsolePosition Begin, XConsolePosition End) WriteLine(string format, object? arg0, object? arg1, object? arg2) => WriteLine(string.Format(format, arg0, arg1, arg2));
         public static (XConsolePosition Begin, XConsolePosition End) WriteLine(string format, params object?[]? arg) => WriteLine(string.Format(format, arg ?? Array.Empty<object?>()));
-        //[CLSCompliant(false)]
         public static (XConsolePosition Begin, XConsolePosition End) WriteLine(uint value) => WriteLineNoParse(value.ToString());
-        //[CLSCompliant(false)]
         public static (XConsolePosition Begin, XConsolePosition End) WriteLine(ulong value) => WriteLineNoParse(value.ToString());
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -433,6 +447,9 @@ namespace System
 
         private static int _pinHeight = 0;
         private static Func<IReadOnlyList<string?>>? _getPinValues = null;
+
+        [Obsolete("At least one argument should be specified", error: true)]
+        public static void Pin() => throw new NotSupportedException("At least one argument should be specified");
 
         public static void Pin(params string?[] values)
         {
