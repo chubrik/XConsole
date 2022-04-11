@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace System
@@ -141,7 +140,8 @@ namespace System
             return WriteBase(items, isWriteLine: true);
         }
 
-        private static (XConsolePosition Begin, XConsolePosition End) WriteBase(IReadOnlyList<XConsoleItem> logItems, bool isWriteLine)
+        private static (XConsolePosition Begin, XConsolePosition End) WriteBase(
+            IReadOnlyList<XConsoleItem> logItems, bool isWriteLine)
         {
             int beginLeft, beginTop, endLeft, endTop;
             long shiftTop;
@@ -393,53 +393,141 @@ namespace System
             }
         }
 
-        public static (XConsolePosition Begin, XConsolePosition End) Write(bool value) => WriteNoParse(value.ToString());
-        public static (XConsolePosition Begin, XConsolePosition End) Write(char value) => WriteNoParse(value.ToString());
-        public static (XConsolePosition Begin, XConsolePosition End) Write(char[]? buffer) => WriteNoParse(buffer?.ToString());
-        public static (XConsolePosition Begin, XConsolePosition End) Write(char[] buffer, int index, int count) => WriteNoParse(buffer.ToString()?.Substring(index, count));
-        public static (XConsolePosition Begin, XConsolePosition End) Write(decimal value) => WriteNoParse(value.ToString());
-        public static (XConsolePosition Begin, XConsolePosition End) Write(double value) => WriteNoParse(value.ToString());
-        public static (XConsolePosition Begin, XConsolePosition End) Write(int value) => WriteNoParse(value.ToString());
-        public static (XConsolePosition Begin, XConsolePosition End) Write(long value) => WriteNoParse(value.ToString());
-        public static (XConsolePosition Begin, XConsolePosition End) Write(object? value) => WriteNoParse(value?.ToString());
-        public static (XConsolePosition Begin, XConsolePosition End) Write(float value) => WriteNoParse(value.ToString());
-        public static (XConsolePosition Begin, XConsolePosition End) Write(string format, object? arg0) => Write(string.Format(format, arg0));
-        public static (XConsolePosition Begin, XConsolePosition End) Write(string format, object? arg0, object? arg1) => Write(string.Format(format, arg0, arg1));
-        public static (XConsolePosition Begin, XConsolePosition End) Write(string format, object? arg0, object? arg1, object? arg2) => Write(string.Format(format, arg0, arg1, arg2));
-        public static (XConsolePosition Begin, XConsolePosition End) Write(string format, params object?[]? arg) => Write(string.Format(format, arg ?? Array.Empty<object?>()));
-        public static (XConsolePosition Begin, XConsolePosition End) Write(uint value) => WriteNoParse(value.ToString());
-        public static (XConsolePosition Begin, XConsolePosition End) Write(ulong value) => WriteNoParse(value.ToString());
+        #region Overloads
 
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(bool value) => WriteLineNoParse(value.ToString());
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(char value) => WriteLineNoParse(value.ToString());
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(char[]? buffer) => WriteLineNoParse(buffer?.ToString());
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(char[] buffer, int index, int count) => WriteLineNoParse(buffer.ToString()?.Substring(index, count));
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(decimal value) => WriteLineNoParse(value.ToString());
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(double value) => WriteLineNoParse(value.ToString());
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(int value) => WriteLineNoParse(value.ToString());
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(long value) => WriteLineNoParse(value.ToString());
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(object? value) => WriteLineNoParse(value?.ToString());
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(float value) => WriteLineNoParse(value.ToString());
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(string format, object? arg0) => WriteLine(string.Format(format, arg0));
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(string format, object? arg0, object? arg1) => WriteLine(string.Format(format, arg0, arg1));
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(string format, object? arg0, object? arg1, object? arg2) => WriteLine(string.Format(format, arg0, arg1, arg2));
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(string format, params object?[]? arg) => WriteLine(string.Format(format, arg ?? Array.Empty<object?>()));
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(uint value) => WriteLineNoParse(value.ToString());
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(ulong value) => WriteLineNoParse(value.ToString());
+        public static (XConsolePosition Begin, XConsolePosition End) Write(bool value) =>
+            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static (XConsolePosition Begin, XConsolePosition End) WriteNoParse(string? value)
+        public static (XConsolePosition Begin, XConsolePosition End) Write(char value) =>
+            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
+
+        public static (XConsolePosition Begin, XConsolePosition End) Write(char[]? buffer)
         {
+            var value = buffer?.ToString();
             var items = string.IsNullOrEmpty(value) ? Array.Empty<XConsoleItem>() : new[] { new XConsoleItem(value) };
             return WriteBase(items, isWriteLine: false);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static (XConsolePosition Begin, XConsolePosition End) WriteLineNoParse(string? value)
+        public static (XConsolePosition Begin, XConsolePosition End) Write(char[] buffer, int index, int count)
         {
+            var value = buffer.ToString()?.Substring(index, count);
+            var items = string.IsNullOrEmpty(value) ? Array.Empty<XConsoleItem>() : new[] { new XConsoleItem(value) };
+            return WriteBase(items, isWriteLine: false);
+        }
+
+        public static (XConsolePosition Begin, XConsolePosition End) Write(decimal value) =>
+            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
+
+        public static (XConsolePosition Begin, XConsolePosition End) Write(double value) =>
+            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
+
+        public static (XConsolePosition Begin, XConsolePosition End) Write(int value) =>
+            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
+
+        public static (XConsolePosition Begin, XConsolePosition End) Write(long value) =>
+            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
+
+        public static (XConsolePosition Begin, XConsolePosition End) Write(object? value)
+        {
+            var str = value?.ToString();
+            var items = string.IsNullOrEmpty(str) ? Array.Empty<XConsoleItem>() : new[] { new XConsoleItem(str) };
+            return WriteBase(items, isWriteLine: false);
+        }
+
+        public static (XConsolePosition Begin, XConsolePosition End) Write(float value) =>
+            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
+
+        public static (XConsolePosition Begin, XConsolePosition End) Write(
+            string format, object? arg0) =>
+            WriteBase(new[] { new XConsoleItem(string.Format(format, arg0)) }, isWriteLine: false);
+
+        public static (XConsolePosition Begin, XConsolePosition End) Write(
+            string format, object? arg0, object? arg1) =>
+            WriteBase(new[] { new XConsoleItem(string.Format(format, arg0, arg1)) }, isWriteLine: false);
+
+        public static (XConsolePosition Begin, XConsolePosition End) Write(
+            string format, object? arg0, object? arg1, object? arg2) =>
+            WriteBase(new[] { new XConsoleItem(string.Format(format, arg0, arg1, arg2)) }, isWriteLine: false);
+
+        public static (XConsolePosition Begin, XConsolePosition End) Write(
+            string format, params object?[]? arg) =>
+            WriteBase(
+                new[] { new XConsoleItem(string.Format(format, arg ?? Array.Empty<object?>())) },
+                isWriteLine: false);
+
+        public static (XConsolePosition Begin, XConsolePosition End) Write(uint value) =>
+            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
+
+        public static (XConsolePosition Begin, XConsolePosition End) Write(ulong value) =>
+            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
+
+        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(bool value) =>
+            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
+
+        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(char value) =>
+            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
+
+        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(char[]? buffer)
+        {
+            var value = buffer?.ToString();
             var items = string.IsNullOrEmpty(value) ? Array.Empty<XConsoleItem>() : new[] { new XConsoleItem(value) };
             return WriteBase(items, isWriteLine: true);
         }
+
+        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(char[] buffer, int index, int count)
+        {
+            var value = buffer.ToString()?.Substring(index, count);
+            var items = string.IsNullOrEmpty(value) ? Array.Empty<XConsoleItem>() : new[] { new XConsoleItem(value) };
+            return WriteBase(items, isWriteLine: true);
+        }
+
+        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(decimal value) =>
+            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
+
+        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(double value) =>
+            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
+
+        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(int value) =>
+            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
+
+        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(long value) =>
+            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
+
+        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(object? value)
+        {
+            var str = value?.ToString();
+            var items = string.IsNullOrEmpty(str) ? Array.Empty<XConsoleItem>() : new[] { new XConsoleItem(str) };
+            return WriteBase(items, isWriteLine: true);
+        }
+
+        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(float value) =>
+            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
+
+        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(
+            string format, object? arg0) =>
+            WriteBase(new[] { new XConsoleItem(string.Format(format, arg0)) }, isWriteLine: true);
+
+        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(
+            string format, object? arg0, object? arg1) =>
+            WriteBase(new[] { new XConsoleItem(string.Format(format, arg0, arg1)) }, isWriteLine: true);
+
+        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(
+            string format, object? arg0, object? arg1, object? arg2) =>
+            WriteBase(new[] { new XConsoleItem(string.Format(format, arg0, arg1, arg2)) }, isWriteLine: true);
+
+        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(
+            string format, params object?[]? arg) =>
+            WriteBase(
+                new[] { new XConsoleItem(string.Format(format, arg ?? Array.Empty<object?>())) },
+                isWriteLine: true);
+
+        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(uint value) =>
+            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
+
+        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(ulong value) =>
+            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
+
+        #endregion
 
         #endregion
 
