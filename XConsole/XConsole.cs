@@ -28,6 +28,106 @@ namespace System
                 action();
         }
 
+        #region Pin
+
+        private static int _pinHeight = 0;
+        private static Func<IReadOnlyList<string?>>? _getPinValues = null;
+
+        [Obsolete("At least one argument should be specified", error: true)]
+        public static void Pin() => throw new NotSupportedException("At least one argument should be specified");
+
+        public static void Pin(params string?[] values)
+        {
+            _getPinValues = () => values;
+            UpdatePin();
+        }
+
+        public static void Pin(Func<string?> getValue)
+        {
+            _getPinValues = () => new[] { getValue() };
+            UpdatePin();
+        }
+
+        public static void Pin(Func<IReadOnlyList<string?>> getValues)
+        {
+            _getPinValues = getValues;
+            UpdatePin();
+        }
+
+        public static void UpdatePin()
+        {
+            var getPinValues = _getPinValues;
+
+            if (getPinValues == null)
+                return;
+
+            var pinValues = getPinValues();
+            var pinItems = new List<XConsoleItem>(pinValues.Count);
+
+            foreach (var pinValue in pinValues)
+                if (!string.IsNullOrEmpty(pinValue))
+                    pinItems.Add(XConsoleItem.Parse(pinValue));
+
+            var spaces = _newLine + new string(' ', Console.BufferWidth - 1);
+
+            lock (_lock)
+            {
+                if (_getPinValues == null)
+                    return;
+
+                var origLeft = Console.CursorLeft;
+                var origTop = Console.CursorTop;
+                Console.CursorVisible = false;
+
+                for (var i = 0; i < _pinHeight; i++)
+                    Console.Write(spaces);
+
+                Console.SetCursorPosition(origLeft, origTop);
+                Console.WriteLine();
+
+                foreach (var pinItem in pinItems)
+                    WriteItem(pinItem);
+
+                if (Console.CursorTop == _maxTop)
+                {
+                    _pinHeight = 1 + pinItems.SelectMany(i => i.Value).Count(i => i == '\n');
+                    var shift = origTop + _pinHeight - _maxTop;
+                    ShiftTop += shift;
+                    origTop -= shift;
+                }
+                else
+                    _pinHeight = Console.CursorTop - origTop;
+
+                Console.SetCursorPosition(origLeft, origTop);
+                Console.CursorVisible = _cursorVisible;
+            }
+        }
+
+        public static void Unpin()
+        {
+            var spaces = _newLine + new string(' ', Console.BufferWidth - 1);
+
+            lock (_lock)
+            {
+                if (_getPinValues == null)
+                    return;
+
+                _getPinValues = null;
+                var origLeft = Console.CursorLeft;
+                var origTop = Console.CursorTop;
+                Console.CursorVisible = false;
+
+                for (var i = 0; i < _pinHeight; i++)
+                    Console.Write(spaces);
+
+                Console.SetCursorPosition(origLeft, origTop);
+                Console.CursorVisible = _cursorVisible;
+                _pinHeight = 0;
+            }
+        }
+
+        #endregion
+
         #region Position
 
         public static XConsolePosition CursorPosition
@@ -70,6 +170,48 @@ namespace System
                 shiftedTop = default;
                 return false;
             }
+        }
+
+        internal static XConsolePosition WriteToPosition(XConsolePosition position, IReadOnlyList<string?> values)
+        {
+            Debug.Assert(values.Count > 0);
+            var items = new List<XConsoleItem>(values.Count);
+
+            foreach (var value in values)
+                if (!string.IsNullOrEmpty(value))
+                    items.Add(XConsoleItem.Parse(value));
+
+            int endLeft, endTop;
+            long shiftTop;
+
+            lock (_lock)
+            {
+                var origLeft = Console.CursorLeft;
+                var origTop = Console.CursorTop;
+                var shiftedTop = checked((int)(position.Top + position.ShiftTop - ShiftTop));
+                Console.CursorVisible = false;
+                Console.SetCursorPosition(position.Left, shiftedTop);
+
+                foreach (var item in items)
+                    WriteItem(item);
+
+                endLeft = Console.CursorLeft;
+                endTop = Console.CursorTop;
+
+                if (endTop == _maxTop)
+                {
+                    var newLineCount = items.SelectMany(i => i.Value).Count(i => i == '\n');
+                    var shift = origTop + newLineCount - endTop;
+                    ShiftTop += shift;
+                    origTop -= shift;
+                }
+
+                Console.SetCursorPosition(origLeft, origTop);
+                Console.CursorVisible = _cursorVisible;
+                shiftTop = ShiftTop;
+            }
+
+            return new(left: endLeft, top: endTop, shiftTop: shiftTop);
         }
 
         #endregion
@@ -340,48 +482,6 @@ namespace System
             );
         }
 
-        internal static XConsolePosition WriteToPosition(IReadOnlyList<string?> values, XConsolePosition position)
-        {
-            Debug.Assert(values.Count > 0);
-            var items = new List<XConsoleItem>(values.Count);
-
-            foreach (var value in values)
-                if (!string.IsNullOrEmpty(value))
-                    items.Add(XConsoleItem.Parse(value));
-
-            int endLeft, endTop;
-            long shiftTop;
-
-            lock (_lock)
-            {
-                var origLeft = Console.CursorLeft;
-                var origTop = Console.CursorTop;
-                var shiftedTop = checked((int)(position.Top + position.ShiftTop - ShiftTop));
-                Console.CursorVisible = false;
-                Console.SetCursorPosition(position.Left, shiftedTop);
-
-                foreach (var item in items)
-                    WriteItem(item);
-
-                endLeft = Console.CursorLeft;
-                endTop = Console.CursorTop;
-
-                if (endTop == _maxTop)
-                {
-                    var newLineCount = items.SelectMany(i => i.Value).Count(i => i == '\n');
-                    var shift = origTop + newLineCount - endTop;
-                    ShiftTop += shift;
-                    origTop -= shift;
-                }
-
-                Console.SetCursorPosition(origLeft, origTop);
-                Console.CursorVisible = _cursorVisible;
-                shiftTop = ShiftTop;
-            }
-
-            return new(left: endLeft, top: endTop, shiftTop: shiftTop);
-        }
-
         private static void WriteItem(XConsoleItem item)
         {
             Debug.Assert(item.Value.Length > 0);
@@ -560,107 +660,7 @@ namespace System
 
         #endregion
 
-        #region Pin
-
-        private static int _pinHeight = 0;
-        private static Func<IReadOnlyList<string?>>? _getPinValues = null;
-
-        [Obsolete("At least one argument should be specified", error: true)]
-        public static void Pin() => throw new NotSupportedException("At least one argument should be specified");
-
-        public static void Pin(params string?[] values)
-        {
-            _getPinValues = () => values;
-            UpdatePin();
-        }
-
-        public static void Pin(Func<string?> getValue)
-        {
-            _getPinValues = () => new[] { getValue() };
-            UpdatePin();
-        }
-
-        public static void Pin(Func<IReadOnlyList<string?>> getValues)
-        {
-            _getPinValues = getValues;
-            UpdatePin();
-        }
-
-        public static void UpdatePin()
-        {
-            var getPinValues = _getPinValues;
-
-            if (getPinValues == null)
-                return;
-
-            var pinValues = getPinValues();
-            var pinItems = new List<XConsoleItem>(pinValues.Count);
-
-            foreach (var pinValue in pinValues)
-                if (!string.IsNullOrEmpty(pinValue))
-                    pinItems.Add(XConsoleItem.Parse(pinValue));
-
-            var spaces = _newLine + new string(' ', Console.BufferWidth - 1);
-
-            lock (_lock)
-            {
-                if (_getPinValues == null)
-                    return;
-
-                var origLeft = Console.CursorLeft;
-                var origTop = Console.CursorTop;
-                Console.CursorVisible = false;
-
-                for (var i = 0; i < _pinHeight; i++)
-                    Console.Write(spaces);
-
-                Console.SetCursorPosition(origLeft, origTop);
-                Console.WriteLine();
-
-                foreach (var pinItem in pinItems)
-                    WriteItem(pinItem);
-
-                if (Console.CursorTop == _maxTop)
-                {
-                    _pinHeight = 1 + pinItems.SelectMany(i => i.Value).Count(i => i == '\n');
-                    var shift = origTop + _pinHeight - _maxTop;
-                    ShiftTop += shift;
-                    origTop -= shift;
-                }
-                else
-                    _pinHeight = Console.CursorTop - origTop;
-
-                Console.SetCursorPosition(origLeft, origTop);
-                Console.CursorVisible = _cursorVisible;
-            }
-        }
-
-        public static void Unpin()
-        {
-            var spaces = _newLine + new string(' ', Console.BufferWidth - 1);
-
-            lock (_lock)
-            {
-                if (_getPinValues == null)
-                    return;
-
-                _getPinValues = null;
-                var origLeft = Console.CursorLeft;
-                var origTop = Console.CursorTop;
-                Console.CursorVisible = false;
-
-                for (var i = 0; i < _pinHeight; i++)
-                    Console.Write(spaces);
-
-                Console.SetCursorPosition(origLeft, origTop);
-                Console.CursorVisible = _cursorVisible;
-                _pinHeight = 0;
-            }
-        }
-
-        #endregion
-
-        #region Proxy
+        #region Rest
 
         public static ConsoleColor BackgroundColor
         {

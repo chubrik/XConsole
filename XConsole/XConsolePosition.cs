@@ -28,7 +28,7 @@
         public XConsolePosition Write(params string?[] values)
         {
             return values.Length > 0
-                ? XConsole.WriteToPosition(values, this)
+                ? XConsole.WriteToPosition(this, values)
                 : this;
         }
     }
