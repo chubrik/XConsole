@@ -20,6 +20,8 @@
             ShiftTop = shiftTop;
         }
 
+        public bool TryGetShiftedTop(out int shiftedTop) => XConsole.TryGetPositionShiftedTop(this, out shiftedTop);
+
         [Obsolete("At least one argument should be specified", error: true)]
         public void Write() => throw new NotSupportedException("At least one argument should be specified");
 

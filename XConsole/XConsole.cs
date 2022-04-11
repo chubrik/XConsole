@@ -28,6 +28,8 @@ namespace System
                 action();
         }
 
+        #region Position
+
         public static XConsolePosition CursorPosition
         {
             get
@@ -44,6 +46,33 @@ namespace System
                 }
             }
         }
+
+        internal static bool TryGetPositionShiftedTop(XConsolePosition position, out int shiftedTop)
+        {
+            long shiftTop;
+            int bufferHeight;
+
+            lock (_lock)
+            {
+                shiftTop = ShiftTop;
+                bufferHeight = Console.BufferHeight;
+            }
+
+            var rawShiftedTop = position.Top + position.ShiftTop - shiftTop;
+
+            if (rawShiftedTop >= 0 && rawShiftedTop < bufferHeight)
+            {
+                shiftedTop = (int)rawShiftedTop;
+                return true;
+            }
+            else
+            {
+                shiftedTop = default;
+                return false;
+            }
+        }
+
+        #endregion
 
         #region ReadLine
 
