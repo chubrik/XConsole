@@ -568,20 +568,20 @@ namespace System
 
         public static (XConsolePosition Begin, XConsolePosition End) Write(
             string format, object? arg0) =>
-            WriteBase(new[] { new XConsoleItem(string.Format(format, arg0)) }, isWriteLine: false);
+            WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0)) }, isWriteLine: false);
 
         public static (XConsolePosition Begin, XConsolePosition End) Write(
             string format, object? arg0, object? arg1) =>
-            WriteBase(new[] { new XConsoleItem(string.Format(format, arg0, arg1)) }, isWriteLine: false);
+            WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0, arg1)) }, isWriteLine: false);
 
         public static (XConsolePosition Begin, XConsolePosition End) Write(
             string format, object? arg0, object? arg1, object? arg2) =>
-            WriteBase(new[] { new XConsoleItem(string.Format(format, arg0, arg1, arg2)) }, isWriteLine: false);
+            WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0, arg1, arg2)) }, isWriteLine: false);
 
         public static (XConsolePosition Begin, XConsolePosition End) Write(
             string format, params object?[]? arg) =>
             WriteBase(
-                new[] { new XConsoleItem(string.Format(format, arg ?? Array.Empty<object?>())) },
+                new[] { XConsoleItem.Parse(string.Format(format, arg ?? Array.Empty<object?>())) },
                 isWriteLine: false);
 
         public static (XConsolePosition Begin, XConsolePosition End) Write(uint value) =>
@@ -634,20 +634,20 @@ namespace System
 
         public static (XConsolePosition Begin, XConsolePosition End) WriteLine(
             string format, object? arg0) =>
-            WriteBase(new[] { new XConsoleItem(string.Format(format, arg0)) }, isWriteLine: true);
+            WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0)) }, isWriteLine: true);
 
         public static (XConsolePosition Begin, XConsolePosition End) WriteLine(
             string format, object? arg0, object? arg1) =>
-            WriteBase(new[] { new XConsoleItem(string.Format(format, arg0, arg1)) }, isWriteLine: true);
+            WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0, arg1)) }, isWriteLine: true);
 
         public static (XConsolePosition Begin, XConsolePosition End) WriteLine(
             string format, object? arg0, object? arg1, object? arg2) =>
-            WriteBase(new[] { new XConsoleItem(string.Format(format, arg0, arg1, arg2)) }, isWriteLine: true);
+            WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0, arg1, arg2)) }, isWriteLine: true);
 
         public static (XConsolePosition Begin, XConsolePosition End) WriteLine(
             string format, params object?[]? arg) =>
             WriteBase(
-                new[] { new XConsoleItem(string.Format(format, arg ?? Array.Empty<object?>())) },
+                new[] { XConsoleItem.Parse(string.Format(format, arg ?? Array.Empty<object?>())) },
                 isWriteLine: true);
 
         public static (XConsolePosition Begin, XConsolePosition End) WriteLine(uint value) =>
