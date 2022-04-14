@@ -76,7 +76,7 @@ namespace System
                 if (!string.IsNullOrEmpty(pinValue))
                     pinItems.Add(XConsoleItem.Parse(pinValue));
 
-            int origLeft, origTop;
+            int origLeft, origTop, pinEndTop;
 
             lock (_syncLock)
             {
@@ -88,25 +88,32 @@ namespace System
                     if (pinHeight != _pinHeight)
                         pinClear = _newLine + new string(' ', Console.BufferWidth * _pinHeight - 1);
 
+#if !NETSTANDARD
+                    (origLeft, origTop) = Console.GetCursorPosition();
+#else
                     origLeft = Console.CursorLeft;
                     origTop = Console.CursorTop;
+#endif
                     Console.CursorVisible = false;
                     Console.Write(pinClear);
                     Console.SetCursorPosition(origLeft, origTop);
                 }
                 else
                 {
+#if !NETSTANDARD
+                    (origLeft, origTop) = Console.GetCursorPosition();
+#else
                     origLeft = Console.CursorLeft;
                     origTop = Console.CursorTop;
+#endif
                     Console.CursorVisible = false;
                 }
 
                 Console.WriteLine();
+                WriteItems(pinItems);
+                pinEndTop = Console.CursorTop;
 
-                foreach (var pinItem in pinItems)
-                    WriteItem(pinItem);
-
-                if (Console.CursorTop == _maxTop)
+                if (pinEndTop == _maxTop)
                 {
                     _pinHeight = 1 + GetLineWrapCount(pinItems, beginLeft: 0);
                     var shift = origTop + _pinHeight - _maxTop;
@@ -114,7 +121,7 @@ namespace System
                     origTop -= shift;
                 }
                 else
-                    _pinHeight = Console.CursorTop - origTop;
+                    _pinHeight = pinEndTop - origTop;
 
                 Console.SetCursorPosition(origLeft, origTop);
                 Console.CursorVisible = _cursorVisible;
@@ -129,6 +136,8 @@ namespace System
                 ? _newLine + new string(' ', Console.BufferWidth * pinHeight - 1)
                 : string.Empty;
 
+            int origLeft, origTop;
+
             lock (_syncLock)
             {
                 if (_getPinValues == null)
@@ -139,8 +148,12 @@ namespace System
                     if (pinHeight != _pinHeight)
                         pinClear = _newLine + new string(' ', Console.BufferWidth + _pinHeight - 1);
 
-                    var origLeft = Console.CursorLeft;
-                    var origTop = Console.CursorTop;
+#if !NETSTANDARD
+                    (origLeft, origTop) = Console.GetCursorPosition();
+#else
+                    origLeft = Console.CursorLeft;
+                    origTop = Console.CursorTop;
+#endif
                     Console.CursorVisible = false;
                     Console.Write(pinClear);
                     Console.SetCursorPosition(origLeft, origTop);
@@ -161,7 +174,14 @@ namespace System
             get
             {
                 lock (_syncLock)
+                {
+#if !NETSTANDARD
+                    var (left, top) = Console.GetCursorPosition();
+                    return new(left: left, top: top, shiftTop: ShiftTop);
+#else
                     return new(left: Console.CursorLeft, top: Console.CursorTop, shiftTop: ShiftTop);
+#endif
+                }
             }
             set
             {
@@ -207,34 +227,40 @@ namespace System
                 if (!string.IsNullOrEmpty(value))
                     items.Add(XConsoleItem.Parse(value));
 
-            int endLeft, endTop;
+            int origLeft, origTop, shiftedTop, endLeft, endTop;
             long shiftTop;
 
             lock (_syncLock)
             {
-                var origLeft = Console.CursorLeft;
-                var origTop = Console.CursorTop;
-                var shiftedTop = checked((int)(position.Top + position.ShiftTop - ShiftTop));
+#if !NETSTANDARD
+                (origLeft, origTop) = Console.GetCursorPosition();
+#else
+                origLeft = Console.CursorLeft;
+                origTop = Console.CursorTop;
+#endif
+                shiftTop = ShiftTop;
+                shiftedTop = checked((int)(position.Top + position.ShiftTop - shiftTop));
                 Console.CursorVisible = false;
                 Console.SetCursorPosition(position.Left, shiftedTop);
-
-                foreach (var item in items)
-                    WriteItem(item);
-
+                WriteItems(items);
+#if !NETSTANDARD
+                (endLeft, endTop) = Console.GetCursorPosition();
+#else
                 endLeft = Console.CursorLeft;
                 endTop = Console.CursorTop;
+#endif
 
                 if (endTop == _maxTop)
                 {
                     var lineWrapCount = GetLineWrapCount(items, origLeft);
                     var shift = origTop + lineWrapCount - endTop;
-                    ShiftTop += shift;
+                    shiftTop += shift;
                     origTop -= shift;
+                    ShiftTop = shiftTop;
                 }
 
                 Console.SetCursorPosition(origLeft, origTop);
                 Console.CursorVisible = _cursorVisible;
-                shiftTop = ShiftTop;
             }
 
             return new(left: endLeft, top: endTop, shiftTop: shiftTop);
@@ -305,7 +331,10 @@ namespace System
 
         public static (XConsolePosition Begin, XConsolePosition End) Write(string? value)
         {
-            var items = string.IsNullOrEmpty(value) ? Array.Empty<XConsoleItem>() : new[] { XConsoleItem.Parse(value) };
+            var items = string.IsNullOrEmpty(value)
+                ? Array.Empty<XConsoleItem>()
+                : new[] { XConsoleItem.Parse(value) };
+
             return WriteBase(items, isWriteLine: false);
         }
 
@@ -322,7 +351,10 @@ namespace System
 
         public static (XConsolePosition Begin, XConsolePosition End) WriteLine(string? value)
         {
-            var items = string.IsNullOrEmpty(value) ? Array.Empty<XConsoleItem>() : new[] { XConsoleItem.Parse(value) };
+            var items = string.IsNullOrEmpty(value)
+                ? Array.Empty<XConsoleItem>()
+                : new[] { XConsoleItem.Parse(value) };
+
             return WriteBase(items, isWriteLine: true);
         }
 
@@ -348,15 +380,20 @@ namespace System
             {
                 lock (_syncLock)
                 {
+#if !NETSTANDARD
+                    (beginLeft, beginTop) = Console.GetCursorPosition();
+#else
                     beginLeft = Console.CursorLeft;
                     beginTop = Console.CursorTop;
+#endif
                     Console.CursorVisible = false;
-
-                    foreach (var logItem in logItems)
-                        WriteItem(logItem);
-
+                    WriteItems(logItems);
+#if !NETSTANDARD
+                    (endLeft, endTop) = Console.GetCursorPosition();
+#else
                     endLeft = Console.CursorLeft;
                     endTop = Console.CursorTop;
+#endif
 
                     if (isWriteLine)
                     {
@@ -403,19 +440,26 @@ namespace System
                     if (!string.IsNullOrEmpty(pinValue))
                         pinItems.Add(XConsoleItem.Parse(pinValue));
 
+                int pinEndTop;
+
                 lock (_syncLock)
                 {
                     if (_getPinValues == null)
                     {
+#if !NETSTANDARD
+                        (beginLeft, beginTop) = Console.GetCursorPosition();
+#else
                         beginLeft = Console.CursorLeft;
                         beginTop = Console.CursorTop;
+#endif
                         Console.CursorVisible = false;
-
-                        foreach (var logItem in logItems)
-                            WriteItem(logItem);
-
+                        WriteItems(logItems);
+#if !NETSTANDARD
+                        (endLeft, endTop) = Console.GetCursorPosition();
+#else
                         endLeft = Console.CursorLeft;
                         endTop = Console.CursorTop;
+#endif
 
                         if (isWriteLine)
                         {
@@ -451,34 +495,43 @@ namespace System
                             if (pinHeight != _pinHeight)
                                 pinClear = _newLine + new string(' ', Console.BufferWidth + _pinHeight - 1);
 
+#if !NETSTANDARD
+                            (beginLeft, beginTop) = Console.GetCursorPosition();
+#else
                             beginLeft = Console.CursorLeft;
                             beginTop = Console.CursorTop;
+#endif
                             Console.CursorVisible = false;
                             Console.Write(pinClear);
                             Console.SetCursorPosition(beginLeft, beginTop);
                         }
                         else
                         {
+#if !NETSTANDARD
+                            (beginLeft, beginTop) = Console.GetCursorPosition();
+#else
                             beginLeft = Console.CursorLeft;
                             beginTop = Console.CursorTop;
+#endif
                             Console.CursorVisible = false;
                         }
 
-                        foreach (var logItem in logItems)
-                            WriteItem(logItem);
-
+                        WriteItems(logItems);
+#if !NETSTANDARD
+                        (endLeft, endTop) = Console.GetCursorPosition();
+#else
                         endLeft = Console.CursorLeft;
                         endTop = Console.CursorTop;
+#endif
                         Console.WriteLine();
 
                         if (isWriteLine)
                         {
                             Console.WriteLine();
+                            WriteItems(pinItems);
+                            pinEndTop = Console.CursorTop;
 
-                            foreach (var pinItem in pinItems)
-                                WriteItem(pinItem);
-
-                            if (Console.CursorTop == _maxTop)
+                            if (pinEndTop == _maxTop)
                             {
                                 var logLineWrapCount = GetLineWrapCount(logItems, beginLeft);
                                 _pinHeight = 1 + GetLineWrapCount(pinItems, beginLeft: 0);
@@ -488,16 +541,16 @@ namespace System
                                 endTop = _maxTop - _pinHeight - 1;
                             }
                             else
-                                _pinHeight = Console.CursorTop - (endTop + 1);
+                                _pinHeight = pinEndTop - (endTop + 1);
 
                             Console.SetCursorPosition(0, endTop + 1);
                         }
                         else
                         {
-                            foreach (var pinItem in pinItems)
-                                WriteItem(pinItem);
+                            WriteItems(pinItems);
+                            pinEndTop = Console.CursorTop;
 
-                            if (Console.CursorTop == _maxTop)
+                            if (pinEndTop == _maxTop)
                             {
                                 var logLineWrapCount = GetLineWrapCount(logItems, beginLeft);
                                 _pinHeight = 1 + GetLineWrapCount(pinItems, beginLeft: 0);
@@ -507,7 +560,7 @@ namespace System
                                 endTop = _maxTop - _pinHeight;
                             }
                             else
-                                _pinHeight = Console.CursorTop - endTop;
+                                _pinHeight = pinEndTop - endTop;
 
                             Console.SetCursorPosition(endLeft, endTop);
                         }
@@ -536,14 +589,22 @@ namespace System
         public static (XConsolePosition Begin, XConsolePosition End) Write(char[]? buffer)
         {
             var value = buffer?.ToString();
-            var items = string.IsNullOrEmpty(value) ? Array.Empty<XConsoleItem>() : new[] { new XConsoleItem(value) };
+
+            var items = string.IsNullOrEmpty(value)
+                ? Array.Empty<XConsoleItem>()
+                : new[] { new XConsoleItem(value) };
+
             return WriteBase(items, isWriteLine: false);
         }
 
         public static (XConsolePosition Begin, XConsolePosition End) Write(char[] buffer, int index, int count)
         {
             var value = buffer.ToString()?.Substring(index, count);
-            var items = string.IsNullOrEmpty(value) ? Array.Empty<XConsoleItem>() : new[] { new XConsoleItem(value) };
+
+            var items = string.IsNullOrEmpty(value)
+                ? Array.Empty<XConsoleItem>()
+                : new[] { new XConsoleItem(value) };
+
             return WriteBase(items, isWriteLine: false);
         }
 
@@ -561,8 +622,12 @@ namespace System
 
         public static (XConsolePosition Begin, XConsolePosition End) Write(object? value)
         {
-            var str = value?.ToString();
-            var items = string.IsNullOrEmpty(str) ? Array.Empty<XConsoleItem>() : new[] { new XConsoleItem(str) };
+            var valueStr = value?.ToString();
+
+            var items = string.IsNullOrEmpty(valueStr)
+                ? Array.Empty<XConsoleItem>()
+                : new[] { new XConsoleItem(valueStr) };
+
             return WriteBase(items, isWriteLine: false);
         }
 
@@ -602,14 +667,22 @@ namespace System
         public static (XConsolePosition Begin, XConsolePosition End) WriteLine(char[]? buffer)
         {
             var value = buffer?.ToString();
-            var items = string.IsNullOrEmpty(value) ? Array.Empty<XConsoleItem>() : new[] { new XConsoleItem(value) };
+
+            var items = string.IsNullOrEmpty(value)
+                ? Array.Empty<XConsoleItem>()
+                : new[] { new XConsoleItem(value) };
+
             return WriteBase(items, isWriteLine: true);
         }
 
         public static (XConsolePosition Begin, XConsolePosition End) WriteLine(char[] buffer, int index, int count)
         {
             var value = buffer.ToString()?.Substring(index, count);
-            var items = string.IsNullOrEmpty(value) ? Array.Empty<XConsoleItem>() : new[] { new XConsoleItem(value) };
+
+            var items = string.IsNullOrEmpty(value)
+                ? Array.Empty<XConsoleItem>()
+                : new[] { new XConsoleItem(value) };
+
             return WriteBase(items, isWriteLine: true);
         }
 
@@ -627,8 +700,12 @@ namespace System
 
         public static (XConsolePosition Begin, XConsolePosition End) WriteLine(object? value)
         {
-            var str = value?.ToString();
-            var items = string.IsNullOrEmpty(str) ? Array.Empty<XConsoleItem>() : new[] { new XConsoleItem(str) };
+            var valueStr = value?.ToString();
+
+            var items = string.IsNullOrEmpty(valueStr)
+                ? Array.Empty<XConsoleItem>()
+                : new[] { new XConsoleItem(valueStr) };
+
             return WriteBase(items, isWriteLine: true);
         }
 
@@ -665,40 +742,43 @@ namespace System
 
         #region Private utils
 
-        private static void WriteItem(XConsoleItem item)
+        private static void WriteItems(IReadOnlyList<XConsoleItem> items)
         {
-            if (item.BackColor == XConsoleItem.NoColor)
+            foreach (var item in items)
             {
-                if (item.ForeColor == XConsoleItem.NoColor)
+                if (item.BackColor == XConsoleItem.NoColor)
                 {
-                    Console.Write(item.Value);
+                    if (item.ForeColor == XConsoleItem.NoColor)
+                    {
+                        Console.Write(item.Value);
+                    }
+                    else
+                    {
+                        var origForeColor = Console.ForegroundColor;
+                        Console.ForegroundColor = item.ForeColor;
+                        Console.Write(item.Value);
+                        Console.ForegroundColor = origForeColor;
+                    }
                 }
                 else
                 {
-                    var origForeColor = Console.ForegroundColor;
-                    Console.ForegroundColor = item.ForeColor;
-                    Console.Write(item.Value);
-                    Console.ForegroundColor = origForeColor;
-                }
-            }
-            else
-            {
-                if (item.ForeColor == XConsoleItem.NoColor)
-                {
-                    var origBackColor = Console.BackgroundColor;
-                    Console.BackgroundColor = item.BackColor;
-                    Console.Write(item.Value);
-                    Console.BackgroundColor = origBackColor;
-                }
-                else
-                {
-                    var origBackColor = Console.BackgroundColor;
-                    var origForeColor = Console.ForegroundColor;
-                    Console.BackgroundColor = item.BackColor;
-                    Console.ForegroundColor = item.ForeColor;
-                    Console.Write(item.Value);
-                    Console.BackgroundColor = origBackColor;
-                    Console.ForegroundColor = origForeColor;
+                    if (item.ForeColor == XConsoleItem.NoColor)
+                    {
+                        var origBackColor = Console.BackgroundColor;
+                        Console.BackgroundColor = item.BackColor;
+                        Console.Write(item.Value);
+                        Console.BackgroundColor = origBackColor;
+                    }
+                    else
+                    {
+                        var origBackColor = Console.BackgroundColor;
+                        var origForeColor = Console.ForegroundColor;
+                        Console.BackgroundColor = item.BackColor;
+                        Console.ForegroundColor = item.ForeColor;
+                        Console.Write(item.Value);
+                        Console.BackgroundColor = origBackColor;
+                        Console.ForegroundColor = origForeColor;
+                    }
                 }
             }
         }
@@ -708,12 +788,11 @@ namespace System
             var lineWrapCount = 0;
             var left = beginLeft;
             var bufferWidth = Console.BufferWidth;
-            var itemCount = items.Count;
             string chars;
             int charCount, charIndex;
             char chr;
 
-            for (var itemIndex = 0; itemIndex < itemCount; itemIndex++)
+            for (var itemIndex = 0; itemIndex < items.Count; itemIndex++)
             {
                 chars = items[itemIndex].Value;
                 charCount = chars.Length;
