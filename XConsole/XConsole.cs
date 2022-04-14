@@ -525,103 +525,6 @@ namespace System
             );
         }
 
-        private static void WriteItem(XConsoleItem item)
-        {
-            if (item.BackColor == XConsoleItem.NoColor)
-            {
-                if (item.ForeColor == XConsoleItem.NoColor)
-                {
-                    Console.Write(item.Value);
-                }
-                else
-                {
-                    var origForeColor = Console.ForegroundColor;
-                    Console.ForegroundColor = item.ForeColor;
-                    Console.Write(item.Value);
-                    Console.ForegroundColor = origForeColor;
-                }
-            }
-            else
-            {
-                if (item.ForeColor == XConsoleItem.NoColor)
-                {
-                    var origBackColor = Console.BackgroundColor;
-                    Console.BackgroundColor = item.BackColor;
-                    Console.Write(item.Value);
-                    Console.BackgroundColor = origBackColor;
-                }
-                else
-                {
-                    var origBackColor = Console.BackgroundColor;
-                    var origForeColor = Console.ForegroundColor;
-                    Console.BackgroundColor = item.BackColor;
-                    Console.ForegroundColor = item.ForeColor;
-                    Console.Write(item.Value);
-                    Console.BackgroundColor = origBackColor;
-                    Console.ForegroundColor = origForeColor;
-                }
-            }
-        }
-
-        private static int GetLineWrapCount(IReadOnlyList<XConsoleItem> items, int beginLeft)
-        {
-            var lineWrapCount = 0;
-            var left = beginLeft;
-            var bufferWidth = Console.BufferWidth;
-            var itemCount = items.Count;
-            string chars;
-            int charCount, charIndex;
-            char chr;
-
-            for (var itemIndex = 0; itemIndex < itemCount; itemIndex++)
-            {
-                chars = items[itemIndex].Value;
-                charCount = chars.Length;
-
-                for (charIndex = 0; charIndex < charCount; charIndex++)
-                {
-                    chr = chars[charIndex];
-
-                    if (chr >= 32)
-                        left++;
-                    else
-                        switch (chr)
-                        {
-                            case '\n':
-                                left = 0;
-                                lineWrapCount++;
-                                continue;
-
-                            case '\r':
-                                left = 0;
-                                continue;
-
-                            case '\t':
-                                left = (left + 8) / 8 * 8;
-                                break;
-
-                            case '\b':
-
-                                if (left > 0)
-                                    left--;
-
-                                continue;
-
-                            default:
-                                continue;
-                        }
-
-                    if (left >= bufferWidth)
-                    {
-                        lineWrapCount++;
-                        left -= bufferWidth;
-                    }
-                }
-            }
-
-            return lineWrapCount;
-        }
-
         #region Overloads
 
         public static (XConsolePosition Begin, XConsolePosition End) Write(bool value) =>
@@ -760,7 +663,108 @@ namespace System
 
         #endregion
 
-        #region Rest
+        #region Private utils
+
+        private static void WriteItem(XConsoleItem item)
+        {
+            if (item.BackColor == XConsoleItem.NoColor)
+            {
+                if (item.ForeColor == XConsoleItem.NoColor)
+                {
+                    Console.Write(item.Value);
+                }
+                else
+                {
+                    var origForeColor = Console.ForegroundColor;
+                    Console.ForegroundColor = item.ForeColor;
+                    Console.Write(item.Value);
+                    Console.ForegroundColor = origForeColor;
+                }
+            }
+            else
+            {
+                if (item.ForeColor == XConsoleItem.NoColor)
+                {
+                    var origBackColor = Console.BackgroundColor;
+                    Console.BackgroundColor = item.BackColor;
+                    Console.Write(item.Value);
+                    Console.BackgroundColor = origBackColor;
+                }
+                else
+                {
+                    var origBackColor = Console.BackgroundColor;
+                    var origForeColor = Console.ForegroundColor;
+                    Console.BackgroundColor = item.BackColor;
+                    Console.ForegroundColor = item.ForeColor;
+                    Console.Write(item.Value);
+                    Console.BackgroundColor = origBackColor;
+                    Console.ForegroundColor = origForeColor;
+                }
+            }
+        }
+
+        private static int GetLineWrapCount(IReadOnlyList<XConsoleItem> items, int beginLeft)
+        {
+            var lineWrapCount = 0;
+            var left = beginLeft;
+            var bufferWidth = Console.BufferWidth;
+            var itemCount = items.Count;
+            string chars;
+            int charCount, charIndex;
+            char chr;
+
+            for (var itemIndex = 0; itemIndex < itemCount; itemIndex++)
+            {
+                chars = items[itemIndex].Value;
+                charCount = chars.Length;
+
+                for (charIndex = 0; charIndex < charCount; charIndex++)
+                {
+                    chr = chars[charIndex];
+
+                    if (chr >= 32)
+                        left++;
+                    else
+                        switch (chr)
+                        {
+                            case '\n':
+                                left = 0;
+                                lineWrapCount++;
+                                continue;
+
+                            case '\r':
+                                left = 0;
+                                continue;
+
+                            case '\t':
+                                left = (left + 8) / 8 * 8;
+                                break;
+
+                            case '\b':
+
+                                if (left > 0)
+                                    left--;
+
+                                continue;
+
+                            default:
+                                continue;
+                        }
+
+                    if (left >= bufferWidth)
+                    {
+                        lineWrapCount++;
+                        left -= bufferWidth;
+                    }
+                }
+            }
+
+            return lineWrapCount;
+        }
+
+        #endregion
+
+        #region Remaining API coverage
 
         public static ConsoleColor BackgroundColor
         {
