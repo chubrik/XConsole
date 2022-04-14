@@ -15,17 +15,20 @@ namespace System
 #endif
     public static class XConsole
     {
-        private static readonly object _lock = new();
+        private static readonly object _syncLock = new();
         private static readonly string _newLine = Environment.NewLine;
         private static bool _cursorVisible = Console.CursorVisible;
         private static int _maxTop = Console.BufferHeight - 1;
         internal static long ShiftTop = 0;
 
-        public static void Lock(Action action)
+        public static void Sync(Action action)
         {
-            lock (_lock)
+            lock (_syncLock)
                 action();
         }
+
+        [Obsolete("Method is deprecated, use Sync method instead.")]
+        public static void Lock(Action action) => Sync(action);
 
         #region Pin
 
@@ -75,7 +78,7 @@ namespace System
 
             int origLeft, origTop;
 
-            lock (_lock)
+            lock (_syncLock)
             {
                 if (_getPinValues == null)
                     return;
@@ -126,7 +129,7 @@ namespace System
                 ? _newLine + new string(' ', Console.BufferWidth * pinHeight - 1)
                 : string.Empty;
 
-            lock (_lock)
+            lock (_syncLock)
             {
                 if (_getPinValues == null)
                     return;
@@ -157,12 +160,12 @@ namespace System
         {
             get
             {
-                lock (_lock)
+                lock (_syncLock)
                     return new(left: Console.CursorLeft, top: Console.CursorTop, shiftTop: ShiftTop);
             }
             set
             {
-                lock (_lock)
+                lock (_syncLock)
                 {
                     var shiftedTop = checked((int)(value.Top + value.ShiftTop - ShiftTop));
                     Console.SetCursorPosition(value.Left, shiftedTop);
@@ -175,7 +178,7 @@ namespace System
             long shiftTop;
             int bufferHeight;
 
-            lock (_lock)
+            lock (_syncLock)
             {
                 shiftTop = ShiftTop;
                 bufferHeight = Console.BufferHeight;
@@ -207,7 +210,7 @@ namespace System
             int endLeft, endTop;
             long shiftTop;
 
-            lock (_lock)
+            lock (_syncLock)
             {
                 var origLeft = Console.CursorLeft;
                 var origTop = Console.CursorTop;
@@ -243,7 +246,7 @@ namespace System
 
         public static string ReadLine()
         {
-            lock (_lock)
+            lock (_syncLock)
                 return Console.ReadLine() ?? string.Empty;
         }
 
@@ -260,7 +263,7 @@ namespace System
                     var text = string.Empty;
                     ConsoleKeyInfo keyInfo;
 
-                    lock (_lock)
+                    lock (_syncLock)
                     {
                         do
                         {
@@ -343,7 +346,7 @@ namespace System
 
             if (getPinValues == null)
             {
-                lock (_lock)
+                lock (_syncLock)
                 {
                     beginLeft = Console.CursorLeft;
                     beginTop = Console.CursorTop;
@@ -400,7 +403,7 @@ namespace System
                     if (!string.IsNullOrEmpty(pinValue))
                         pinItems.Add(XConsoleItem.Parse(pinValue));
 
-                lock (_lock)
+                lock (_syncLock)
                 {
                     if (_getPinValues == null)
                     {
@@ -763,12 +766,12 @@ namespace System
         {
             get
             {
-                lock (_lock)
+                lock (_syncLock)
                     return Console.BackgroundColor;
             }
             set
             {
-                lock (_lock)
+                lock (_syncLock)
                     Console.BackgroundColor = value;
             }
         }
@@ -777,12 +780,12 @@ namespace System
         {
             get
             {
-                lock (_lock)
+                lock (_syncLock)
                     return Console.BufferHeight;
             }
             set
             {
-                lock (_lock)
+                lock (_syncLock)
                 {
                     Console.BufferHeight = value;
                     _maxTop = value - 1;
@@ -794,12 +797,12 @@ namespace System
         {
             get
             {
-                lock (_lock)
+                lock (_syncLock)
                     return Console.BufferWidth;
             }
             set
             {
-                lock (_lock)
+                lock (_syncLock)
                     Console.BufferWidth = value;
             }
         }
@@ -810,12 +813,12 @@ namespace System
         {
             get
             {
-                lock (_lock)
+                lock (_syncLock)
                     return Console.CursorLeft;
             }
             set
             {
-                lock (_lock)
+                lock (_syncLock)
                     Console.CursorLeft = value;
             }
         }
@@ -830,12 +833,12 @@ namespace System
         {
             get
             {
-                lock (_lock)
+                lock (_syncLock)
                     return Console.CursorTop;
             }
             set
             {
-                lock (_lock)
+                lock (_syncLock)
                     Console.CursorTop = value;
             }
         }
@@ -844,12 +847,12 @@ namespace System
         {
             get
             {
-                lock (_lock)
+                lock (_syncLock)
                     return Console.CursorVisible;
             }
             set
             {
-                lock (_lock)
+                lock (_syncLock)
                     Console.CursorVisible = _cursorVisible = value;
             }
         }
@@ -860,12 +863,12 @@ namespace System
         {
             get
             {
-                lock (_lock)
+                lock (_syncLock)
                     return Console.ForegroundColor;
             }
             set
             {
-                lock (_lock)
+                lock (_syncLock)
                     Console.ForegroundColor = value;
             }
         }
@@ -876,12 +879,12 @@ namespace System
         {
             get
             {
-                lock (_lock)
+                lock (_syncLock)
                     return Console.InputEncoding;
             }
             set
             {
-                lock (_lock)
+                lock (_syncLock)
                     Console.InputEncoding = value;
             }
         }
@@ -906,12 +909,12 @@ namespace System
         {
             get
             {
-                lock (_lock)
+                lock (_syncLock)
                     return Console.OutputEncoding;
             }
             set
             {
-                lock (_lock)
+                lock (_syncLock)
                     Console.OutputEncoding = value;
             }
         }
@@ -966,13 +969,13 @@ namespace System
 
         public static void Clear()
         {
-            lock (_lock)
+            lock (_syncLock)
                 Console.Clear();
         }
 
         public static (int Left, int Top) GetCursorPosition()
         {
-            lock (_lock)
+            lock (_syncLock)
 #if !NETSTANDARD
                 return Console.GetCursorPosition();
 #else
@@ -983,7 +986,7 @@ namespace System
         public static void MoveBufferArea(
             int sourceLeft, int sourceTop, int sourceWidth, int sourceHeight, int targetLeft, int targetTop)
         {
-            lock (_lock)
+            lock (_syncLock)
                 Console.MoveBufferArea(
                     sourceLeft: sourceLeft, sourceTop: sourceTop,
                     sourceWidth: sourceWidth, sourceHeight: sourceHeight,
@@ -994,7 +997,7 @@ namespace System
             int sourceLeft, int sourceTop, int sourceWidth, int sourceHeight, int targetLeft, int targetTop,
             char sourceChar, ConsoleColor sourceForeColor, ConsoleColor sourceBackColor)
         {
-            lock (_lock)
+            lock (_syncLock)
                 Console.MoveBufferArea(
                     sourceLeft: sourceLeft, sourceTop: sourceTop,
                     sourceWidth: sourceWidth, sourceHeight: sourceHeight,
@@ -1016,37 +1019,37 @@ namespace System
 
         public static int Read()
         {
-            lock (_lock)
+            lock (_syncLock)
                 return Console.Read();
         }
 
         public static ConsoleKeyInfo ReadKey()
         {
-            lock (_lock)
+            lock (_syncLock)
                 return Console.ReadKey();
         }
 
         public static ConsoleKeyInfo ReadKey(bool intercept)
         {
-            lock (_lock)
+            lock (_syncLock)
                 return Console.ReadKey(intercept: intercept);
         }
 
         public static void ResetColor()
         {
-            lock (_lock)
+            lock (_syncLock)
                 Console.ResetColor();
         }
 
         public static void SetBufferSize(int width, int height)
         {
-            lock (_lock)
+            lock (_syncLock)
                 Console.SetBufferSize(width: width, height: height);
         }
 
         public static void SetCursorPosition(int left, int top)
         {
-            lock (_lock)
+            lock (_syncLock)
                 Console.SetCursorPosition(left: left, top: top);
         }
 
@@ -1060,7 +1063,7 @@ namespace System
 
         public static void SetWindowSize(int width, int height)
         {
-            lock (_lock)
+            lock (_syncLock)
                 Console.SetWindowSize(width: width, height: height);
         }
 
