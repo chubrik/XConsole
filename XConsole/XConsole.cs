@@ -226,9 +226,19 @@ namespace System
                 origTop = Console.CursorTop;
 #endif
                 shiftTop = ShiftTop;
-                positionActualTop = checked((int)(position.InitialTop + position.ShiftTop - shiftTop));
-                Console.CursorVisible = false;
-                Console.SetCursorPosition(position.Left, positionActualTop);
+
+                try
+                {
+                    positionActualTop = checked((int)(position.InitialTop + position.ShiftTop - shiftTop));
+                    Console.CursorVisible = false;
+                    Console.SetCursorPosition(position.Left, positionActualTop);
+                }
+                catch
+                {
+                    Console.CursorVisible = _cursorVisible;
+                    throw;
+                }
+
                 WriteItems(items);
 #if !NETSTANDARD
                 (endLeft, endTop) = Console.GetCursorPosition();

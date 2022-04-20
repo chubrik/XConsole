@@ -32,6 +32,18 @@
                 : this;
         }
 
+        [Obsolete("At least one argument should be specified", error: true)]
+        public void TryWrite() => throw new NotSupportedException("At least one argument should be specified");
+
+        public XConsolePosition? TryWrite(params string?[] values)
+        {
+            if (values.Length > 0)
+                try { return XConsole.WriteToPosition(this, values); }
+                catch { return null; }
+
+            return this;
+        }
+
         #region Deprecated
 
         // v1.0.4
