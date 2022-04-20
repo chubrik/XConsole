@@ -1,5 +1,13 @@
 ﻿namespace System
 {
+#if !NETSTANDARD
+    using System.Runtime.Versioning;
+    [SupportedOSPlatform("windows")]
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+#endif
     public struct XConsolePosition
     {
         public readonly int Left;

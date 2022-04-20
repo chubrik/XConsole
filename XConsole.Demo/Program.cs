@@ -1,4 +1,8 @@
-﻿namespace Demo
+﻿#if NET5_0
+#pragma warning disable CA1416 // Validate platform compatibility
+#endif
+
+namespace Demo
 {
     using Console = XConsole;
 
@@ -37,7 +41,11 @@
 
             //Console.SetCursorPosition(0, 8950);
 
+#if !NETSTANDARD1_3
             var sysFolder = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.System));
+#else
+            var sysFolder = new DirectoryInfo(@"C:\Windows\System32");
+#endif
             var files = sysFolder.GetFiles("*.exe");
             var fileIndex = 0;
             Console.Pin(() => new[] { "m`This is pin!\n", $"g`Number of files: ", $"W`{fileIndex}" });

@@ -3,6 +3,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 
+#if NETSTANDARD
+#pragma warning disable CS8604 // Possible null reference argument.
+#endif
+
 namespace System
 {
 #if !NETSTANDARD
@@ -1087,15 +1091,21 @@ namespace System
 
         public static Stream OpenStandardError() => Console.OpenStandardError();
 
+#if !NETSTANDARD1_3
         public static Stream OpenStandardError(int bufferSize) => Console.OpenStandardError(bufferSize: bufferSize);
+#endif
 
         public static Stream OpenStandardInput() => Console.OpenStandardInput();
 
+#if !NETSTANDARD1_3
         public static Stream OpenStandardInput(int bufferSize) => Console.OpenStandardInput(bufferSize: bufferSize);
+#endif
 
         public static Stream OpenStandardOutput() => Console.OpenStandardOutput();
 
+#if !NETSTANDARD1_3
         public static Stream OpenStandardOutput(int bufferSize) => Console.OpenStandardOutput(bufferSize: bufferSize);
+#endif
 
         public static int Read()
         {
