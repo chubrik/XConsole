@@ -3,24 +3,24 @@
     public struct XConsolePosition
     {
         public readonly int Left;
-        public readonly int Top;
+        public readonly int InitialTop;
         internal readonly long ShiftTop;
 
         public XConsolePosition(int left, int top)
         {
             Left = left;
-            Top = top;
+            InitialTop = top;
             ShiftTop = XConsole.ShiftTop;
         }
 
         internal XConsolePosition(int left, int top, long shiftTop)
         {
             Left = left;
-            Top = top;
+            InitialTop = top;
             ShiftTop = shiftTop;
         }
 
-        public bool TryGetShiftedTop(out int shiftedTop) => XConsole.TryGetPositionShiftedTop(this, out shiftedTop);
+        public int? ActualTop => XConsole.GetPositionActualTop(this);
 
         [Obsolete("At least one argument should be specified", error: true)]
         public void Write() => throw new NotSupportedException("At least one argument should be specified");
@@ -31,5 +31,22 @@
                 ? XConsole.WriteToPosition(this, values)
                 : this;
         }
+
+        #region Deprecated
+
+        // v1.0.4
+        [Obsolete("Property is deprecated, use InitialTop property instead.")]
+        public int Top => InitialTop;
+
+        // v1.0.4
+        [Obsolete("Method is deprecated, use ActualTop property instead.")]
+        public bool TryGetShiftedTop(out int shiftedTop)
+        {
+            var actualTop = ActualTop;
+            shiftedTop = actualTop ?? default;
+            return actualTop != null;
+        }
+
+        #endregion
     }
 }

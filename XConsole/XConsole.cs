@@ -27,9 +27,6 @@ namespace System
                 action();
         }
 
-        [Obsolete("Method is deprecated, use Sync method instead.")]
-        public static void Lock(Action action) => Sync(action);
-
         #region Pin
 
         private static int _pinHeight = 0;
@@ -158,10 +155,10 @@ namespace System
                     Console.Write(pinClear);
                     Console.SetCursorPosition(origLeft, origTop);
                     Console.CursorVisible = _cursorVisible;
+                    _pinHeight = 0;
                 }
 
                 _getPinValues = null;
-                _pinHeight = 0;
             }
         }
 
@@ -187,13 +184,13 @@ namespace System
             {
                 lock (_syncLock)
                 {
-                    var shiftedTop = checked((int)(value.Top + value.ShiftTop - ShiftTop));
-                    Console.SetCursorPosition(value.Left, shiftedTop);
+                    var actualTop = checked((int)(value.InitialTop + value.ShiftTop - ShiftTop));
+                    Console.SetCursorPosition(value.Left, actualTop);
                 }
             }
         }
 
-        internal static bool TryGetPositionShiftedTop(XConsolePosition position, out int shiftedTop)
+        internal static int? GetPositionActualTop(XConsolePosition position)
         {
             long shiftTop;
             int bufferHeight;
@@ -204,18 +201,8 @@ namespace System
                 bufferHeight = Console.BufferHeight;
             }
 
-            var rawShiftedTop = position.Top + position.ShiftTop - shiftTop;
-
-            if (rawShiftedTop >= 0 && rawShiftedTop < bufferHeight)
-            {
-                shiftedTop = (int)rawShiftedTop;
-                return true;
-            }
-            else
-            {
-                shiftedTop = default;
-                return false;
-            }
+            var actualTop = position.InitialTop + position.ShiftTop - shiftTop;
+            return actualTop >= 0 && actualTop < bufferHeight ? (int)actualTop : null;
         }
 
         internal static XConsolePosition WriteToPosition(XConsolePosition position, string?[] values)
@@ -227,7 +214,7 @@ namespace System
                 if (!string.IsNullOrEmpty(value))
                     items.Add(XConsoleItem.Parse(value));
 
-            int origLeft, origTop, shiftedTop, endLeft, endTop;
+            int origLeft, origTop, positionActualTop, endLeft, endTop;
             long shiftTop;
 
             lock (_syncLock)
@@ -239,9 +226,9 @@ namespace System
                 origTop = Console.CursorTop;
 #endif
                 shiftTop = ShiftTop;
-                shiftedTop = checked((int)(position.Top + position.ShiftTop - shiftTop));
+                positionActualTop = checked((int)(position.InitialTop + position.ShiftTop - shiftTop));
                 Console.CursorVisible = false;
-                Console.SetCursorPosition(position.Left, shiftedTop);
+                Console.SetCursorPosition(position.Left, positionActualTop);
                 WriteItems(items);
 #if !NETSTANDARD
                 (endLeft, endTop) = Console.GetCursorPosition();
@@ -843,7 +830,7 @@ namespace System
 
         #endregion
 
-        #region Remaining API coverage
+        #region Remaining API
 
         public static ConsoleColor BackgroundColor
         {
@@ -1149,6 +1136,14 @@ namespace System
             lock (_syncLock)
                 Console.SetWindowSize(width: width, height: height);
         }
+
+        #endregion
+
+        #region Deprecated
+
+        // v1.0.3
+        [Obsolete("Method is deprecated, use Sync method instead.")]
+        public static void Lock(Action action) => Sync(action);
 
         #endregion
     }
