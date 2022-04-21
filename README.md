@@ -28,7 +28,7 @@ By adding to \*.csproj file:
 <PackageReference Include="XConsole" Version="1.0.*" />
 ```
 More ways to install see on [NuGet Gallery](https://www.nuget.org/packages/XConsole/).
-<br><br>
+<br><br><br>
 
 ## <a name="setup"></a>Setup
 Simplest way to start using the XConsole is by adding `using` to your code:
@@ -44,7 +44,7 @@ This trick is also great for upgrading your regular console application,
 because the XConsole is backwards compatible with the standard Console.
 Once you add `using`, your application will not change how it works
 unless you want to start using the XConsole features.
-<br><br>
+<br><br><br>
 
 ## <a name="coloring"></a>Coloring
 To colorize the text you need to add a prefix to a string.
@@ -72,7 +72,11 @@ Console.WriteLine("C`It is easy ", "bW`to use many", "R` colors in ", "Y`one mes
 The following table shows all possible colors and their letter designations:
 
 ![XConsole color table](https://raw.githubusercontent.com/chubrik/XConsole/main/img/colors-table.png)
-<br><br>
+<br>
+
+### NO_COLOR
+XConsole supports the [`NO_COLOR`](https://no-color.org/) standard with an appropriate environment variable and property.
+<br><br><br>
 
 ## <a name="pinning"></a>Pinning
 You can pin some text below regular log messages with the `Pin` method.

@@ -21,9 +21,16 @@ namespace System
     {
         private static readonly object _syncLock = new();
         private static readonly string _newLine = Environment.NewLine;
+        private static bool _colorsEnabled = Environment.GetEnvironmentVariable("NO_COLOR") == null;
         private static bool _cursorVisible = Console.CursorVisible;
         private static int _maxTop = Console.BufferHeight - 1;
         internal static long ShiftTop = 0;
+
+        public static bool NO_COLOR
+        {
+            get => !_colorsEnabled;
+            set => _colorsEnabled = !value;
+        }
 
         public static void Sync(Action action)
         {
@@ -745,43 +752,49 @@ namespace System
 
         private static void WriteItems(IReadOnlyList<XConsoleItem> items)
         {
-            foreach (var item in items)
+            if (_colorsEnabled)
             {
-                if (item.BackColor == XConsoleItem.NoColor)
+                foreach (var item in items)
                 {
-                    if (item.ForeColor == XConsoleItem.NoColor)
+                    if (item.BackColor == XConsoleItem.NoColor)
                     {
-                        Console.Write(item.Value);
+                        if (item.ForeColor == XConsoleItem.NoColor)
+                        {
+                            Console.Write(item.Value);
+                        }
+                        else
+                        {
+                            var origForeColor = Console.ForegroundColor;
+                            Console.ForegroundColor = item.ForeColor;
+                            Console.Write(item.Value);
+                            Console.ForegroundColor = origForeColor;
+                        }
                     }
                     else
                     {
-                        var origForeColor = Console.ForegroundColor;
-                        Console.ForegroundColor = item.ForeColor;
-                        Console.Write(item.Value);
-                        Console.ForegroundColor = origForeColor;
-                    }
-                }
-                else
-                {
-                    if (item.ForeColor == XConsoleItem.NoColor)
-                    {
-                        var origBackColor = Console.BackgroundColor;
-                        Console.BackgroundColor = item.BackColor;
-                        Console.Write(item.Value);
-                        Console.BackgroundColor = origBackColor;
-                    }
-                    else
-                    {
-                        var origBackColor = Console.BackgroundColor;
-                        var origForeColor = Console.ForegroundColor;
-                        Console.BackgroundColor = item.BackColor;
-                        Console.ForegroundColor = item.ForeColor;
-                        Console.Write(item.Value);
-                        Console.BackgroundColor = origBackColor;
-                        Console.ForegroundColor = origForeColor;
+                        if (item.ForeColor == XConsoleItem.NoColor)
+                        {
+                            var origBackColor = Console.BackgroundColor;
+                            Console.BackgroundColor = item.BackColor;
+                            Console.Write(item.Value);
+                            Console.BackgroundColor = origBackColor;
+                        }
+                        else
+                        {
+                            var origBackColor = Console.BackgroundColor;
+                            var origForeColor = Console.ForegroundColor;
+                            Console.BackgroundColor = item.BackColor;
+                            Console.ForegroundColor = item.ForeColor;
+                            Console.Write(item.Value);
+                            Console.BackgroundColor = origBackColor;
+                            Console.ForegroundColor = origForeColor;
+                        }
                     }
                 }
             }
+            else
+                foreach (var item in items)
+                    Console.Write(item.Value);
         }
 
         private static int GetLineWrapCount(IReadOnlyList<XConsoleItem> items, int beginLeft)
@@ -855,8 +868,9 @@ namespace System
             }
             set
             {
-                lock (_syncLock)
-                    Console.BackgroundColor = value;
+                if (_colorsEnabled)
+                    lock (_syncLock)
+                        Console.BackgroundColor = value;
             }
         }
 
@@ -952,8 +966,9 @@ namespace System
             }
             set
             {
-                lock (_syncLock)
-                    Console.ForegroundColor = value;
+                if (_colorsEnabled)
+                    lock (_syncLock)
+                        Console.ForegroundColor = value;
             }
         }
 
