@@ -3,7 +3,7 @@
 [![MIT licensed](https://img.shields.io/github/license/chubrik/XConsole)](https://github.com/chubrik/XConsole/blob/main/LICENSE)
 
 Extended .NET console with coloring microsyntax, multiline pinning, write-to-position, etc.
-Safe for multitasking, safe for &gt;9000 lines, easy to use.
+Safe for multitasking, safe for 9000+ lines, easy to use.
 
 The main features are shown in the following image:
 
@@ -81,7 +81,7 @@ XConsole supports the [`NO_COLOR`](https://no-color.org/) standard with an appro
 ## <a name="pinning"></a>Pinning
 You can pin some text below regular log messages with the `Pin` method.
 Pinned text can be static or dynamic, contain one or more lines, and of course can be colorized.
-Pin is resistant to line wrapping and to console buffer overflows (&gt;9000 log lines).
+Pin is resistant to line wrapping and to console buffer overflows (9000+ log lines).
 
 ### Static pin
 ```csharp
@@ -117,7 +117,7 @@ Console.Unpin(); // Remove pin
 ## <a name="positioning"></a>Positioning
 XConsole provides an `XConsolePosition` structure, which is a position in the console area.
 This is an important feature if you have a lot of log messages.
-This structure is resistant to console buffer overflows (>9000 log lines)
+This structure is resistant to console buffer overflows (9000+ log lines)
 and always points to the correct position in the console area.
 
 Each `Write` and `WriteLine` method returns a start and end position.
