@@ -3,13 +3,13 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 
-#if NETSTANDARD
+#if !NET
 #pragma warning disable CS8604 // Possible null reference argument.
 #endif
 
 namespace System
 {
-#if !NETSTANDARD
+#if NET
     using System.Runtime.Versioning;
     [SupportedOSPlatform("windows")]
     [UnsupportedOSPlatform("android")]
@@ -96,7 +96,7 @@ namespace System
                     if (pinHeight != _pinHeight)
                         pinClear = _newLine + new string(' ', Console.BufferWidth * _pinHeight - 1);
 
-#if !NETSTANDARD
+#if NET
                     (origLeft, origTop) = Console.GetCursorPosition();
 #else
                     origLeft = Console.CursorLeft;
@@ -108,7 +108,7 @@ namespace System
                 }
                 else
                 {
-#if !NETSTANDARD
+#if NET
                     (origLeft, origTop) = Console.GetCursorPosition();
 #else
                     origLeft = Console.CursorLeft;
@@ -156,7 +156,7 @@ namespace System
                     if (pinHeight != _pinHeight)
                         pinClear = _newLine + new string(' ', Console.BufferWidth + _pinHeight - 1);
 
-#if !NETSTANDARD
+#if NET
                     (origLeft, origTop) = Console.GetCursorPosition();
 #else
                     origLeft = Console.CursorLeft;
@@ -183,7 +183,7 @@ namespace System
             {
                 lock (_syncLock)
                 {
-#if !NETSTANDARD
+#if NET
                     var (left, top) = Console.GetCursorPosition();
                     return new(left: left, top: top, shiftTop: ShiftTop);
 #else
@@ -230,7 +230,7 @@ namespace System
 
             lock (_syncLock)
             {
-#if !NETSTANDARD
+#if NET
                 (origLeft, origTop) = Console.GetCursorPosition();
 #else
                 origLeft = Console.CursorLeft;
@@ -251,7 +251,7 @@ namespace System
                 }
 
                 WriteItems(items);
-#if !NETSTANDARD
+#if NET
                 (endLeft, endTop) = Console.GetCursorPosition();
 #else
                 endLeft = Console.CursorLeft;
@@ -388,7 +388,7 @@ namespace System
             {
                 lock (_syncLock)
                 {
-#if !NETSTANDARD
+#if NET
                     (beginLeft, beginTop) = Console.GetCursorPosition();
 #else
                     beginLeft = Console.CursorLeft;
@@ -396,7 +396,7 @@ namespace System
 #endif
                     Console.CursorVisible = false;
                     WriteItems(logItems);
-#if !NETSTANDARD
+#if NET
                     (endLeft, endTop) = Console.GetCursorPosition();
 #else
                     endLeft = Console.CursorLeft;
@@ -454,7 +454,7 @@ namespace System
                 {
                     if (_getPinValues == null)
                     {
-#if !NETSTANDARD
+#if NET
                         (beginLeft, beginTop) = Console.GetCursorPosition();
 #else
                         beginLeft = Console.CursorLeft;
@@ -462,7 +462,7 @@ namespace System
 #endif
                         Console.CursorVisible = false;
                         WriteItems(logItems);
-#if !NETSTANDARD
+#if NET
                         (endLeft, endTop) = Console.GetCursorPosition();
 #else
                         endLeft = Console.CursorLeft;
@@ -503,7 +503,7 @@ namespace System
                             if (pinHeight != _pinHeight)
                                 pinClear = _newLine + new string(' ', Console.BufferWidth + _pinHeight - 1);
 
-#if !NETSTANDARD
+#if NET
                             (beginLeft, beginTop) = Console.GetCursorPosition();
 #else
                             beginLeft = Console.CursorLeft;
@@ -515,7 +515,7 @@ namespace System
                         }
                         else
                         {
-#if !NETSTANDARD
+#if NET
                             (beginLeft, beginTop) = Console.GetCursorPosition();
 #else
                             beginLeft = Console.CursorLeft;
@@ -525,7 +525,7 @@ namespace System
                         }
 
                         WriteItems(logItems);
-#if !NETSTANDARD
+#if NET
                         (endLeft, endTop) = Console.GetCursorPosition();
 #else
                         endLeft = Console.CursorLeft;
@@ -1075,7 +1075,7 @@ namespace System
         public static (int Left, int Top) GetCursorPosition()
         {
             lock (_syncLock)
-#if !NETSTANDARD
+#if NET
                 return Console.GetCursorPosition();
 #else
                 return (Console.CursorLeft, Console.CursorTop);

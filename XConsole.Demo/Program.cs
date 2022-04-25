@@ -1,4 +1,9 @@
-﻿#if NET5_0
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
+
+#if NET5_0
 #pragma warning disable CA1416 // Validate platform compatibility
 #endif
 

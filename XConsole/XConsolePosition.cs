@@ -1,6 +1,6 @@
 ﻿namespace System
 {
-#if !NETSTANDARD
+#if NET
     using System.Runtime.Versioning;
     [SupportedOSPlatform("windows")]
     [UnsupportedOSPlatform("android")]
