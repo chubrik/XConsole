@@ -9,11 +9,11 @@
     <Copyright>© 2022 Arkadi Chubrik</Copyright>
     <Description>Extended .NET console with coloring microsyntax, multiline pinning, write-to-position, etc. Safe for multitasking, safe for 9000+ lines, easy to use.</Description>
     <PackageTags>console color coloring multicolor microsyntax pin pinning position positioning multitasking easy-to-use</PackageTags>
-    <PackageProjectUrl>https://github.com/chubrik/XConsole</PackageProjectUrl>
     <PackageIcon>icon.png</PackageIcon>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <Version>1.0.5</Version>
+    <RepositoryUrl>https://github.com/chubrik/XConsole</RepositoryUrl>
+    <Version>1.0.6</Version>
   </PropertyGroup>
 
   <ItemGroup>
