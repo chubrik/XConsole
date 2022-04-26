@@ -195,8 +195,15 @@ namespace System
             {
                 lock (_syncLock)
                 {
-                    var actualTop = checked((int)(value.InitialTop + value.ShiftTop - ShiftTop));
-                    Console.SetCursorPosition(value.Left, actualTop);
+                    var actualTop = value.InitialTop + value.ShiftTop - ShiftTop;
+
+                    if (actualTop < int.MinValue)
+                        actualTop = int.MinValue;
+
+                    if (actualTop > int.MaxValue)
+                        actualTop = int.MaxValue;
+
+                    Console.SetCursorPosition(value.Left, (int)actualTop);
                 }
             }
         }
@@ -218,33 +225,39 @@ namespace System
 
         internal static XConsolePosition WriteToPosition(XConsolePosition position, string?[] values)
         {
-            Debug.Assert(values.Length > 0);
             var items = new List<XConsoleItem>(values.Length);
 
             foreach (var value in values)
                 if (!string.IsNullOrEmpty(value))
                     items.Add(XConsoleItem.Parse(value));
 
-            int origLeft, origTop, positionActualTop, endLeft, endTop;
-            long shiftTop;
+            int origLeft, origTop, endLeft, endTop;
+            long shiftTop, positionActualTop;
 
             lock (_syncLock)
             {
+                shiftTop = ShiftTop;
+                positionActualTop = position.InitialTop + position.ShiftTop - shiftTop;
+
+                if (positionActualTop < int.MinValue)
+                    positionActualTop = int.MinValue;
+
+                if (positionActualTop > int.MaxValue)
+                    positionActualTop = int.MaxValue;
+
 #if NET
                 (origLeft, origTop) = Console.GetCursorPosition();
 #else
                 origLeft = Console.CursorLeft;
                 origTop = Console.CursorTop;
 #endif
-                shiftTop = ShiftTop;
+                Console.CursorVisible = false;
 
                 try
                 {
-                    positionActualTop = checked((int)(position.InitialTop + position.ShiftTop - shiftTop));
-                    Console.CursorVisible = false;
-                    Console.SetCursorPosition(position.Left, positionActualTop);
+                    Console.SetCursorPosition(position.Left, (int)positionActualTop);
                 }
-                catch
+                catch (ArgumentOutOfRangeException)
                 {
                     Console.CursorVisible = _cursorVisible;
                     throw;

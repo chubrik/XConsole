@@ -45,11 +45,14 @@
 
         public XConsolePosition? TryWrite(params string?[] values)
         {
-            if (values.Length > 0)
-                try { return XConsole.WriteToPosition(this, values); }
-                catch { return null; }
-
-            return this;
+            try
+            {
+                return XConsole.WriteToPosition(this, values);
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                return null;
+            }
         }
 
         #region Deprecated
