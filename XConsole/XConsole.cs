@@ -22,9 +22,23 @@ namespace Chubrik.XConsole
         private static readonly object _syncLock = new();
         private static readonly string _newLine = Environment.NewLine;
         private static bool _colorsEnabled = Environment.GetEnvironmentVariable("NO_COLOR") == null;
-        private static bool _cursorVisible = Console.CursorVisible;
-        private static int _maxTop = Console.BufferHeight - 1;
+        private static bool _positioningEnabled = true;
+        private static bool _cursorVisible;
+        private static int _maxTop;
         internal static long ShiftTop = 0;
+
+        static XConsole()
+        {
+            try
+            {
+                _cursorVisible = Console.CursorVisible;
+                _maxTop = Console.BufferHeight - 1;
+            }
+            catch
+            {
+                _positioningEnabled = false;
+            }
+        }
 
         public static bool NO_COLOR
         {
@@ -38,7 +52,7 @@ namespace Chubrik.XConsole
                 action();
         }
 
-        #region Pin
+        #region Pinning
 
         private static int _pinHeight = 0;
         private static Func<IReadOnlyList<string?>>? _getPinValues = null;
@@ -48,24 +62,36 @@ namespace Chubrik.XConsole
 
         public static void Pin(params string?[] values)
         {
+            if (!_positioningEnabled)
+                return;
+
             _getPinValues = () => values;
             UpdatePin();
         }
 
         public static void Pin(Func<string?> getValue)
         {
+            if (!_positioningEnabled)
+                return;
+
             _getPinValues = () => new[] { getValue() };
             UpdatePin();
         }
 
         public static void Pin(Func<IReadOnlyList<string?>> getValues)
         {
+            if (!_positioningEnabled)
+                return;
+
             _getPinValues = getValues;
             UpdatePin();
         }
 
         public static void UpdatePin()
         {
+            if (!_positioningEnabled)
+                return;
+
             var getPinValues = _getPinValues;
 
             if (getPinValues == null)
@@ -138,6 +164,9 @@ namespace Chubrik.XConsole
 
         public static void Unpin()
         {
+            if (!_positioningEnabled)
+                return;
+
             var pinHeight = _pinHeight;
 
             var pinClear = pinHeight > 0
@@ -175,7 +204,7 @@ namespace Chubrik.XConsole
 
         #endregion
 
-        #region Position
+        #region Positioning
 
         public static XConsolePosition CursorPosition
         {
@@ -225,6 +254,9 @@ namespace Chubrik.XConsole
 
         internal static XConsolePosition WriteToPosition(XConsolePosition position, string?[] values)
         {
+            if (!_positioningEnabled)
+                return new(0, 0);
+
             var items = new List<XConsoleItem>(values.Length);
 
             foreach (var value in values)
@@ -393,6 +425,19 @@ namespace Chubrik.XConsole
         private static (XConsolePosition Begin, XConsolePosition End) WriteBase(
             IReadOnlyList<XConsoleItem> logItems, bool isWriteLine)
         {
+            if (!_positioningEnabled)
+            {
+                lock (_syncLock)
+                {
+                    WriteItems(logItems);
+
+                    if (isWriteLine)
+                        Console.WriteLine();
+                }
+
+                return (new(0, 0), new(0, 0));
+            }
+
             int beginLeft, beginTop, endLeft, endTop;
             long shiftTop;
             var getPinValues = _getPinValues;
