@@ -1,6 +1,7 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 
-namespace System
+namespace Chubrik.XConsole
 {
     internal struct XConsoleItem
     {

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 #pragma warning disable CA1416 // Validate platform compatibility
 #endif
 
-namespace Demo
+namespace Chubrik.XConsole.Demo
 {
     using Console = XConsole;
 

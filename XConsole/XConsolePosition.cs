@@ -1,4 +1,6 @@
-﻿namespace System
+﻿using System;
+
+namespace Chubrik.XConsole
 {
 #if NET
     using System.Runtime.Versioning;

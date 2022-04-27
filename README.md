@@ -1,6 +1,6 @@
 # XConsole
-[![NuGet](https://img.shields.io/nuget/v/XConsole)](https://www.nuget.org/packages/XConsole/)
-[![MIT licensed](https://img.shields.io/github/license/chubrik/XConsole)](https://github.com/chubrik/XConsole/blob/main/LICENSE)
+[![NuGet package](https://img.shields.io/nuget/v/XConsole)](https://www.nuget.org/packages/XConsole/)
+[![MIT license](https://img.shields.io/github/license/chubrik/XConsole)](https://github.com/chubrik/XConsole/blob/main/LICENSE)
 
 Extended .NET console with coloring microsyntax, multiline pinning, write-to-position, etc.
 Safe for multitasking, safe for 9000+ lines, easy to use.
@@ -33,6 +33,8 @@ More ways to install see on [NuGet Gallery](https://www.nuget.org/packages/XCons
 ## <a name="setup"></a>Setup
 Simplest way to start using the XConsole is by adding `using` to your code:
 ```csharp
+using Chubrik.XConsole;
+
 namespace MyProject
 {
     using Console = XConsole;

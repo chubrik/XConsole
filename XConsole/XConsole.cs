@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -6,7 +7,7 @@ using System.Text;
 #pragma warning disable CS8604 // Possible null reference argument.
 #endif
 
-namespace System
+namespace Chubrik.XConsole
 {
 #if NET
     using System.Runtime.Versioning;
