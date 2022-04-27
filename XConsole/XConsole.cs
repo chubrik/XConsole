@@ -1186,13 +1186,5 @@ namespace Chubrik.XConsole
         }
 
         #endregion
-
-        #region Deprecated
-
-        // v1.0.3
-        [Obsolete("Method is deprecated, use Sync method instead.")]
-        public static void Lock(Action action) => Sync(action);
-
-        #endregion
     }
 }

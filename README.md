@@ -23,28 +23,31 @@ By Package Manager:
 ```
 PM> Install-Package XConsole
 ```
-By adding to \*.csproj file:
+Or by adding to \*.csproj file:
 ```
-<PackageReference Include="XConsole" Version="1.0.*" />
+<PackageReference Include="XConsole" Version="1.1.*" />
 ```
 More ways to install see on [NuGet Gallery](https://www.nuget.org/packages/XConsole/).
 <br><br><br>
 
 ## <a name="setup"></a>Setup
-Simplest way to start using the XConsole is by adding `using` to your code:
+Simple way to start using the XConsole is by adding `using` to your code.
+After that you can write `Console` as usual and get all the features of XConsole:
 ```csharp
-using Chubrik.XConsole;
-
-namespace MyProject
-{
-    using Console = XConsole;
-    ...
+// Safely upgrade a single code file to XConsole
+using Console = Chubrik.XConsole.XConsole;
 ```
-After that you can write `Console` as usual and get all the features of XConsole.
-
-This trick is also great for upgrading your regular console application,
-because the XConsole is backwards compatible with the standard Console.
-Once you add `using`, your application will not change how it works
+Alternatively, you can upgrade an entire project to XConsole at once
+by adding the following lines to the \*.csproj file:
+```csproj
+<ItemGroup>
+  <!-- Safely upgrade an entire project to XConsole -->
+  <Using Include="Chubrik.XConsole.XConsole" Alias="Console" />
+</ItemGroup>
+```
+This trick is great for upgrading an existing regular console application
+because XConsole is backwards compatible with the standard Console.
+After the upgrade, the application will not change how it works
 unless you want to start using the XConsole features.
 <br><br><br>
 

@@ -9,4 +9,9 @@
     <ProjectReference Include="..\XConsole\XConsole.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Safely upgrade an entire project to XConsole -->
+    <Using Include="Chubrik.XConsole.XConsole" Alias="Console" />
+  </ItemGroup>
+
 </Project>

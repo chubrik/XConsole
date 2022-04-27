@@ -9,8 +9,6 @@ using System.Threading.Tasks;
 
 namespace Chubrik.XConsole.Demo
 {
-    using Console = XConsole;
-
     public static class Program
     {
         public static async Task Main()

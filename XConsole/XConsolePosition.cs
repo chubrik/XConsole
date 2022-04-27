@@ -56,22 +56,5 @@ namespace Chubrik.XConsole
                 return null;
             }
         }
-
-        #region Deprecated
-
-        // v1.0.4
-        [Obsolete("Property is deprecated, use InitialTop property instead.")]
-        public int Top => InitialTop;
-
-        // v1.0.4
-        [Obsolete("Method is deprecated, use ActualTop property instead.")]
-        public bool TryGetShiftedTop(out int shiftedTop)
-        {
-            var actualTop = ActualTop;
-            shiftedTop = actualTop ?? default;
-            return actualTop != null;
-        }
-
-        #endregion
     }
 }
