@@ -21,8 +21,8 @@ namespace Chubrik.XConsole
     {
         private static readonly object _syncLock = new();
         private static readonly string _newLine = Environment.NewLine;
-        private static bool _colorsEnabled = Environment.GetEnvironmentVariable("NO_COLOR") == null;
-        private static bool _positioningEnabled = true;
+        private static readonly bool _positioningEnabled = true;
+        private static bool _coloringEnabled = Environment.GetEnvironmentVariable("NO_COLOR") == null;
         private static bool _cursorVisible;
         private static int _maxTop;
         internal static long ShiftTop = 0;
@@ -42,8 +42,8 @@ namespace Chubrik.XConsole
 
         public static bool NO_COLOR
         {
-            get => !_colorsEnabled;
-            set => _colorsEnabled = !value;
+            get => !_coloringEnabled;
+            set => _coloringEnabled = !value;
         }
 
         public static void Sync(Action action)
@@ -58,7 +58,7 @@ namespace Chubrik.XConsole
         private static Func<IReadOnlyList<string?>>? _getPinValues = null;
 
         [Obsolete("At least one argument should be specified", error: true)]
-        public static void Pin() => throw new NotSupportedException("At least one argument should be specified");
+        public static void Pin() => throw new InvalidOperationException();
 
         public static void Pin(params string?[] values)
         {
@@ -125,8 +125,7 @@ namespace Chubrik.XConsole
 #if NET
                     (origLeft, origTop) = Console.GetCursorPosition();
 #else
-                    origLeft = Console.CursorLeft;
-                    origTop = Console.CursorTop;
+                    (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
                     Console.CursorVisible = false;
                     Console.Write(pinClear);
@@ -137,8 +136,7 @@ namespace Chubrik.XConsole
 #if NET
                     (origLeft, origTop) = Console.GetCursorPosition();
 #else
-                    origLeft = Console.CursorLeft;
-                    origTop = Console.CursorTop;
+                    (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
                     Console.CursorVisible = false;
                 }
@@ -188,8 +186,7 @@ namespace Chubrik.XConsole
 #if NET
                     (origLeft, origTop) = Console.GetCursorPosition();
 #else
-                    origLeft = Console.CursorLeft;
-                    origTop = Console.CursorTop;
+                    (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
                     Console.CursorVisible = false;
                     Console.Write(pinClear);
@@ -255,7 +252,7 @@ namespace Chubrik.XConsole
         internal static XConsolePosition WriteToPosition(XConsolePosition position, string?[] values)
         {
             if (!_positioningEnabled)
-                return new(0, 0);
+                return new(0, 0, 0);
 
             var items = new List<XConsoleItem>(values.Length);
 
@@ -280,8 +277,7 @@ namespace Chubrik.XConsole
 #if NET
                 (origLeft, origTop) = Console.GetCursorPosition();
 #else
-                origLeft = Console.CursorLeft;
-                origTop = Console.CursorTop;
+                (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
                 Console.CursorVisible = false;
 
@@ -299,8 +295,7 @@ namespace Chubrik.XConsole
 #if NET
                 (endLeft, endTop) = Console.GetCursorPosition();
 #else
-                endLeft = Console.CursorLeft;
-                endTop = Console.CursorTop;
+                (endLeft, endTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
 
                 if (endTop == _maxTop)
@@ -380,7 +375,7 @@ namespace Chubrik.XConsole
         #region Write, WriteLine
 
         [Obsolete("At least one argument should be specified", error: true)]
-        public static void Write() => throw new NotSupportedException("At least one argument should be specified");
+        public static void Write() => throw new InvalidOperationException();
 
         public static (XConsolePosition Begin, XConsolePosition End) Write(string? value)
         {
@@ -435,7 +430,7 @@ namespace Chubrik.XConsole
                         Console.WriteLine();
                 }
 
-                return (new(0, 0), new(0, 0));
+                return (new(0, 0, 0), new(0, 0, 0));
             }
 
             int beginLeft, beginTop, endLeft, endTop;
@@ -448,17 +443,14 @@ namespace Chubrik.XConsole
                 {
 #if NET
                     (beginLeft, beginTop) = Console.GetCursorPosition();
-#else
-                    beginLeft = Console.CursorLeft;
-                    beginTop = Console.CursorTop;
-#endif
                     Console.CursorVisible = false;
                     WriteItems(logItems);
-#if NET
                     (endLeft, endTop) = Console.GetCursorPosition();
 #else
-                    endLeft = Console.CursorLeft;
-                    endTop = Console.CursorTop;
+                    (beginLeft, beginTop) = (Console.CursorLeft, Console.CursorTop);
+                    Console.CursorVisible = false;
+                    WriteItems(logItems);
+                    (endLeft, endTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
 
                     if (isWriteLine)
@@ -514,17 +506,14 @@ namespace Chubrik.XConsole
                     {
 #if NET
                         (beginLeft, beginTop) = Console.GetCursorPosition();
-#else
-                        beginLeft = Console.CursorLeft;
-                        beginTop = Console.CursorTop;
-#endif
                         Console.CursorVisible = false;
                         WriteItems(logItems);
-#if NET
                         (endLeft, endTop) = Console.GetCursorPosition();
 #else
-                        endLeft = Console.CursorLeft;
-                        endTop = Console.CursorTop;
+                        (beginLeft, beginTop) = (Console.CursorLeft, Console.CursorTop);
+                        Console.CursorVisible = false;
+                        WriteItems(logItems);
+                        (endLeft, endTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
 
                         if (isWriteLine)
@@ -564,8 +553,7 @@ namespace Chubrik.XConsole
 #if NET
                             (beginLeft, beginTop) = Console.GetCursorPosition();
 #else
-                            beginLeft = Console.CursorLeft;
-                            beginTop = Console.CursorTop;
+                            (beginLeft, beginTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
                             Console.CursorVisible = false;
                             Console.Write(pinClear);
@@ -576,8 +564,7 @@ namespace Chubrik.XConsole
 #if NET
                             (beginLeft, beginTop) = Console.GetCursorPosition();
 #else
-                            beginLeft = Console.CursorLeft;
-                            beginTop = Console.CursorTop;
+                            (beginLeft, beginTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
                             Console.CursorVisible = false;
                         }
@@ -586,8 +573,7 @@ namespace Chubrik.XConsole
 #if NET
                         (endLeft, endTop) = Console.GetCursorPosition();
 #else
-                        endLeft = Console.CursorLeft;
-                        endTop = Console.CursorTop;
+                        (endLeft, endTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
                         Console.WriteLine();
 
@@ -810,7 +796,7 @@ namespace Chubrik.XConsole
 
         private static void WriteItems(IReadOnlyList<XConsoleItem> items)
         {
-            if (_colorsEnabled)
+            if (_coloringEnabled)
             {
                 foreach (var item in items)
                 {
@@ -926,7 +912,7 @@ namespace Chubrik.XConsole
             }
             set
             {
-                if (_colorsEnabled)
+                if (_coloringEnabled)
                     lock (_syncLock)
                         Console.BackgroundColor = value;
             }
@@ -1024,7 +1010,7 @@ namespace Chubrik.XConsole
             }
             set
             {
-                if (_colorsEnabled)
+                if (_coloringEnabled)
                     lock (_syncLock)
                         Console.ForegroundColor = value;
             }

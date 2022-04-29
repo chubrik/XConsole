@@ -33,7 +33,7 @@ namespace Chubrik.XConsole
         public int? ActualTop => XConsole.GetPositionActualTop(this);
 
         [Obsolete("At least one argument should be specified", error: true)]
-        public void Write() => throw new NotSupportedException("At least one argument should be specified");
+        public void Write() => throw new InvalidOperationException();
 
         public XConsolePosition Write(params string?[] values)
         {
@@ -43,7 +43,7 @@ namespace Chubrik.XConsole
         }
 
         [Obsolete("At least one argument should be specified", error: true)]
-        public void TryWrite() => throw new NotSupportedException("At least one argument should be specified");
+        public void TryWrite() => throw new InvalidOperationException();
 
         public XConsolePosition? TryWrite(params string?[] values)
         {
