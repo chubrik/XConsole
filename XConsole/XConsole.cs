@@ -150,8 +150,8 @@ namespace Chubrik.XConsole
                 {
                     _pinHeight = 1 + GetLineWrapCount(pinItems, beginLeft: 0);
                     var shift = origTop + _pinHeight - _maxTop;
-                    ShiftTop += shift;
                     origTop -= shift;
+                    ShiftTop += shift;
                 }
                 else
                     _pinHeight = pinEndTop - origTop;
@@ -289,7 +289,7 @@ namespace Chubrik.XConsole
                 {
                     Console.SetCursorPosition(position.Left, (int)positionActualTop);
                 }
-                catch (ArgumentOutOfRangeException)
+                catch
                 {
                     Console.CursorVisible = _cursorVisible;
                     throw;
@@ -306,8 +306,8 @@ namespace Chubrik.XConsole
                 {
                     var lineWrapCount = GetLineWrapCount(items, origLeft);
                     var shift = origTop + lineWrapCount - endTop;
-                    shiftTop += shift;
                     origTop -= shift;
+                    shiftTop += shift;
                     ShiftTop = shiftTop;
                 }
 
@@ -449,6 +449,7 @@ namespace Chubrik.XConsole
             {
                 lock (_syncLock)
                 {
+                    shiftTop = ShiftTop;
 #if NET
                     (origLeft, origTop) = Console.GetCursorPosition();
 #else
@@ -458,11 +459,10 @@ namespace Chubrik.XConsole
 
                     if (origTop == _maxTop)
                     {
-                        ShiftTop += 1;
-                        origTop -= 1;
+                        origTop--;
+                        shiftTop++;
+                        ShiftTop = shiftTop;
                     }
-
-                    shiftTop = ShiftTop;
                 }
             }
             else
@@ -484,6 +484,8 @@ namespace Chubrik.XConsole
 
                 lock (_syncLock)
                 {
+                    shiftTop = ShiftTop;
+
                     if (_getPinValues == null)
                     {
 #if NET
@@ -495,8 +497,9 @@ namespace Chubrik.XConsole
 
                         if (origTop == _maxTop)
                         {
-                            ShiftTop += 1;
-                            origTop -= 1;
+                            origTop--;
+                            shiftTop++;
+                            ShiftTop = shiftTop;
                         }
                     }
                     else
@@ -533,8 +536,9 @@ namespace Chubrik.XConsole
                         {
                             _pinHeight = 1 + GetLineWrapCount(pinItems, beginLeft: 0);
                             var shift = origTop + 1 + _pinHeight - _maxTop;
-                            ShiftTop += shift;
                             origTop -= shift;
+                            shiftTop += shift;
+                            ShiftTop = shiftTop;
                         }
                         else
                             _pinHeight = pinEndTop - (origTop + 1);
@@ -542,8 +546,6 @@ namespace Chubrik.XConsole
                         Console.SetCursorPosition(0, origTop + 1);
                         Console.CursorVisible = _cursorVisible;
                     }
-
-                    shiftTop = ShiftTop;
                 }
             }
 
@@ -579,6 +581,7 @@ namespace Chubrik.XConsole
             {
                 lock (_syncLock)
                 {
+                    shiftTop = ShiftTop;
 #if NET
                     (beginLeft, beginTop) = Console.GetCursorPosition();
                     Console.CursorVisible = false;
@@ -600,9 +603,10 @@ namespace Chubrik.XConsole
                         {
                             var logLineWrapCount = GetLineWrapCount(logItems, beginLeft);
                             var shift = beginTop + logLineWrapCount + 1 - endTop;
-                            ShiftTop += shift;
                             beginTop -= shift;
                             endTop--;
+                            shiftTop += shift;
+                            ShiftTop = shiftTop;
                         }
                     }
                     else
@@ -613,12 +617,11 @@ namespace Chubrik.XConsole
                         {
                             var logLineWrapCount = GetLineWrapCount(logItems, beginLeft);
                             var shift = beginTop + logLineWrapCount - endTop;
-                            ShiftTop += shift;
                             beginTop -= shift;
+                            shiftTop += shift;
+                            ShiftTop = shiftTop;
                         }
                     }
-
-                    shiftTop = ShiftTop;
                 }
             }
             else
@@ -640,6 +643,8 @@ namespace Chubrik.XConsole
 
                 lock (_syncLock)
                 {
+                    shiftTop = ShiftTop;
+
                     if (_getPinValues == null)
                     {
 #if NET
@@ -663,9 +668,10 @@ namespace Chubrik.XConsole
                             {
                                 var logLineWrapCount = GetLineWrapCount(logItems, beginLeft);
                                 var shift = beginTop + logLineWrapCount + 1 - endTop;
-                                ShiftTop += shift;
                                 beginTop -= shift;
                                 endTop--;
+                                shiftTop += shift;
+                                ShiftTop = shiftTop;
                             }
                         }
                         else
@@ -676,8 +682,9 @@ namespace Chubrik.XConsole
                             {
                                 var logLineWrapCount = GetLineWrapCount(logItems, beginLeft);
                                 var shift = beginTop + logLineWrapCount - endTop;
-                                ShiftTop += shift;
                                 beginTop -= shift;
+                                shiftTop += shift;
+                                ShiftTop = shiftTop;
                             }
                         }
                     }
@@ -713,9 +720,29 @@ namespace Chubrik.XConsole
 #else
                         (endLeft, endTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
-                        Console.WriteLine();
 
                         if (isWriteLine)
+                        {
+                            Console.WriteLine(_newLine);
+                            WriteItems(pinItems);
+                            pinEndTop = Console.CursorTop;
+
+                            if (pinEndTop == _maxTop)
+                            {
+                                var logLineWrapCount = GetLineWrapCount(logItems, beginLeft);
+                                _pinHeight = 1 + GetLineWrapCount(pinItems, beginLeft: 0);
+                                var shift = beginTop + logLineWrapCount + 1 + _pinHeight - _maxTop;
+                                beginTop -= shift;
+                                endTop = _maxTop - _pinHeight - 1;
+                                shiftTop += shift;
+                                ShiftTop = shiftTop;
+                            }
+                            else
+                                _pinHeight = pinEndTop - (endTop + 1);
+
+                            Console.SetCursorPosition(0, endTop + 1);
+                        }
+                        else
                         {
                             Console.WriteLine();
                             WriteItems(pinItems);
@@ -725,29 +752,11 @@ namespace Chubrik.XConsole
                             {
                                 var logLineWrapCount = GetLineWrapCount(logItems, beginLeft);
                                 _pinHeight = 1 + GetLineWrapCount(pinItems, beginLeft: 0);
-                                var shift = beginTop + logLineWrapCount + 1 + _pinHeight - _maxTop;
-                                ShiftTop += shift;
-                                beginTop -= shift;
-                                endTop = _maxTop - _pinHeight - 1;
-                            }
-                            else
-                                _pinHeight = pinEndTop - (endTop + 1);
-
-                            Console.SetCursorPosition(0, endTop + 1);
-                        }
-                        else
-                        {
-                            WriteItems(pinItems);
-                            pinEndTop = Console.CursorTop;
-
-                            if (pinEndTop == _maxTop)
-                            {
-                                var logLineWrapCount = GetLineWrapCount(logItems, beginLeft);
-                                _pinHeight = 1 + GetLineWrapCount(pinItems, beginLeft: 0);
                                 var shift = beginTop + logLineWrapCount + _pinHeight - _maxTop;
-                                ShiftTop += shift;
                                 beginTop -= shift;
                                 endTop = _maxTop - _pinHeight;
+                                shiftTop += shift;
+                                ShiftTop = shiftTop;
                             }
                             else
                                 _pinHeight = pinEndTop - endTop;
@@ -757,8 +766,6 @@ namespace Chubrik.XConsole
 
                         Console.CursorVisible = _cursorVisible;
                     }
-
-                    shiftTop = ShiftTop;
                 }
             }
 
