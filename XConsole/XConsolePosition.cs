@@ -37,9 +37,7 @@ namespace Chubrik.XConsole
 
         public XConsolePosition Write(params string?[] values)
         {
-            return values.Length > 0
-                ? XConsole.WriteToPosition(this, values)
-                : this;
+            return XConsole.WriteToPosition(this, values);
         }
 
         [Obsolete("At least one argument should be specified", error: true)]

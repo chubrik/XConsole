@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 
@@ -260,6 +261,9 @@ namespace Chubrik.XConsole
                 if (!string.IsNullOrEmpty(value))
                     items.Add(XConsoleItem.Parse(value));
 
+            if (items.Count == 0)
+                return position;
+
             int origLeft, origTop, endLeft, endTop;
             long shiftTop, positionActualTop;
 
@@ -379,11 +383,13 @@ namespace Chubrik.XConsole
 
         public static (XConsolePosition Begin, XConsolePosition End) Write(string? value)
         {
-            var items = string.IsNullOrEmpty(value)
-                ? Array.Empty<XConsoleItem>()
-                : new[] { XConsoleItem.Parse(value) };
+            if (string.IsNullOrEmpty(value))
+            {
+                var position = CursorPosition;
+                return (position, position);
+            }
 
-            return WriteBase(items, isWriteLine: false);
+            return WriteBase(new[] { XConsoleItem.Parse(value) }, isWriteLine: false);
         }
 
         public static (XConsolePosition Begin, XConsolePosition End) Write(params string?[] values)
@@ -394,16 +400,21 @@ namespace Chubrik.XConsole
                 if (!string.IsNullOrEmpty(value))
                     items.Add(XConsoleItem.Parse(value));
 
+            if (items.Count == 0)
+            {
+                var position = CursorPosition;
+                return (position, position);
+            }
+
             return WriteBase(items, isWriteLine: false);
         }
 
         public static (XConsolePosition Begin, XConsolePosition End) WriteLine(string? value)
         {
-            var items = string.IsNullOrEmpty(value)
-                ? Array.Empty<XConsoleItem>()
-                : new[] { XConsoleItem.Parse(value) };
+            if (string.IsNullOrEmpty(value))
+                return WriteLine();
 
-            return WriteBase(items, isWriteLine: true);
+            return WriteBase(new[] { XConsoleItem.Parse(value) }, isWriteLine: true);
         }
 
         public static (XConsolePosition Begin, XConsolePosition End) WriteLine(params string?[] values)
@@ -414,12 +425,139 @@ namespace Chubrik.XConsole
                 if (!string.IsNullOrEmpty(value))
                     items.Add(XConsoleItem.Parse(value));
 
+            if (items.Count == 0)
+                return WriteLine();
+
             return WriteBase(items, isWriteLine: true);
+        }
+
+        public static (XConsolePosition Begin, XConsolePosition End) WriteLine()
+        {
+            if (!_positioningEnabled)
+            {
+                lock (_syncLock)
+                    Console.WriteLine();
+
+                return (new(0, 0, 0), new(0, 0, 0));
+            }
+
+            int origLeft, origTop;
+            long shiftTop;
+            var getPinValues = _getPinValues;
+
+            if (getPinValues == null)
+            {
+                lock (_syncLock)
+                {
+#if NET
+                    (origLeft, origTop) = Console.GetCursorPosition();
+#else
+                    (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
+#endif
+                    Console.WriteLine();
+
+                    if (origTop == _maxTop)
+                    {
+                        ShiftTop += 1;
+                        origTop -= 1;
+                    }
+
+                    shiftTop = ShiftTop;
+                }
+            }
+            else
+            {
+                var pinHeight = _pinHeight;
+
+                var pinClear = pinHeight > 0
+                    ? _newLine + new string(' ', Console.BufferWidth * pinHeight - 1)
+                    : string.Empty;
+
+                var pinValues = getPinValues();
+                var pinItems = new List<XConsoleItem>(pinValues.Count);
+
+                foreach (var pinValue in pinValues)
+                    if (!string.IsNullOrEmpty(pinValue))
+                        pinItems.Add(XConsoleItem.Parse(pinValue));
+
+                int pinEndTop;
+
+                lock (_syncLock)
+                {
+                    if (_getPinValues == null)
+                    {
+#if NET
+                        (origLeft, origTop) = Console.GetCursorPosition();
+#else
+                        (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
+#endif
+                        Console.WriteLine();
+
+                        if (origTop == _maxTop)
+                        {
+                            ShiftTop += 1;
+                            origTop -= 1;
+                        }
+                    }
+                    else
+                    {
+                        if (_pinHeight > 0)
+                        {
+                            if (pinHeight != _pinHeight)
+                                pinClear = _newLine + new string(' ', Console.BufferWidth + _pinHeight - 1);
+
+#if NET
+                            (origLeft, origTop) = Console.GetCursorPosition();
+#else
+                            (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
+#endif
+                            Console.CursorVisible = false;
+                            Console.Write(pinClear);
+                            Console.SetCursorPosition(origLeft, origTop);
+                        }
+                        else
+                        {
+#if NET
+                            (origLeft, origTop) = Console.GetCursorPosition();
+#else
+                            (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
+#endif
+                            Console.CursorVisible = false;
+                        }
+
+                        Console.WriteLine(_newLine);
+                        WriteItems(pinItems);
+                        pinEndTop = Console.CursorTop;
+
+                        if (pinEndTop == _maxTop)
+                        {
+                            _pinHeight = 1 + GetLineWrapCount(pinItems, beginLeft: 0);
+                            var shift = origTop + 1 + _pinHeight - _maxTop;
+                            ShiftTop += shift;
+                            origTop -= shift;
+                        }
+                        else
+                            _pinHeight = pinEndTop - (origTop + 1);
+
+                        Console.SetCursorPosition(0, origTop + 1);
+                        Console.CursorVisible = _cursorVisible;
+                    }
+
+                    shiftTop = ShiftTop;
+                }
+            }
+
+            return (
+                new(left: origLeft, top: origTop, shiftTop: shiftTop),
+                new(left: origLeft, top: origTop, shiftTop: shiftTop)
+            );
         }
 
         private static (XConsolePosition Begin, XConsolePosition End) WriteBase(
             IReadOnlyList<XConsoleItem> logItems, bool isWriteLine)
         {
+            Debug.Assert(logItems.Count > 0);
+
             if (!_positioningEnabled)
             {
                 lock (_syncLock)
@@ -642,22 +780,26 @@ namespace Chubrik.XConsole
         {
             var value = buffer?.ToString();
 
-            var items = string.IsNullOrEmpty(value)
-                ? Array.Empty<XConsoleItem>()
-                : new[] { new XConsoleItem(value) };
+            if (string.IsNullOrEmpty(value))
+            {
+                var position = CursorPosition;
+                return (position, position);
+            }
 
-            return WriteBase(items, isWriteLine: false);
+            return WriteBase(new[] { new XConsoleItem(value) }, isWriteLine: false);
         }
 
         public static (XConsolePosition Begin, XConsolePosition End) Write(char[] buffer, int index, int count)
         {
             var value = buffer.ToString()?.Substring(index, count);
 
-            var items = string.IsNullOrEmpty(value)
-                ? Array.Empty<XConsoleItem>()
-                : new[] { new XConsoleItem(value) };
+            if (string.IsNullOrEmpty(value))
+            {
+                var position = CursorPosition;
+                return (position, position);
+            }
 
-            return WriteBase(items, isWriteLine: false);
+            return WriteBase(new[] { new XConsoleItem(value) }, isWriteLine: false);
         }
 
         public static (XConsolePosition Begin, XConsolePosition End) Write(decimal value) =>
@@ -676,33 +818,67 @@ namespace Chubrik.XConsole
         {
             var valueStr = value?.ToString();
 
-            var items = string.IsNullOrEmpty(valueStr)
-                ? Array.Empty<XConsoleItem>()
-                : new[] { new XConsoleItem(valueStr) };
+            if (string.IsNullOrEmpty(valueStr))
+            {
+                var position = CursorPosition;
+                return (position, position);
+            }
 
-            return WriteBase(items, isWriteLine: false);
+            return WriteBase(new[] { new XConsoleItem(valueStr) }, isWriteLine: false);
         }
 
         public static (XConsolePosition Begin, XConsolePosition End) Write(float value) =>
             WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
 
         public static (XConsolePosition Begin, XConsolePosition End) Write(
-            string format, object? arg0) =>
-            WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0)) }, isWriteLine: false);
+            string format, object? arg0)
+        {
+            if (string.IsNullOrEmpty(format))
+            {
+                var position = CursorPosition;
+                return (position, position);
+            }
+
+            return WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0)) }, isWriteLine: false);
+        }
 
         public static (XConsolePosition Begin, XConsolePosition End) Write(
-            string format, object? arg0, object? arg1) =>
-            WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0, arg1)) }, isWriteLine: false);
+            string format, object? arg0, object? arg1)
+        {
+            if (string.IsNullOrEmpty(format))
+            {
+                var position = CursorPosition;
+                return (position, position);
+            }
+
+            return WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0, arg1)) }, isWriteLine: false);
+        }
 
         public static (XConsolePosition Begin, XConsolePosition End) Write(
-            string format, object? arg0, object? arg1, object? arg2) =>
-            WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0, arg1, arg2)) }, isWriteLine: false);
+            string format, object? arg0, object? arg1, object? arg2)
+        {
+            if (string.IsNullOrEmpty(format))
+            {
+                var position = CursorPosition;
+                return (position, position);
+            }
+
+            return WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0, arg1, arg2)) }, isWriteLine: false);
+        }
 
         public static (XConsolePosition Begin, XConsolePosition End) Write(
-            string format, params object?[]? arg) =>
-            WriteBase(
+            string format, params object?[]? arg)
+        {
+            if (string.IsNullOrEmpty(format))
+            {
+                var position = CursorPosition;
+                return (position, position);
+            }
+
+            return WriteBase(
                 new[] { XConsoleItem.Parse(string.Format(format, arg ?? Array.Empty<object?>())) },
                 isWriteLine: false);
+        }
 
         public static (XConsolePosition Begin, XConsolePosition End) Write(uint value) =>
             WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
@@ -720,22 +896,20 @@ namespace Chubrik.XConsole
         {
             var value = buffer?.ToString();
 
-            var items = string.IsNullOrEmpty(value)
-                ? Array.Empty<XConsoleItem>()
-                : new[] { new XConsoleItem(value) };
+            if (string.IsNullOrEmpty(value))
+                return WriteLine();
 
-            return WriteBase(items, isWriteLine: true);
+            return WriteBase(new[] { new XConsoleItem(value) }, isWriteLine: true);
         }
 
         public static (XConsolePosition Begin, XConsolePosition End) WriteLine(char[] buffer, int index, int count)
         {
             var value = buffer.ToString()?.Substring(index, count);
 
-            var items = string.IsNullOrEmpty(value)
-                ? Array.Empty<XConsoleItem>()
-                : new[] { new XConsoleItem(value) };
+            if (string.IsNullOrEmpty(value))
+                return WriteLine();
 
-            return WriteBase(items, isWriteLine: true);
+            return WriteBase(new[] { new XConsoleItem(value) }, isWriteLine: true);
         }
 
         public static (XConsolePosition Begin, XConsolePosition End) WriteLine(decimal value) =>
@@ -754,33 +928,52 @@ namespace Chubrik.XConsole
         {
             var valueStr = value?.ToString();
 
-            var items = string.IsNullOrEmpty(valueStr)
-                ? Array.Empty<XConsoleItem>()
-                : new[] { new XConsoleItem(valueStr) };
+            if (string.IsNullOrEmpty(valueStr))
+                return WriteLine();
 
-            return WriteBase(items, isWriteLine: true);
+            return WriteBase(new[] { new XConsoleItem(valueStr) }, isWriteLine: true);
         }
 
         public static (XConsolePosition Begin, XConsolePosition End) WriteLine(float value) =>
             WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
 
         public static (XConsolePosition Begin, XConsolePosition End) WriteLine(
-            string format, object? arg0) =>
-            WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0)) }, isWriteLine: true);
+            string format, object? arg0)
+        {
+            if (string.IsNullOrEmpty(format))
+                return WriteLine();
+
+            return WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0)) }, isWriteLine: true);
+        }
 
         public static (XConsolePosition Begin, XConsolePosition End) WriteLine(
-            string format, object? arg0, object? arg1) =>
-            WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0, arg1)) }, isWriteLine: true);
+            string format, object? arg0, object? arg1)
+        {
+            if (string.IsNullOrEmpty(format))
+                return WriteLine();
+
+            return WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0, arg1)) }, isWriteLine: true);
+        }
 
         public static (XConsolePosition Begin, XConsolePosition End) WriteLine(
-            string format, object? arg0, object? arg1, object? arg2) =>
-            WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0, arg1, arg2)) }, isWriteLine: true);
+            string format, object? arg0, object? arg1, object? arg2)
+        {
+            if (string.IsNullOrEmpty(format))
+                return WriteLine();
+
+            return WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0, arg1, arg2)) }, isWriteLine: true);
+        }
 
         public static (XConsolePosition Begin, XConsolePosition End) WriteLine(
-            string format, params object?[]? arg) =>
-            WriteBase(
+            string format, params object?[]? arg)
+        {
+            if (string.IsNullOrEmpty(format))
+                return WriteLine();
+
+            return WriteBase(
                 new[] { XConsoleItem.Parse(string.Format(format, arg ?? Array.Empty<object?>())) },
                 isWriteLine: true);
+        }
 
         public static (XConsolePosition Begin, XConsolePosition End) WriteLine(uint value) =>
             WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
