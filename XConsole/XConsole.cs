@@ -184,7 +184,7 @@ namespace Chubrik.XConsole
                 if (_pinHeight > 0)
                 {
                     if (pinHeight != _pinHeight)
-                        pinClear = _newLine + new string(' ', Console.BufferWidth + _pinHeight - 1);
+                        pinClear = _newLine + new string(' ', Console.BufferWidth * _pinHeight - 1);
 
 #if NET
                     (origLeft, origTop) = Console.GetCursorPosition();
@@ -506,7 +506,7 @@ namespace Chubrik.XConsole
                         if (_pinHeight > 0)
                         {
                             if (pinHeight != _pinHeight)
-                                pinClear = _newLine + new string(' ', Console.BufferWidth + _pinHeight - 1);
+                                pinClear = _newLine + new string(' ', Console.BufferWidth * _pinHeight - 1);
 
 #if NET
                             (origLeft, origTop) = Console.GetCursorPosition();
@@ -688,7 +688,7 @@ namespace Chubrik.XConsole
                         if (_pinHeight > 0)
                         {
                             if (pinHeight != _pinHeight)
-                                pinClear = _newLine + new string(' ', Console.BufferWidth + _pinHeight - 1);
+                                pinClear = _newLine + new string(' ', Console.BufferWidth * _pinHeight - 1);
 
 #if NET
                             (beginLeft, beginTop) = Console.GetCursorPosition();
