@@ -57,8 +57,8 @@ namespace Chubrik.XConsole
 
         #region Pinning
 
-        private static int _pinHeight = 0;
         private static Func<IReadOnlyList<string?>>? _getPinValues = null;
+        private static int _pinHeight = 0;
 
         [Obsolete("At least one argument should be specified", error: true)]
         public static void Pin() => throw new InvalidOperationException();
@@ -100,10 +100,10 @@ namespace Chubrik.XConsole
             if (getPinValues == null)
                 return;
 
-            var pinHeight = _pinHeight;
+            var prePinHeight = _pinHeight;
 
-            var pinClear = pinHeight > 0
-                ? _newLine + new string(' ', Console.BufferWidth * pinHeight - 1)
+            var pinClear = prePinHeight > 0
+                ? _newLine + new string(' ', Console.BufferWidth * prePinHeight - 1)
                 : string.Empty;
 
             var pinValues = getPinValues();
@@ -113,17 +113,19 @@ namespace Chubrik.XConsole
                 if (!string.IsNullOrEmpty(pinValue))
                     pinItems.Add(XConsoleItem.Parse(pinValue));
 
-            int origLeft, origTop, pinEndTop;
+            int pinHeight, origLeft, origTop, pinEndTop;
 
             lock (_syncLock)
             {
                 if (_getPinValues == null)
                     return;
 
-                if (_pinHeight > 0)
+                pinHeight = _pinHeight;
+
+                if (pinHeight > 0)
                 {
-                    if (pinHeight != _pinHeight)
-                        pinClear = _newLine + new string(' ', Console.BufferWidth * _pinHeight - 1);
+                    if (pinHeight != prePinHeight)
+                        pinClear = _newLine + new string(' ', Console.BufferWidth * pinHeight - 1);
 
 #if NET
                     (origLeft, origTop) = Console.GetCursorPosition();
@@ -132,7 +134,7 @@ namespace Chubrik.XConsole
 #endif
                     Console.CursorVisible = false;
                     Console.Write(pinClear);
-                    Console.SetCursorPosition(origLeft, origTop);
+                    Console.SetCursorPosition(0, origTop + 1);
                 }
                 else
                 {
@@ -142,9 +144,9 @@ namespace Chubrik.XConsole
                     (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
                     Console.CursorVisible = false;
+                    Console.WriteLine();
                 }
 
-                Console.WriteLine();
                 WriteItems(pinItems);
                 pinEndTop = Console.CursorTop;
 
@@ -168,23 +170,26 @@ namespace Chubrik.XConsole
             if (!_positioningEnabled)
                 return;
 
-            var pinHeight = _pinHeight;
+            var prePinHeight = _pinHeight;
 
-            var pinClear = pinHeight > 0
-                ? _newLine + new string(' ', Console.BufferWidth * pinHeight - 1)
+            var pinClear = prePinHeight > 0
+                ? _newLine + new string(' ', Console.BufferWidth * prePinHeight - 1)
                 : string.Empty;
 
-            int origLeft, origTop;
+            int pinHeight, origLeft, origTop;
 
             lock (_syncLock)
             {
                 if (_getPinValues == null)
                     return;
 
-                if (_pinHeight > 0)
+                pinHeight = _pinHeight;
+
+                if (pinHeight > 0)
                 {
-                    if (pinHeight != _pinHeight)
-                        pinClear = _newLine + new string(' ', Console.BufferWidth * _pinHeight - 1);
+
+                    if (pinHeight != prePinHeight)
+                        pinClear = _newLine + new string(' ', Console.BufferWidth * pinHeight - 1);
 
 #if NET
                     (origLeft, origTop) = Console.GetCursorPosition();
@@ -443,9 +448,9 @@ namespace Chubrik.XConsole
                 return (new(0, 0, 0), new(0, 0, 0));
             }
 
+            var getPinValues = _getPinValues;
             int origLeft, origTop;
             long shiftTop;
-            var getPinValues = _getPinValues;
 
             if (getPinValues == null)
             {
@@ -469,10 +474,10 @@ namespace Chubrik.XConsole
             }
             else
             {
-                var pinHeight = _pinHeight;
+                var prePinHeight = _pinHeight;
 
-                var pinClear = pinHeight > 0
-                    ? _newLine + new string(' ', Console.BufferWidth * pinHeight - 1)
+                var pinClear = prePinHeight > 0
+                    ? _newLine + new string(' ', Console.BufferWidth * prePinHeight - 1)
                     : string.Empty;
 
                 var pinValues = getPinValues();
@@ -482,7 +487,7 @@ namespace Chubrik.XConsole
                     if (!string.IsNullOrEmpty(pinValue))
                         pinItems.Add(XConsoleItem.Parse(pinValue));
 
-                int pinEndTop;
+                int pinHeight, pinEndTop;
 
                 lock (_syncLock)
                 {
@@ -503,10 +508,12 @@ namespace Chubrik.XConsole
                     }
                     else
                     {
-                        if (_pinHeight > 0)
+                        pinHeight = _pinHeight;
+
+                        if (pinHeight > 0)
                         {
-                            if (pinHeight != _pinHeight)
-                                pinClear = _newLine + new string(' ', Console.BufferWidth * _pinHeight - 1);
+                            if (pinHeight != prePinHeight)
+                                pinClear = _newLine + new string(' ', Console.BufferWidth * pinHeight - 1);
 
 #if NET
                             (origLeft, origTop) = Console.GetCursorPosition();
@@ -573,9 +580,9 @@ namespace Chubrik.XConsole
                 return (new(0, 0, 0), new(0, 0, 0));
             }
 
+            var getPinValues = _getPinValues;
             int beginLeft, beginTop, endLeft, endTop;
             long shiftTop;
-            var getPinValues = _getPinValues;
 
             if (getPinValues == null)
             {
@@ -625,10 +632,10 @@ namespace Chubrik.XConsole
             }
             else
             {
-                var pinHeight = _pinHeight;
+                var prePinHeight = _pinHeight;
 
-                var pinClear = pinHeight > 0
-                    ? _newLine + new string(' ', Console.BufferWidth * pinHeight - 1)
+                var pinClear = prePinHeight > 0
+                    ? _newLine + new string(' ', Console.BufferWidth * prePinHeight - 1)
                     : string.Empty;
 
                 var pinValues = getPinValues();
@@ -638,7 +645,7 @@ namespace Chubrik.XConsole
                     if (!string.IsNullOrEmpty(pinValue))
                         pinItems.Add(XConsoleItem.Parse(pinValue));
 
-                int pinEndTop;
+                int pinHeight, pinEndTop;
 
                 lock (_syncLock)
                 {
@@ -685,10 +692,12 @@ namespace Chubrik.XConsole
                     }
                     else
                     {
-                        if (_pinHeight > 0)
+                        pinHeight = _pinHeight;
+
+                        if (pinHeight > 0)
                         {
-                            if (pinHeight != _pinHeight)
-                                pinClear = _newLine + new string(' ', Console.BufferWidth * _pinHeight - 1);
+                            if (pinHeight != prePinHeight)
+                                pinClear = _newLine + new string(' ', Console.BufferWidth * pinHeight - 1);
 
 #if NET
                             (beginLeft, beginTop) = Console.GetCursorPosition();
