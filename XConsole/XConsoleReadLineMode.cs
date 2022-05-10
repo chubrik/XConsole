@@ -1,9 +1,8 @@
-﻿namespace Chubrik.XConsole
+﻿namespace Chubrik.XConsole;
+
+public enum XConsoleReadLineMode
 {
-    public enum XConsoleReadLineMode
-    {
-        Default = 0,
-        Masked,
-        Hidden
-    }
+    Default = 0,
+    Masked,
+    Hidden
 }

@@ -1,105 +1,479 @@
-﻿using System;
+﻿#if !NET
+#pragma warning disable CS8604 // Possible null reference argument.
+#endif
+
+namespace Chubrik.XConsole;
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
 
-#if !NET
-#pragma warning disable CS8604 // Possible null reference argument.
-#endif
-
-namespace Chubrik.XConsole
-{
 #if NET
-    using System.Runtime.Versioning;
-    [SupportedOSPlatform("windows")]
-    [UnsupportedOSPlatform("android")]
-    [UnsupportedOSPlatform("browser")]
-    [UnsupportedOSPlatform("ios")]
-    [UnsupportedOSPlatform("tvos")]
+using System.Runtime.Versioning;
+[SupportedOSPlatform("windows")]
+[UnsupportedOSPlatform("android")]
+[UnsupportedOSPlatform("browser")]
+[UnsupportedOSPlatform("ios")]
+[UnsupportedOSPlatform("tvos")]
 #endif
-    public static class XConsole
-    {
-        private static readonly object _syncLock = new();
-        private static readonly string _newLine = Environment.NewLine;
-        private static readonly bool _positioningEnabled = true;
-        private static bool _coloringEnabled = Environment.GetEnvironmentVariable("NO_COLOR") == null;
-        private static long _shiftTop = 0;
-        private static bool _cursorVisible;
-        private static int _maxTop;
 
-        static XConsole()
+public static class XConsole
+{
+    private static readonly object _syncLock = new();
+    private static readonly string _newLine = Environment.NewLine;
+    private static readonly bool _positioningEnabled = true;
+    private static bool _coloringEnabled = Environment.GetEnvironmentVariable("NO_COLOR") == null;
+    private static long _shiftTop = 0;
+    private static bool _cursorVisible;
+    private static int _maxTop;
+
+    static XConsole()
+    {
+        try
         {
+            _cursorVisible = Console.CursorVisible;
+            _maxTop = Console.BufferHeight - 1;
+        }
+        catch
+        {
+            _positioningEnabled = false;
+        }
+    }
+
+    internal static long ShiftTop => _shiftTop;
+
+    public static bool NO_COLOR
+    {
+        get => !_coloringEnabled;
+        set => _coloringEnabled = !value;
+    }
+
+    public static void Sync(Action action)
+    {
+        lock (_syncLock)
+            action();
+    }
+
+    #region Pinning
+
+    private static Func<IReadOnlyList<string?>>? _getPinValues = null;
+    private static int _pinHeight = 0;
+
+    [Obsolete("At least one argument should be specified", error: true)]
+    public static void Pin() => throw new InvalidOperationException();
+
+    public static void Pin(params string?[] values)
+    {
+        if (!_positioningEnabled)
+            return;
+
+        _getPinValues = () => values;
+        UpdatePin();
+    }
+
+    public static void Pin(Func<string?> getValue)
+    {
+        if (!_positioningEnabled)
+            return;
+
+        _getPinValues = () => new[] { getValue() };
+        UpdatePin();
+    }
+
+    public static void Pin(Func<IReadOnlyList<string?>> getValues)
+    {
+        if (!_positioningEnabled)
+            return;
+
+        _getPinValues = getValues;
+        UpdatePin();
+    }
+
+    public static void UpdatePin()
+    {
+        if (!_positioningEnabled)
+            return;
+
+        var getPinValues = _getPinValues;
+
+        if (getPinValues == null)
+            return;
+
+        var prePinHeight = _pinHeight;
+
+        var pinClear = prePinHeight > 0
+            ? _newLine + new string(' ', Console.BufferWidth * prePinHeight - 1)
+            : string.Empty;
+
+        var pinValues = getPinValues();
+        var pinItems = new List<XConsoleItem>(pinValues.Count);
+
+        foreach (var pinValue in pinValues)
+            if (!string.IsNullOrEmpty(pinValue))
+                pinItems.Add(XConsoleItem.Parse(pinValue));
+
+        int pinHeight, origLeft, origTop, pinEndTop;
+
+        lock (_syncLock)
+        {
+            if (_getPinValues == null)
+                return;
+
+            pinHeight = _pinHeight;
+
+            if (pinHeight > 0)
+            {
+                if (pinHeight != prePinHeight)
+                    pinClear = _newLine + new string(' ', Console.BufferWidth * pinHeight - 1);
+
+#if NET
+                (origLeft, origTop) = Console.GetCursorPosition();
+#else
+                (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
+#endif
+                Console.CursorVisible = false;
+                Console.Write(pinClear);
+                Console.SetCursorPosition(0, origTop + 1);
+            }
+            else
+            {
+#if NET
+                (origLeft, origTop) = Console.GetCursorPosition();
+#else
+                (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
+#endif
+                Console.CursorVisible = false;
+                Console.WriteLine();
+            }
+
+            WriteItems(pinItems);
+            pinEndTop = Console.CursorTop;
+
+            if (pinEndTop == _maxTop)
+            {
+                _pinHeight = 1 + GetLineWrapCount(pinItems, beginLeft: 0);
+                var shift = origTop + _pinHeight - _maxTop;
+                _shiftTop += shift;
+                origTop -= shift;
+            }
+            else
+                _pinHeight = pinEndTop - origTop;
+
+            Console.SetCursorPosition(origLeft, origTop);
+            Console.CursorVisible = _cursorVisible;
+        }
+    }
+
+    public static void Unpin()
+    {
+        if (!_positioningEnabled)
+            return;
+
+        var prePinHeight = _pinHeight;
+
+        var pinClear = prePinHeight > 0
+            ? _newLine + new string(' ', Console.BufferWidth * prePinHeight - 1)
+            : string.Empty;
+
+        int pinHeight, origLeft, origTop;
+
+        lock (_syncLock)
+        {
+            if (_getPinValues == null)
+                return;
+
+            pinHeight = _pinHeight;
+
+            if (pinHeight > 0)
+            {
+                if (pinHeight != prePinHeight)
+                    pinClear = _newLine + new string(' ', Console.BufferWidth * pinHeight - 1);
+
+#if NET
+                (origLeft, origTop) = Console.GetCursorPosition();
+#else
+                (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
+#endif
+                Console.CursorVisible = false;
+                Console.Write(pinClear);
+                Console.SetCursorPosition(origLeft, origTop);
+                Console.CursorVisible = _cursorVisible;
+                _pinHeight = 0;
+            }
+
+            _getPinValues = null;
+        }
+    }
+
+    #endregion
+
+    #region Positioning
+
+    public static XConsolePosition CursorPosition
+    {
+        get
+        {
+            lock (_syncLock)
+            {
+#if NET
+                var (left, top) = Console.GetCursorPosition();
+                return new(left: left, top: top, shiftTop: _shiftTop);
+#else
+                return new(left: Console.CursorLeft, top: Console.CursorTop, shiftTop: _shiftTop);
+#endif
+            }
+        }
+        set
+        {
+            lock (_syncLock)
+            {
+                var actualTop = value.InitialTop + value.ShiftTop - _shiftTop;
+
+                if (actualTop < int.MinValue)
+                    actualTop = int.MinValue;
+
+                if (actualTop > int.MaxValue)
+                    actualTop = int.MaxValue;
+
+                Console.SetCursorPosition(value.Left, (int)actualTop);
+            }
+        }
+    }
+
+    internal static int? GetPositionActualTop(XConsolePosition position)
+    {
+        long shiftTop;
+        int bufferHeight;
+
+        lock (_syncLock)
+        {
+            shiftTop = _shiftTop;
+            bufferHeight = Console.BufferHeight;
+        }
+
+        var actualTop = position.InitialTop + position.ShiftTop - shiftTop;
+        return actualTop >= 0 && actualTop < bufferHeight ? (int)actualTop : null;
+    }
+
+    internal static XConsolePosition WriteToPosition(XConsolePosition position, string?[] values)
+    {
+        if (!_positioningEnabled)
+            return new(0, 0, 0);
+
+        var items = new List<XConsoleItem>(values.Length);
+
+        foreach (var value in values)
+            if (!string.IsNullOrEmpty(value))
+                items.Add(XConsoleItem.Parse(value));
+
+        if (items.Count == 0)
+            return position;
+
+        int origLeft, origTop, endLeft, endTop;
+        long shiftTop, positionActualTop;
+
+        lock (_syncLock)
+        {
+            shiftTop = _shiftTop;
+            positionActualTop = position.InitialTop + position.ShiftTop - shiftTop;
+
+            if (positionActualTop < int.MinValue)
+                positionActualTop = int.MinValue;
+
+            if (positionActualTop > int.MaxValue)
+                positionActualTop = int.MaxValue;
+
+#if NET
+            (origLeft, origTop) = Console.GetCursorPosition();
+#else
+            (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
+#endif
+            Console.CursorVisible = false;
+
             try
             {
-                _cursorVisible = Console.CursorVisible;
-                _maxTop = Console.BufferHeight - 1;
+                Console.SetCursorPosition(position.Left, (int)positionActualTop);
             }
             catch
             {
-                _positioningEnabled = false;
+                Console.CursorVisible = _cursorVisible;
+                throw;
             }
+
+            WriteItems(items);
+#if NET
+            (endLeft, endTop) = Console.GetCursorPosition();
+#else
+            (endLeft, endTop) = (Console.CursorLeft, Console.CursorTop);
+#endif
+
+            if (endTop == _maxTop)
+            {
+                var lineWrapCount = GetLineWrapCount(items, origLeft);
+                var shift = origTop + lineWrapCount - endTop;
+                shiftTop += shift;
+                origTop -= shift;
+                _shiftTop = shiftTop;
+            }
+
+            Console.SetCursorPosition(origLeft, origTop);
+            Console.CursorVisible = _cursorVisible;
         }
 
-        internal static long ShiftTop => _shiftTop;
+        return new(left: endLeft, top: endTop, shiftTop: shiftTop);
+    }
 
-        public static bool NO_COLOR
+    #endregion
+
+    #region ReadLine
+
+    public static string ReadLine()
+    {
+        lock (_syncLock)
+            return Console.ReadLine() ?? string.Empty;
+    }
+
+    public static string ReadLine(XConsoleReadLineMode mode, char maskChar = '*')
+    {
+        switch (mode)
         {
-            get => !_coloringEnabled;
-            set => _coloringEnabled = !value;
+            case XConsoleReadLineMode.Default:
+                return ReadLine();
+
+            case XConsoleReadLineMode.Masked:
+            case XConsoleReadLineMode.Hidden:
+                var isMaskedMode = mode == XConsoleReadLineMode.Masked;
+                var text = string.Empty;
+                ConsoleKeyInfo keyInfo;
+
+                lock (_syncLock)
+                {
+                    do
+                    {
+                        keyInfo = Console.ReadKey(intercept: true);
+
+                        if (keyInfo.Key == ConsoleKey.Backspace && text.Length > 0)
+                        {
+                            if (isMaskedMode)
+                                Console.Write("\b \b");
+
+                            text = text.Substring(0, text.Length - 1);
+                        }
+                        else if (!char.IsControl(keyInfo.KeyChar))
+                        {
+                            if (isMaskedMode)
+                                Console.Write(maskChar);
+
+                            text += keyInfo.KeyChar;
+                        }
+                    }
+                    while (keyInfo.Key != ConsoleKey.Enter);
+
+                    Console.WriteLine();
+                }
+
+                return text;
+
+            default:
+                throw new ArgumentOutOfRangeException(nameof(mode));
+        }
+    }
+
+    #endregion
+
+    #region Write, WriteLine
+
+    [Obsolete("At least one argument should be specified", error: true)]
+    public static void Write() => throw new InvalidOperationException();
+
+    public static (XConsolePosition Begin, XConsolePosition End) Write(string? value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            var position = CursorPosition;
+            return (position, position);
         }
 
-        public static void Sync(Action action)
+        return WriteBase(new[] { XConsoleItem.Parse(value) }, isWriteLine: false);
+    }
+
+    public static (XConsolePosition Begin, XConsolePosition End) Write(params string?[] values)
+    {
+        var items = new List<XConsoleItem>(values.Length);
+
+        foreach (var value in values)
+            if (!string.IsNullOrEmpty(value))
+                items.Add(XConsoleItem.Parse(value));
+
+        if (items.Count == 0)
+        {
+            var position = CursorPosition;
+            return (position, position);
+        }
+
+        return WriteBase(items, isWriteLine: false);
+    }
+
+    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(string? value)
+    {
+        if (string.IsNullOrEmpty(value))
+            return WriteLine();
+
+        return WriteBase(new[] { XConsoleItem.Parse(value) }, isWriteLine: true);
+    }
+
+    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(params string?[] values)
+    {
+        var items = new List<XConsoleItem>(values.Length);
+
+        foreach (var value in values)
+            if (!string.IsNullOrEmpty(value))
+                items.Add(XConsoleItem.Parse(value));
+
+        if (items.Count == 0)
+            return WriteLine();
+
+        return WriteBase(items, isWriteLine: true);
+    }
+
+    public static (XConsolePosition Begin, XConsolePosition End) WriteLine()
+    {
+        if (!_positioningEnabled)
         {
             lock (_syncLock)
-                action();
+                Console.WriteLine();
+
+            return (new(0, 0, 0), new(0, 0, 0));
         }
 
-        #region Pinning
+        var getPinValues = _getPinValues;
+        int origLeft, origTop;
+        long shiftTop;
 
-        private static Func<IReadOnlyList<string?>>? _getPinValues = null;
-        private static int _pinHeight = 0;
-
-        [Obsolete("At least one argument should be specified", error: true)]
-        public static void Pin() => throw new InvalidOperationException();
-
-        public static void Pin(params string?[] values)
+        if (getPinValues == null)
         {
-            if (!_positioningEnabled)
-                return;
+            lock (_syncLock)
+            {
+#if NET
+                (origLeft, origTop) = Console.GetCursorPosition();
+#else
+                (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
+#endif
+                Console.WriteLine();
 
-            _getPinValues = () => values;
-            UpdatePin();
+                if (origTop == _maxTop)
+                {
+                    _shiftTop++;
+                    origTop--;
+                }
+
+                shiftTop = _shiftTop;
+            }
         }
-
-        public static void Pin(Func<string?> getValue)
+        else
         {
-            if (!_positioningEnabled)
-                return;
-
-            _getPinValues = () => new[] { getValue() };
-            UpdatePin();
-        }
-
-        public static void Pin(Func<IReadOnlyList<string?>> getValues)
-        {
-            if (!_positioningEnabled)
-                return;
-
-            _getPinValues = getValues;
-            UpdatePin();
-        }
-
-        public static void UpdatePin()
-        {
-            if (!_positioningEnabled)
-                return;
-
-            var getPinValues = _getPinValues;
-
-            if (getPinValues == null)
-                return;
-
             var prePinHeight = _pinHeight;
 
             var pinClear = prePinHeight > 0
@@ -113,348 +487,11 @@ namespace Chubrik.XConsole
                 if (!string.IsNullOrEmpty(pinValue))
                     pinItems.Add(XConsoleItem.Parse(pinValue));
 
-            int pinHeight, origLeft, origTop, pinEndTop;
+            int pinHeight, pinEndTop;
 
             lock (_syncLock)
             {
                 if (_getPinValues == null)
-                    return;
-
-                pinHeight = _pinHeight;
-
-                if (pinHeight > 0)
-                {
-                    if (pinHeight != prePinHeight)
-                        pinClear = _newLine + new string(' ', Console.BufferWidth * pinHeight - 1);
-
-#if NET
-                    (origLeft, origTop) = Console.GetCursorPosition();
-#else
-                    (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
-                    Console.CursorVisible = false;
-                    Console.Write(pinClear);
-                    Console.SetCursorPosition(0, origTop + 1);
-                }
-                else
-                {
-#if NET
-                    (origLeft, origTop) = Console.GetCursorPosition();
-#else
-                    (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
-                    Console.CursorVisible = false;
-                    Console.WriteLine();
-                }
-
-                WriteItems(pinItems);
-                pinEndTop = Console.CursorTop;
-
-                if (pinEndTop == _maxTop)
-                {
-                    _pinHeight = 1 + GetLineWrapCount(pinItems, beginLeft: 0);
-                    var shift = origTop + _pinHeight - _maxTop;
-                    _shiftTop += shift;
-                    origTop -= shift;
-                }
-                else
-                    _pinHeight = pinEndTop - origTop;
-
-                Console.SetCursorPosition(origLeft, origTop);
-                Console.CursorVisible = _cursorVisible;
-            }
-        }
-
-        public static void Unpin()
-        {
-            if (!_positioningEnabled)
-                return;
-
-            var prePinHeight = _pinHeight;
-
-            var pinClear = prePinHeight > 0
-                ? _newLine + new string(' ', Console.BufferWidth * prePinHeight - 1)
-                : string.Empty;
-
-            int pinHeight, origLeft, origTop;
-
-            lock (_syncLock)
-            {
-                if (_getPinValues == null)
-                    return;
-
-                pinHeight = _pinHeight;
-
-                if (pinHeight > 0)
-                {
-
-                    if (pinHeight != prePinHeight)
-                        pinClear = _newLine + new string(' ', Console.BufferWidth * pinHeight - 1);
-
-#if NET
-                    (origLeft, origTop) = Console.GetCursorPosition();
-#else
-                    (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
-                    Console.CursorVisible = false;
-                    Console.Write(pinClear);
-                    Console.SetCursorPosition(origLeft, origTop);
-                    Console.CursorVisible = _cursorVisible;
-                    _pinHeight = 0;
-                }
-
-                _getPinValues = null;
-            }
-        }
-
-        #endregion
-
-        #region Positioning
-
-        public static XConsolePosition CursorPosition
-        {
-            get
-            {
-                lock (_syncLock)
-                {
-#if NET
-                    var (left, top) = Console.GetCursorPosition();
-                    return new(left: left, top: top, shiftTop: _shiftTop);
-#else
-                    return new(left: Console.CursorLeft, top: Console.CursorTop, shiftTop: _shiftTop);
-#endif
-                }
-            }
-            set
-            {
-                lock (_syncLock)
-                {
-                    var actualTop = value.InitialTop + value.ShiftTop - _shiftTop;
-
-                    if (actualTop < int.MinValue)
-                        actualTop = int.MinValue;
-
-                    if (actualTop > int.MaxValue)
-                        actualTop = int.MaxValue;
-
-                    Console.SetCursorPosition(value.Left, (int)actualTop);
-                }
-            }
-        }
-
-        internal static int? GetPositionActualTop(XConsolePosition position)
-        {
-            long shiftTop;
-            int bufferHeight;
-
-            lock (_syncLock)
-            {
-                shiftTop = _shiftTop;
-                bufferHeight = Console.BufferHeight;
-            }
-
-            var actualTop = position.InitialTop + position.ShiftTop - shiftTop;
-            return actualTop >= 0 && actualTop < bufferHeight ? (int)actualTop : null;
-        }
-
-        internal static XConsolePosition WriteToPosition(XConsolePosition position, string?[] values)
-        {
-            if (!_positioningEnabled)
-                return new(0, 0, 0);
-
-            var items = new List<XConsoleItem>(values.Length);
-
-            foreach (var value in values)
-                if (!string.IsNullOrEmpty(value))
-                    items.Add(XConsoleItem.Parse(value));
-
-            if (items.Count == 0)
-                return position;
-
-            int origLeft, origTop, endLeft, endTop;
-            long shiftTop, positionActualTop;
-
-            lock (_syncLock)
-            {
-                shiftTop = _shiftTop;
-                positionActualTop = position.InitialTop + position.ShiftTop - shiftTop;
-
-                if (positionActualTop < int.MinValue)
-                    positionActualTop = int.MinValue;
-
-                if (positionActualTop > int.MaxValue)
-                    positionActualTop = int.MaxValue;
-
-#if NET
-                (origLeft, origTop) = Console.GetCursorPosition();
-#else
-                (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
-                Console.CursorVisible = false;
-
-                try
-                {
-                    Console.SetCursorPosition(position.Left, (int)positionActualTop);
-                }
-                catch
-                {
-                    Console.CursorVisible = _cursorVisible;
-                    throw;
-                }
-
-                WriteItems(items);
-#if NET
-                (endLeft, endTop) = Console.GetCursorPosition();
-#else
-                (endLeft, endTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
-
-                if (endTop == _maxTop)
-                {
-                    var lineWrapCount = GetLineWrapCount(items, origLeft);
-                    var shift = origTop + lineWrapCount - endTop;
-                    shiftTop += shift;
-                    origTop -= shift;
-                    _shiftTop = shiftTop;
-                }
-
-                Console.SetCursorPosition(origLeft, origTop);
-                Console.CursorVisible = _cursorVisible;
-            }
-
-            return new(left: endLeft, top: endTop, shiftTop: shiftTop);
-        }
-
-        #endregion
-
-        #region ReadLine
-
-        public static string ReadLine()
-        {
-            lock (_syncLock)
-                return Console.ReadLine() ?? string.Empty;
-        }
-
-        public static string ReadLine(XConsoleReadLineMode mode, char maskChar = '*')
-        {
-            switch (mode)
-            {
-                case XConsoleReadLineMode.Default:
-                    return ReadLine();
-
-                case XConsoleReadLineMode.Masked:
-                case XConsoleReadLineMode.Hidden:
-                    var isMaskedMode = mode == XConsoleReadLineMode.Masked;
-                    var text = string.Empty;
-                    ConsoleKeyInfo keyInfo;
-
-                    lock (_syncLock)
-                    {
-                        do
-                        {
-                            keyInfo = Console.ReadKey(intercept: true);
-
-                            if (keyInfo.Key == ConsoleKey.Backspace && text.Length > 0)
-                            {
-                                if (isMaskedMode)
-                                    Console.Write("\b \b");
-
-                                text = text.Substring(0, text.Length - 1);
-                            }
-                            else if (!char.IsControl(keyInfo.KeyChar))
-                            {
-                                if (isMaskedMode)
-                                    Console.Write(maskChar);
-
-                                text += keyInfo.KeyChar;
-                            }
-                        }
-                        while (keyInfo.Key != ConsoleKey.Enter);
-
-                        Console.WriteLine();
-                    }
-
-                    return text;
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(mode));
-            }
-        }
-
-        #endregion
-
-        #region Write, WriteLine
-
-        [Obsolete("At least one argument should be specified", error: true)]
-        public static void Write() => throw new InvalidOperationException();
-
-        public static (XConsolePosition Begin, XConsolePosition End) Write(string? value)
-        {
-            if (string.IsNullOrEmpty(value))
-            {
-                var position = CursorPosition;
-                return (position, position);
-            }
-
-            return WriteBase(new[] { XConsoleItem.Parse(value) }, isWriteLine: false);
-        }
-
-        public static (XConsolePosition Begin, XConsolePosition End) Write(params string?[] values)
-        {
-            var items = new List<XConsoleItem>(values.Length);
-
-            foreach (var value in values)
-                if (!string.IsNullOrEmpty(value))
-                    items.Add(XConsoleItem.Parse(value));
-
-            if (items.Count == 0)
-            {
-                var position = CursorPosition;
-                return (position, position);
-            }
-
-            return WriteBase(items, isWriteLine: false);
-        }
-
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(string? value)
-        {
-            if (string.IsNullOrEmpty(value))
-                return WriteLine();
-
-            return WriteBase(new[] { XConsoleItem.Parse(value) }, isWriteLine: true);
-        }
-
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(params string?[] values)
-        {
-            var items = new List<XConsoleItem>(values.Length);
-
-            foreach (var value in values)
-                if (!string.IsNullOrEmpty(value))
-                    items.Add(XConsoleItem.Parse(value));
-
-            if (items.Count == 0)
-                return WriteLine();
-
-            return WriteBase(items, isWriteLine: true);
-        }
-
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine()
-        {
-            if (!_positioningEnabled)
-            {
-                lock (_syncLock)
-                    Console.WriteLine();
-
-                return (new(0, 0, 0), new(0, 0, 0));
-            }
-
-            var getPinValues = _getPinValues;
-            int origLeft, origTop;
-            long shiftTop;
-
-            if (getPinValues == null)
-            {
-                lock (_syncLock)
                 {
 #if NET
                     (origLeft, origTop) = Console.GetCursorPosition();
@@ -468,125 +505,151 @@ namespace Chubrik.XConsole
                         _shiftTop++;
                         origTop--;
                     }
-
-                    shiftTop = _shiftTop;
                 }
-            }
-            else
-            {
-                var prePinHeight = _pinHeight;
-
-                var pinClear = prePinHeight > 0
-                    ? _newLine + new string(' ', Console.BufferWidth * prePinHeight - 1)
-                    : string.Empty;
-
-                var pinValues = getPinValues();
-                var pinItems = new List<XConsoleItem>(pinValues.Count);
-
-                foreach (var pinValue in pinValues)
-                    if (!string.IsNullOrEmpty(pinValue))
-                        pinItems.Add(XConsoleItem.Parse(pinValue));
-
-                int pinHeight, pinEndTop;
-
-                lock (_syncLock)
+                else
                 {
-                    if (_getPinValues == null)
+                    pinHeight = _pinHeight;
+
+                    if (pinHeight > 0)
+                    {
+                        if (pinHeight != prePinHeight)
+                            pinClear = _newLine + new string(' ', Console.BufferWidth * pinHeight - 1);
+
+#if NET
+                        (origLeft, origTop) = Console.GetCursorPosition();
+#else
+                        (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
+#endif
+                        Console.CursorVisible = false;
+                        Console.Write(pinClear);
+                        Console.SetCursorPosition(origLeft, origTop);
+                    }
+                    else
                     {
 #if NET
                         (origLeft, origTop) = Console.GetCursorPosition();
 #else
                         (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
-                        Console.WriteLine();
+                        Console.CursorVisible = false;
+                    }
 
-                        if (origTop == _maxTop)
-                        {
-                            _shiftTop++;
-                            origTop--;
-                        }
+                    Console.WriteLine(_newLine);
+                    WriteItems(pinItems);
+                    pinEndTop = Console.CursorTop;
+
+                    if (pinEndTop == _maxTop)
+                    {
+                        _pinHeight = 1 + GetLineWrapCount(pinItems, beginLeft: 0);
+                        var shift = origTop + 1 + _pinHeight - _maxTop;
+                        _shiftTop += shift;
+                        origTop -= shift;
                     }
                     else
-                    {
-                        pinHeight = _pinHeight;
+                        _pinHeight = pinEndTop - (origTop + 1);
 
-                        if (pinHeight > 0)
-                        {
-                            if (pinHeight != prePinHeight)
-                                pinClear = _newLine + new string(' ', Console.BufferWidth * pinHeight - 1);
-
-#if NET
-                            (origLeft, origTop) = Console.GetCursorPosition();
-#else
-                            (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
-                            Console.CursorVisible = false;
-                            Console.Write(pinClear);
-                            Console.SetCursorPosition(origLeft, origTop);
-                        }
-                        else
-                        {
-#if NET
-                            (origLeft, origTop) = Console.GetCursorPosition();
-#else
-                            (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
-                            Console.CursorVisible = false;
-                        }
-
-                        Console.WriteLine(_newLine);
-                        WriteItems(pinItems);
-                        pinEndTop = Console.CursorTop;
-
-                        if (pinEndTop == _maxTop)
-                        {
-                            _pinHeight = 1 + GetLineWrapCount(pinItems, beginLeft: 0);
-                            var shift = origTop + 1 + _pinHeight - _maxTop;
-                            _shiftTop += shift;
-                            origTop -= shift;
-                        }
-                        else
-                            _pinHeight = pinEndTop - (origTop + 1);
-
-                        Console.SetCursorPosition(0, origTop + 1);
-                        Console.CursorVisible = _cursorVisible;
-                    }
-
-                    shiftTop = _shiftTop;
+                    Console.SetCursorPosition(0, origTop + 1);
+                    Console.CursorVisible = _cursorVisible;
                 }
-            }
 
-            return (
-                new(left: origLeft, top: origTop, shiftTop: shiftTop),
-                new(left: origLeft, top: origTop, shiftTop: shiftTop)
-            );
+                shiftTop = _shiftTop;
+            }
         }
 
-        private static (XConsolePosition Begin, XConsolePosition End) WriteBase(
-            IReadOnlyList<XConsoleItem> logItems, bool isWriteLine)
+        return (
+            new(left: origLeft, top: origTop, shiftTop: shiftTop),
+            new(left: origLeft, top: origTop, shiftTop: shiftTop)
+        );
+    }
+
+    private static (XConsolePosition Begin, XConsolePosition End) WriteBase(
+        IReadOnlyList<XConsoleItem> logItems, bool isWriteLine)
+    {
+        Debug.Assert(logItems.Count > 0);
+
+        if (!_positioningEnabled)
         {
-            Debug.Assert(logItems.Count > 0);
-
-            if (!_positioningEnabled)
+            lock (_syncLock)
             {
-                lock (_syncLock)
-                {
-                    WriteItems(logItems);
+                WriteItems(logItems);
 
-                    if (isWriteLine)
-                        Console.WriteLine();
-                }
-
-                return (new(0, 0, 0), new(0, 0, 0));
+                if (isWriteLine)
+                    Console.WriteLine();
             }
 
-            var getPinValues = _getPinValues;
-            int beginLeft, beginTop, endLeft, endTop;
-            long shiftTop;
+            return (new(0, 0, 0), new(0, 0, 0));
+        }
 
-            if (getPinValues == null)
+        var getPinValues = _getPinValues;
+        int beginLeft, beginTop, endLeft, endTop;
+        long shiftTop;
+
+        if (getPinValues == null)
+        {
+            lock (_syncLock)
             {
-                lock (_syncLock)
+#if NET
+                (beginLeft, beginTop) = Console.GetCursorPosition();
+                Console.CursorVisible = false;
+                WriteItems(logItems);
+                (endLeft, endTop) = Console.GetCursorPosition();
+#else
+                (beginLeft, beginTop) = (Console.CursorLeft, Console.CursorTop);
+                Console.CursorVisible = false;
+                WriteItems(logItems);
+                (endLeft, endTop) = (Console.CursorLeft, Console.CursorTop);
+#endif
+
+                if (isWriteLine)
+                {
+                    Console.WriteLine();
+                    Console.CursorVisible = _cursorVisible;
+
+                    if (endTop == _maxTop)
+                    {
+                        var logLineWrapCount = GetLineWrapCount(logItems, beginLeft);
+                        var shift = beginTop + logLineWrapCount + 1 - endTop;
+                        _shiftTop += shift;
+                        beginTop -= shift;
+                        endTop--;
+                    }
+                }
+                else
+                {
+                    Console.CursorVisible = _cursorVisible;
+
+                    if (endTop == _maxTop)
+                    {
+                        var logLineWrapCount = GetLineWrapCount(logItems, beginLeft);
+                        var shift = beginTop + logLineWrapCount - endTop;
+                        _shiftTop += shift;
+                        beginTop -= shift;
+                    }
+                }
+
+                shiftTop = _shiftTop;
+            }
+        }
+        else
+        {
+            var prePinHeight = _pinHeight;
+
+            var pinClear = prePinHeight > 0
+                ? _newLine + new string(' ', Console.BufferWidth * prePinHeight - 1)
+                : string.Empty;
+
+            var pinValues = getPinValues();
+            var pinItems = new List<XConsoleItem>(pinValues.Count);
+
+            foreach (var pinValue in pinValues)
+                if (!string.IsNullOrEmpty(pinValue))
+                    pinItems.Add(XConsoleItem.Parse(pinValue));
+
+            int pinHeight, pinEndTop;
+
+            lock (_syncLock)
+            {
+                if (_getPinValues == null)
                 {
 #if NET
                     (beginLeft, beginTop) = Console.GetCursorPosition();
@@ -626,800 +689,736 @@ namespace Chubrik.XConsole
                             beginTop -= shift;
                         }
                     }
-
-                    shiftTop = _shiftTop;
                 }
-            }
-            else
-            {
-                var prePinHeight = _pinHeight;
-
-                var pinClear = prePinHeight > 0
-                    ? _newLine + new string(' ', Console.BufferWidth * prePinHeight - 1)
-                    : string.Empty;
-
-                var pinValues = getPinValues();
-                var pinItems = new List<XConsoleItem>(pinValues.Count);
-
-                foreach (var pinValue in pinValues)
-                    if (!string.IsNullOrEmpty(pinValue))
-                        pinItems.Add(XConsoleItem.Parse(pinValue));
-
-                int pinHeight, pinEndTop;
-
-                lock (_syncLock)
+                else
                 {
-                    if (_getPinValues == null)
+                    pinHeight = _pinHeight;
+
+                    if (pinHeight > 0)
+                    {
+                        if (pinHeight != prePinHeight)
+                            pinClear = _newLine + new string(' ', Console.BufferWidth * pinHeight - 1);
+
+#if NET
+                        (beginLeft, beginTop) = Console.GetCursorPosition();
+#else
+                        (beginLeft, beginTop) = (Console.CursorLeft, Console.CursorTop);
+#endif
+                        Console.CursorVisible = false;
+                        Console.Write(pinClear);
+                        Console.SetCursorPosition(beginLeft, beginTop);
+                    }
+                    else
                     {
 #if NET
                         (beginLeft, beginTop) = Console.GetCursorPosition();
-                        Console.CursorVisible = false;
-                        WriteItems(logItems);
-                        (endLeft, endTop) = Console.GetCursorPosition();
 #else
                         (beginLeft, beginTop) = (Console.CursorLeft, Console.CursorTop);
+#endif
                         Console.CursorVisible = false;
-                        WriteItems(logItems);
-                        (endLeft, endTop) = (Console.CursorLeft, Console.CursorTop);
+                    }
+
+                    WriteItems(logItems);
+#if NET
+                    (endLeft, endTop) = Console.GetCursorPosition();
+#else
+                    (endLeft, endTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
 
-                        if (isWriteLine)
-                        {
-                            Console.WriteLine();
-                            Console.CursorVisible = _cursorVisible;
+                    if (isWriteLine)
+                    {
+                        Console.WriteLine(_newLine);
+                        WriteItems(pinItems);
+                        pinEndTop = Console.CursorTop;
 
-                            if (endTop == _maxTop)
-                            {
-                                var logLineWrapCount = GetLineWrapCount(logItems, beginLeft);
-                                var shift = beginTop + logLineWrapCount + 1 - endTop;
-                                _shiftTop += shift;
-                                beginTop -= shift;
-                                endTop--;
-                            }
+                        if (pinEndTop == _maxTop)
+                        {
+                            var logLineWrapCount = GetLineWrapCount(logItems, beginLeft);
+                            _pinHeight = 1 + GetLineWrapCount(pinItems, beginLeft: 0);
+                            var shift = beginTop + logLineWrapCount + 1 + _pinHeight - _maxTop;
+                            _shiftTop += shift;
+                            beginTop -= shift;
+                            endTop = _maxTop - _pinHeight - 1;
                         }
                         else
-                        {
-                            Console.CursorVisible = _cursorVisible;
+                            _pinHeight = pinEndTop - (endTop + 1);
 
-                            if (endTop == _maxTop)
-                            {
-                                var logLineWrapCount = GetLineWrapCount(logItems, beginLeft);
-                                var shift = beginTop + logLineWrapCount - endTop;
-                                _shiftTop += shift;
-                                beginTop -= shift;
-                            }
-                        }
+                        Console.SetCursorPosition(0, endTop + 1);
                     }
                     else
                     {
-                        pinHeight = _pinHeight;
+                        Console.WriteLine();
+                        WriteItems(pinItems);
+                        pinEndTop = Console.CursorTop;
 
-                        if (pinHeight > 0)
+                        if (pinEndTop == _maxTop)
                         {
-                            if (pinHeight != prePinHeight)
-                                pinClear = _newLine + new string(' ', Console.BufferWidth * pinHeight - 1);
-
-#if NET
-                            (beginLeft, beginTop) = Console.GetCursorPosition();
-#else
-                            (beginLeft, beginTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
-                            Console.CursorVisible = false;
-                            Console.Write(pinClear);
-                            Console.SetCursorPosition(beginLeft, beginTop);
+                            var logLineWrapCount = GetLineWrapCount(logItems, beginLeft);
+                            _pinHeight = 1 + GetLineWrapCount(pinItems, beginLeft: 0);
+                            var shift = beginTop + logLineWrapCount + _pinHeight - _maxTop;
+                            _shiftTop += shift;
+                            beginTop -= shift;
+                            endTop = _maxTop - _pinHeight;
                         }
                         else
-                        {
-#if NET
-                            (beginLeft, beginTop) = Console.GetCursorPosition();
-#else
-                            (beginLeft, beginTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
-                            Console.CursorVisible = false;
-                        }
+                            _pinHeight = pinEndTop - endTop;
 
-                        WriteItems(logItems);
-#if NET
-                        (endLeft, endTop) = Console.GetCursorPosition();
-#else
-                        (endLeft, endTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
-
-                        if (isWriteLine)
-                        {
-                            Console.WriteLine(_newLine);
-                            WriteItems(pinItems);
-                            pinEndTop = Console.CursorTop;
-
-                            if (pinEndTop == _maxTop)
-                            {
-                                var logLineWrapCount = GetLineWrapCount(logItems, beginLeft);
-                                _pinHeight = 1 + GetLineWrapCount(pinItems, beginLeft: 0);
-                                var shift = beginTop + logLineWrapCount + 1 + _pinHeight - _maxTop;
-                                _shiftTop += shift;
-                                beginTop -= shift;
-                                endTop = _maxTop - _pinHeight - 1;
-                            }
-                            else
-                                _pinHeight = pinEndTop - (endTop + 1);
-
-                            Console.SetCursorPosition(0, endTop + 1);
-                        }
-                        else
-                        {
-                            Console.WriteLine();
-                            WriteItems(pinItems);
-                            pinEndTop = Console.CursorTop;
-
-                            if (pinEndTop == _maxTop)
-                            {
-                                var logLineWrapCount = GetLineWrapCount(logItems, beginLeft);
-                                _pinHeight = 1 + GetLineWrapCount(pinItems, beginLeft: 0);
-                                var shift = beginTop + logLineWrapCount + _pinHeight - _maxTop;
-                                _shiftTop += shift;
-                                beginTop -= shift;
-                                endTop = _maxTop - _pinHeight;
-                            }
-                            else
-                                _pinHeight = pinEndTop - endTop;
-
-                            Console.SetCursorPosition(endLeft, endTop);
-                        }
-
-                        Console.CursorVisible = _cursorVisible;
+                        Console.SetCursorPosition(endLeft, endTop);
                     }
 
-                    shiftTop = _shiftTop;
+                    Console.CursorVisible = _cursorVisible;
+                }
+
+                shiftTop = _shiftTop;
+            }
+        }
+
+        return (
+            new(left: beginLeft, top: beginTop, shiftTop: shiftTop),
+            new(left: endLeft, top: endTop, shiftTop: shiftTop)
+        );
+    }
+
+    #region Overloads
+
+    public static (XConsolePosition Begin, XConsolePosition End) Write(bool value) =>
+        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
+
+    public static (XConsolePosition Begin, XConsolePosition End) Write(char value) =>
+        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
+
+    public static (XConsolePosition Begin, XConsolePosition End) Write(char[]? buffer)
+    {
+        var value = buffer?.ToString();
+
+        if (string.IsNullOrEmpty(value))
+        {
+            var position = CursorPosition;
+            return (position, position);
+        }
+
+        return WriteBase(new[] { new XConsoleItem(value) }, isWriteLine: false);
+    }
+
+    public static (XConsolePosition Begin, XConsolePosition End) Write(char[] buffer, int index, int count)
+    {
+        var value = buffer.ToString()?.Substring(index, count);
+
+        if (string.IsNullOrEmpty(value))
+        {
+            var position = CursorPosition;
+            return (position, position);
+        }
+
+        return WriteBase(new[] { new XConsoleItem(value) }, isWriteLine: false);
+    }
+
+    public static (XConsolePosition Begin, XConsolePosition End) Write(decimal value) =>
+        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
+
+    public static (XConsolePosition Begin, XConsolePosition End) Write(double value) =>
+        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
+
+    public static (XConsolePosition Begin, XConsolePosition End) Write(int value) =>
+        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
+
+    public static (XConsolePosition Begin, XConsolePosition End) Write(long value) =>
+        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
+
+    public static (XConsolePosition Begin, XConsolePosition End) Write(object? value)
+    {
+        var valueStr = value?.ToString();
+
+        if (string.IsNullOrEmpty(valueStr))
+        {
+            var position = CursorPosition;
+            return (position, position);
+        }
+
+        return WriteBase(new[] { new XConsoleItem(valueStr) }, isWriteLine: false);
+    }
+
+    public static (XConsolePosition Begin, XConsolePosition End) Write(float value) =>
+        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
+
+    public static (XConsolePosition Begin, XConsolePosition End) Write(
+        string format, object? arg0)
+    {
+        if (string.IsNullOrEmpty(format))
+        {
+            var position = CursorPosition;
+            return (position, position);
+        }
+
+        return WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0)) }, isWriteLine: false);
+    }
+
+    public static (XConsolePosition Begin, XConsolePosition End) Write(
+        string format, object? arg0, object? arg1)
+    {
+        if (string.IsNullOrEmpty(format))
+        {
+            var position = CursorPosition;
+            return (position, position);
+        }
+
+        return WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0, arg1)) }, isWriteLine: false);
+    }
+
+    public static (XConsolePosition Begin, XConsolePosition End) Write(
+        string format, object? arg0, object? arg1, object? arg2)
+    {
+        if (string.IsNullOrEmpty(format))
+        {
+            var position = CursorPosition;
+            return (position, position);
+        }
+
+        return WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0, arg1, arg2)) }, isWriteLine: false);
+    }
+
+    public static (XConsolePosition Begin, XConsolePosition End) Write(
+        string format, params object?[]? arg)
+    {
+        if (string.IsNullOrEmpty(format))
+        {
+            var position = CursorPosition;
+            return (position, position);
+        }
+
+        return WriteBase(
+            new[] { XConsoleItem.Parse(string.Format(format, arg ?? Array.Empty<object?>())) },
+            isWriteLine: false);
+    }
+
+    public static (XConsolePosition Begin, XConsolePosition End) Write(uint value) =>
+        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
+
+    public static (XConsolePosition Begin, XConsolePosition End) Write(ulong value) =>
+        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
+
+    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(bool value) =>
+        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
+
+    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(char value) =>
+        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
+
+    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(char[]? buffer)
+    {
+        var value = buffer?.ToString();
+
+        if (string.IsNullOrEmpty(value))
+            return WriteLine();
+
+        return WriteBase(new[] { new XConsoleItem(value) }, isWriteLine: true);
+    }
+
+    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(char[] buffer, int index, int count)
+    {
+        var value = buffer.ToString()?.Substring(index, count);
+
+        if (string.IsNullOrEmpty(value))
+            return WriteLine();
+
+        return WriteBase(new[] { new XConsoleItem(value) }, isWriteLine: true);
+    }
+
+    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(decimal value) =>
+        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
+
+    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(double value) =>
+        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
+
+    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(int value) =>
+        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
+
+    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(long value) =>
+        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
+
+    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(object? value)
+    {
+        var valueStr = value?.ToString();
+
+        if (string.IsNullOrEmpty(valueStr))
+            return WriteLine();
+
+        return WriteBase(new[] { new XConsoleItem(valueStr) }, isWriteLine: true);
+    }
+
+    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(float value) =>
+        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
+
+    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(
+        string format, object? arg0)
+    {
+        if (string.IsNullOrEmpty(format))
+            return WriteLine();
+
+        return WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0)) }, isWriteLine: true);
+    }
+
+    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(
+        string format, object? arg0, object? arg1)
+    {
+        if (string.IsNullOrEmpty(format))
+            return WriteLine();
+
+        return WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0, arg1)) }, isWriteLine: true);
+    }
+
+    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(
+        string format, object? arg0, object? arg1, object? arg2)
+    {
+        if (string.IsNullOrEmpty(format))
+            return WriteLine();
+
+        return WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0, arg1, arg2)) }, isWriteLine: true);
+    }
+
+    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(
+        string format, params object?[]? arg)
+    {
+        if (string.IsNullOrEmpty(format))
+            return WriteLine();
+
+        return WriteBase(
+            new[] { XConsoleItem.Parse(string.Format(format, arg ?? Array.Empty<object?>())) },
+            isWriteLine: true);
+    }
+
+    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(uint value) =>
+        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
+
+    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(ulong value) =>
+        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
+
+    #endregion
+
+    #endregion
+
+    #region Private utils
+
+    private static void WriteItems(IReadOnlyList<XConsoleItem> items)
+    {
+        if (_coloringEnabled)
+        {
+            foreach (var item in items)
+            {
+                if (item.BackColor == XConsoleItem.NoColor)
+                {
+                    if (item.ForeColor == XConsoleItem.NoColor)
+                    {
+                        Console.Write(item.Value);
+                    }
+                    else
+                    {
+                        var origForeColor = Console.ForegroundColor;
+                        Console.ForegroundColor = item.ForeColor;
+                        Console.Write(item.Value);
+                        Console.ForegroundColor = origForeColor;
+                    }
+                }
+                else
+                {
+                    if (item.ForeColor == XConsoleItem.NoColor)
+                    {
+                        var origBackColor = Console.BackgroundColor;
+                        Console.BackgroundColor = item.BackColor;
+                        Console.Write(item.Value);
+                        Console.BackgroundColor = origBackColor;
+                    }
+                    else
+                    {
+                        var origBackColor = Console.BackgroundColor;
+                        var origForeColor = Console.ForegroundColor;
+                        Console.BackgroundColor = item.BackColor;
+                        Console.ForegroundColor = item.ForeColor;
+                        Console.Write(item.Value);
+                        Console.BackgroundColor = origBackColor;
+                        Console.ForegroundColor = origForeColor;
+                    }
                 }
             }
-
-            return (
-                new(left: beginLeft, top: beginTop, shiftTop: shiftTop),
-                new(left: endLeft, top: endTop, shiftTop: shiftTop)
-            );
         }
+        else
+            foreach (var item in items)
+                Console.Write(item.Value);
+    }
 
-        #region Overloads
+    private static int GetLineWrapCount(IReadOnlyList<XConsoleItem> items, int beginLeft)
+    {
+        var lineWrapCount = 0;
+        var left = beginLeft;
+        var bufferWidth = Console.BufferWidth;
+        string chars;
+        int charCount, charIndex;
+        char chr;
 
-        public static (XConsolePosition Begin, XConsolePosition End) Write(bool value) =>
-            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
-
-        public static (XConsolePosition Begin, XConsolePosition End) Write(char value) =>
-            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
-
-        public static (XConsolePosition Begin, XConsolePosition End) Write(char[]? buffer)
+        for (var itemIndex = 0; itemIndex < items.Count; itemIndex++)
         {
-            var value = buffer?.ToString();
+            chars = items[itemIndex].Value;
+            charCount = chars.Length;
 
-            if (string.IsNullOrEmpty(value))
+            for (charIndex = 0; charIndex < charCount; charIndex++)
             {
-                var position = CursorPosition;
-                return (position, position);
+                chr = chars[charIndex];
+
+                if (chr >= 32)
+                    left++;
+                else
+                    switch (chr)
+                    {
+                        case '\n':
+                            left = 0;
+                            lineWrapCount++;
+                            continue;
+
+                        case '\r':
+                            left = 0;
+                            continue;
+
+                        case '\t':
+                            left = (left + 8) / 8 * 8;
+                            break;
+
+                        case '\b':
+
+                            if (left > 0)
+                                left--;
+
+                            continue;
+
+                        default:
+                            continue;
+                    }
+
+                if (left >= bufferWidth)
+                {
+                    lineWrapCount++;
+                    left -= bufferWidth;
+                }
             }
-
-            return WriteBase(new[] { new XConsoleItem(value) }, isWriteLine: false);
         }
 
-        public static (XConsolePosition Begin, XConsolePosition End) Write(char[] buffer, int index, int count)
+        return lineWrapCount;
+    }
+
+    #endregion
+
+    #region Remaining API
+
+    public static ConsoleColor BackgroundColor
+    {
+        get
         {
-            var value = buffer.ToString()?.Substring(index, count);
-
-            if (string.IsNullOrEmpty(value))
-            {
-                var position = CursorPosition;
-                return (position, position);
-            }
-
-            return WriteBase(new[] { new XConsoleItem(value) }, isWriteLine: false);
+            lock (_syncLock)
+                return Console.BackgroundColor;
         }
-
-        public static (XConsolePosition Begin, XConsolePosition End) Write(decimal value) =>
-            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
-
-        public static (XConsolePosition Begin, XConsolePosition End) Write(double value) =>
-            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
-
-        public static (XConsolePosition Begin, XConsolePosition End) Write(int value) =>
-            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
-
-        public static (XConsolePosition Begin, XConsolePosition End) Write(long value) =>
-            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
-
-        public static (XConsolePosition Begin, XConsolePosition End) Write(object? value)
-        {
-            var valueStr = value?.ToString();
-
-            if (string.IsNullOrEmpty(valueStr))
-            {
-                var position = CursorPosition;
-                return (position, position);
-            }
-
-            return WriteBase(new[] { new XConsoleItem(valueStr) }, isWriteLine: false);
-        }
-
-        public static (XConsolePosition Begin, XConsolePosition End) Write(float value) =>
-            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
-
-        public static (XConsolePosition Begin, XConsolePosition End) Write(
-            string format, object? arg0)
-        {
-            if (string.IsNullOrEmpty(format))
-            {
-                var position = CursorPosition;
-                return (position, position);
-            }
-
-            return WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0)) }, isWriteLine: false);
-        }
-
-        public static (XConsolePosition Begin, XConsolePosition End) Write(
-            string format, object? arg0, object? arg1)
-        {
-            if (string.IsNullOrEmpty(format))
-            {
-                var position = CursorPosition;
-                return (position, position);
-            }
-
-            return WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0, arg1)) }, isWriteLine: false);
-        }
-
-        public static (XConsolePosition Begin, XConsolePosition End) Write(
-            string format, object? arg0, object? arg1, object? arg2)
-        {
-            if (string.IsNullOrEmpty(format))
-            {
-                var position = CursorPosition;
-                return (position, position);
-            }
-
-            return WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0, arg1, arg2)) }, isWriteLine: false);
-        }
-
-        public static (XConsolePosition Begin, XConsolePosition End) Write(
-            string format, params object?[]? arg)
-        {
-            if (string.IsNullOrEmpty(format))
-            {
-                var position = CursorPosition;
-                return (position, position);
-            }
-
-            return WriteBase(
-                new[] { XConsoleItem.Parse(string.Format(format, arg ?? Array.Empty<object?>())) },
-                isWriteLine: false);
-        }
-
-        public static (XConsolePosition Begin, XConsolePosition End) Write(uint value) =>
-            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
-
-        public static (XConsolePosition Begin, XConsolePosition End) Write(ulong value) =>
-            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
-
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(bool value) =>
-            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
-
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(char value) =>
-            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
-
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(char[]? buffer)
-        {
-            var value = buffer?.ToString();
-
-            if (string.IsNullOrEmpty(value))
-                return WriteLine();
-
-            return WriteBase(new[] { new XConsoleItem(value) }, isWriteLine: true);
-        }
-
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(char[] buffer, int index, int count)
-        {
-            var value = buffer.ToString()?.Substring(index, count);
-
-            if (string.IsNullOrEmpty(value))
-                return WriteLine();
-
-            return WriteBase(new[] { new XConsoleItem(value) }, isWriteLine: true);
-        }
-
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(decimal value) =>
-            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
-
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(double value) =>
-            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
-
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(int value) =>
-            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
-
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(long value) =>
-            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
-
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(object? value)
-        {
-            var valueStr = value?.ToString();
-
-            if (string.IsNullOrEmpty(valueStr))
-                return WriteLine();
-
-            return WriteBase(new[] { new XConsoleItem(valueStr) }, isWriteLine: true);
-        }
-
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(float value) =>
-            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
-
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(
-            string format, object? arg0)
-        {
-            if (string.IsNullOrEmpty(format))
-                return WriteLine();
-
-            return WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0)) }, isWriteLine: true);
-        }
-
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(
-            string format, object? arg0, object? arg1)
-        {
-            if (string.IsNullOrEmpty(format))
-                return WriteLine();
-
-            return WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0, arg1)) }, isWriteLine: true);
-        }
-
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(
-            string format, object? arg0, object? arg1, object? arg2)
-        {
-            if (string.IsNullOrEmpty(format))
-                return WriteLine();
-
-            return WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0, arg1, arg2)) }, isWriteLine: true);
-        }
-
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(
-            string format, params object?[]? arg)
-        {
-            if (string.IsNullOrEmpty(format))
-                return WriteLine();
-
-            return WriteBase(
-                new[] { XConsoleItem.Parse(string.Format(format, arg ?? Array.Empty<object?>())) },
-                isWriteLine: true);
-        }
-
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(uint value) =>
-            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
-
-        public static (XConsolePosition Begin, XConsolePosition End) WriteLine(ulong value) =>
-            WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
-
-        #endregion
-
-        #endregion
-
-        #region Private utils
-
-        private static void WriteItems(IReadOnlyList<XConsoleItem> items)
+        set
         {
             if (_coloringEnabled)
-            {
-                foreach (var item in items)
-                {
-                    if (item.BackColor == XConsoleItem.NoColor)
-                    {
-                        if (item.ForeColor == XConsoleItem.NoColor)
-                        {
-                            Console.Write(item.Value);
-                        }
-                        else
-                        {
-                            var origForeColor = Console.ForegroundColor;
-                            Console.ForegroundColor = item.ForeColor;
-                            Console.Write(item.Value);
-                            Console.ForegroundColor = origForeColor;
-                        }
-                    }
-                    else
-                    {
-                        if (item.ForeColor == XConsoleItem.NoColor)
-                        {
-                            var origBackColor = Console.BackgroundColor;
-                            Console.BackgroundColor = item.BackColor;
-                            Console.Write(item.Value);
-                            Console.BackgroundColor = origBackColor;
-                        }
-                        else
-                        {
-                            var origBackColor = Console.BackgroundColor;
-                            var origForeColor = Console.ForegroundColor;
-                            Console.BackgroundColor = item.BackColor;
-                            Console.ForegroundColor = item.ForeColor;
-                            Console.Write(item.Value);
-                            Console.BackgroundColor = origBackColor;
-                            Console.ForegroundColor = origForeColor;
-                        }
-                    }
-                }
-            }
-            else
-                foreach (var item in items)
-                    Console.Write(item.Value);
-        }
-
-        private static int GetLineWrapCount(IReadOnlyList<XConsoleItem> items, int beginLeft)
-        {
-            var lineWrapCount = 0;
-            var left = beginLeft;
-            var bufferWidth = Console.BufferWidth;
-            string chars;
-            int charCount, charIndex;
-            char chr;
-
-            for (var itemIndex = 0; itemIndex < items.Count; itemIndex++)
-            {
-                chars = items[itemIndex].Value;
-                charCount = chars.Length;
-
-                for (charIndex = 0; charIndex < charCount; charIndex++)
-                {
-                    chr = chars[charIndex];
-
-                    if (chr >= 32)
-                        left++;
-                    else
-                        switch (chr)
-                        {
-                            case '\n':
-                                left = 0;
-                                lineWrapCount++;
-                                continue;
-
-                            case '\r':
-                                left = 0;
-                                continue;
-
-                            case '\t':
-                                left = (left + 8) / 8 * 8;
-                                break;
-
-                            case '\b':
-
-                                if (left > 0)
-                                    left--;
-
-                                continue;
-
-                            default:
-                                continue;
-                        }
-
-                    if (left >= bufferWidth)
-                    {
-                        lineWrapCount++;
-                        left -= bufferWidth;
-                    }
-                }
-            }
-
-            return lineWrapCount;
-        }
-
-        #endregion
-
-        #region Remaining API
-
-        public static ConsoleColor BackgroundColor
-        {
-            get
-            {
                 lock (_syncLock)
-                    return Console.BackgroundColor;
-            }
-            set
-            {
-                if (_coloringEnabled)
-                    lock (_syncLock)
-                        Console.BackgroundColor = value;
-            }
+                    Console.BackgroundColor = value;
         }
-
-        public static int BufferHeight
-        {
-            get
-            {
-                lock (_syncLock)
-                    return Console.BufferHeight;
-            }
-            set
-            {
-                lock (_syncLock)
-                {
-                    Console.BufferHeight = value;
-                    _maxTop = value - 1;
-                }
-            }
-        }
-
-        public static int BufferWidth
-        {
-            get
-            {
-                lock (_syncLock)
-                    return Console.BufferWidth;
-            }
-            set
-            {
-                lock (_syncLock)
-                    Console.BufferWidth = value;
-            }
-        }
-
-        public static bool CapsLock => Console.CapsLock;
-
-        public static int CursorLeft
-        {
-            get
-            {
-                lock (_syncLock)
-                    return Console.CursorLeft;
-            }
-            set
-            {
-                lock (_syncLock)
-                    Console.CursorLeft = value;
-            }
-        }
-
-        public static int CursorSize
-        {
-            get => Console.CursorSize;
-            set => Console.CursorSize = value;
-        }
-
-        public static int CursorTop
-        {
-            get
-            {
-                lock (_syncLock)
-                    return Console.CursorTop;
-            }
-            set
-            {
-                lock (_syncLock)
-                    Console.CursorTop = value;
-            }
-        }
-
-        public static bool CursorVisible
-        {
-            get
-            {
-                lock (_syncLock)
-                    return Console.CursorVisible;
-            }
-            set
-            {
-                lock (_syncLock)
-                    Console.CursorVisible = _cursorVisible = value;
-            }
-        }
-
-        public static TextWriter Error => Console.Error;
-
-        public static ConsoleColor ForegroundColor
-        {
-            get
-            {
-                lock (_syncLock)
-                    return Console.ForegroundColor;
-            }
-            set
-            {
-                if (_coloringEnabled)
-                    lock (_syncLock)
-                        Console.ForegroundColor = value;
-            }
-        }
-
-        public static TextReader In => Console.In;
-
-        public static Encoding InputEncoding
-        {
-            get
-            {
-                lock (_syncLock)
-                    return Console.InputEncoding;
-            }
-            set
-            {
-                lock (_syncLock)
-                    Console.InputEncoding = value;
-            }
-        }
-
-        public static bool IsErrorRedirected => Console.IsErrorRedirected;
-
-        public static bool IsInputRedirected => Console.IsInputRedirected;
-
-        public static bool IsOutputRedirected => Console.IsOutputRedirected;
-
-        public static bool KeyAvailable => Console.KeyAvailable;
-
-        public static int LargestWindowHeight => Console.LargestWindowHeight;
-
-        public static int LargestWindowWidth => Console.LargestWindowWidth;
-
-        public static bool NumberLock => Console.NumberLock;
-
-        public static TextWriter Out => Console.Out;
-
-        public static Encoding OutputEncoding
-        {
-            get
-            {
-                lock (_syncLock)
-                    return Console.OutputEncoding;
-            }
-            set
-            {
-                lock (_syncLock)
-                    Console.OutputEncoding = value;
-            }
-        }
-
-        public static string Title
-        {
-            get => Console.Title;
-            set => Console.Title = value;
-        }
-
-        public static bool TreatControlCAsInput
-        {
-            get => Console.TreatControlCAsInput;
-            set => Console.TreatControlCAsInput = value;
-        }
-
-        public static int WindowHeight
-        {
-            get => Console.WindowHeight;
-            set => Console.WindowHeight = value;
-        }
-
-        public static int WindowLeft
-        {
-            get => Console.WindowLeft;
-            set => Console.WindowLeft = value;
-        }
-
-        public static int WindowTop
-        {
-            get => Console.WindowTop;
-            set => Console.WindowTop = value;
-        }
-
-        public static int WindowWidth
-        {
-            get => Console.WindowWidth;
-            set => Console.WindowWidth = value;
-        }
-
-        public static event ConsoleCancelEventHandler? CancelKeyPress
-        {
-            //[System.Runtime.CompilerServices.NullableContext(2)]
-            add => Console.CancelKeyPress += value;
-            //[System.Runtime.CompilerServices.NullableContext(2)]
-            remove => Console.CancelKeyPress -= value;
-        }
-
-        public static void Beep() => Console.Beep();
-
-        public static void Beep(int frequency, int duration) => Console.Beep(frequency: frequency, duration: duration);
-
-        public static void Clear()
-        {
-            lock (_syncLock)
-                Console.Clear();
-        }
-
-        public static (int Left, int Top) GetCursorPosition()
-        {
-            lock (_syncLock)
-#if NET
-                return Console.GetCursorPosition();
-#else
-                return (Console.CursorLeft, Console.CursorTop);
-#endif
-        }
-
-        public static void MoveBufferArea(
-            int sourceLeft, int sourceTop, int sourceWidth, int sourceHeight, int targetLeft, int targetTop)
-        {
-            lock (_syncLock)
-                Console.MoveBufferArea(
-                    sourceLeft: sourceLeft, sourceTop: sourceTop,
-                    sourceWidth: sourceWidth, sourceHeight: sourceHeight,
-                    targetLeft: targetLeft, targetTop: targetTop);
-        }
-
-        public static void MoveBufferArea(
-            int sourceLeft, int sourceTop, int sourceWidth, int sourceHeight, int targetLeft, int targetTop,
-            char sourceChar, ConsoleColor sourceForeColor, ConsoleColor sourceBackColor)
-        {
-            lock (_syncLock)
-                Console.MoveBufferArea(
-                    sourceLeft: sourceLeft, sourceTop: sourceTop,
-                    sourceWidth: sourceWidth, sourceHeight: sourceHeight,
-                    targetLeft: targetLeft, targetTop: targetTop,
-                    sourceChar: sourceChar, sourceForeColor: sourceForeColor, sourceBackColor: sourceBackColor);
-        }
-
-        public static Stream OpenStandardError() => Console.OpenStandardError();
-
-#if !NETSTANDARD1_3
-        public static Stream OpenStandardError(int bufferSize) => Console.OpenStandardError(bufferSize: bufferSize);
-#endif
-
-        public static Stream OpenStandardInput() => Console.OpenStandardInput();
-
-#if !NETSTANDARD1_3
-        public static Stream OpenStandardInput(int bufferSize) => Console.OpenStandardInput(bufferSize: bufferSize);
-#endif
-
-        public static Stream OpenStandardOutput() => Console.OpenStandardOutput();
-
-#if !NETSTANDARD1_3
-        public static Stream OpenStandardOutput(int bufferSize) => Console.OpenStandardOutput(bufferSize: bufferSize);
-#endif
-
-        public static int Read()
-        {
-            lock (_syncLock)
-                return Console.Read();
-        }
-
-        public static ConsoleKeyInfo ReadKey()
-        {
-            lock (_syncLock)
-                return Console.ReadKey();
-        }
-
-        public static ConsoleKeyInfo ReadKey(bool intercept)
-        {
-            lock (_syncLock)
-                return Console.ReadKey(intercept: intercept);
-        }
-
-        public static void ResetColor()
-        {
-            lock (_syncLock)
-                Console.ResetColor();
-        }
-
-        public static void SetBufferSize(int width, int height)
-        {
-            lock (_syncLock)
-                Console.SetBufferSize(width: width, height: height);
-        }
-
-        public static void SetCursorPosition(int left, int top)
-        {
-            lock (_syncLock)
-                Console.SetCursorPosition(left: left, top: top);
-        }
-
-        public static void SetError(TextWriter newError) => Console.SetError(newError: newError);
-
-        public static void SetIn(TextReader newIn) => Console.SetIn(newIn: newIn);
-
-        public static void SetOut(TextWriter newOut) => Console.SetOut(newOut: newOut);
-
-        public static void SetWindowPosition(int left, int top) => Console.SetWindowPosition(left: left, top: top);
-
-        public static void SetWindowSize(int width, int height)
-        {
-            lock (_syncLock)
-                Console.SetWindowSize(width: width, height: height);
-        }
-
-        #endregion
     }
+
+    public static int BufferHeight
+    {
+        get
+        {
+            lock (_syncLock)
+                return Console.BufferHeight;
+        }
+        set
+        {
+            lock (_syncLock)
+            {
+                Console.BufferHeight = value;
+                _maxTop = value - 1;
+            }
+        }
+    }
+
+    public static int BufferWidth
+    {
+        get
+        {
+            lock (_syncLock)
+                return Console.BufferWidth;
+        }
+        set
+        {
+            lock (_syncLock)
+                Console.BufferWidth = value;
+        }
+    }
+
+    public static bool CapsLock => Console.CapsLock;
+
+    public static int CursorLeft
+    {
+        get
+        {
+            lock (_syncLock)
+                return Console.CursorLeft;
+        }
+        set
+        {
+            lock (_syncLock)
+                Console.CursorLeft = value;
+        }
+    }
+
+    public static int CursorSize
+    {
+        get => Console.CursorSize;
+        set => Console.CursorSize = value;
+    }
+
+    public static int CursorTop
+    {
+        get
+        {
+            lock (_syncLock)
+                return Console.CursorTop;
+        }
+        set
+        {
+            lock (_syncLock)
+                Console.CursorTop = value;
+        }
+    }
+
+    public static bool CursorVisible
+    {
+        get
+        {
+            lock (_syncLock)
+                return Console.CursorVisible;
+        }
+        set
+        {
+            lock (_syncLock)
+                Console.CursorVisible = _cursorVisible = value;
+        }
+    }
+
+    public static TextWriter Error => Console.Error;
+
+    public static ConsoleColor ForegroundColor
+    {
+        get
+        {
+            lock (_syncLock)
+                return Console.ForegroundColor;
+        }
+        set
+        {
+            if (_coloringEnabled)
+                lock (_syncLock)
+                    Console.ForegroundColor = value;
+        }
+    }
+
+    public static TextReader In => Console.In;
+
+    public static Encoding InputEncoding
+    {
+        get
+        {
+            lock (_syncLock)
+                return Console.InputEncoding;
+        }
+        set
+        {
+            lock (_syncLock)
+                Console.InputEncoding = value;
+        }
+    }
+
+    public static bool IsErrorRedirected => Console.IsErrorRedirected;
+
+    public static bool IsInputRedirected => Console.IsInputRedirected;
+
+    public static bool IsOutputRedirected => Console.IsOutputRedirected;
+
+    public static bool KeyAvailable => Console.KeyAvailable;
+
+    public static int LargestWindowHeight => Console.LargestWindowHeight;
+
+    public static int LargestWindowWidth => Console.LargestWindowWidth;
+
+    public static bool NumberLock => Console.NumberLock;
+
+    public static TextWriter Out => Console.Out;
+
+    public static Encoding OutputEncoding
+    {
+        get
+        {
+            lock (_syncLock)
+                return Console.OutputEncoding;
+        }
+        set
+        {
+            lock (_syncLock)
+                Console.OutputEncoding = value;
+        }
+    }
+
+    public static string Title
+    {
+        get => Console.Title;
+        set => Console.Title = value;
+    }
+
+    public static bool TreatControlCAsInput
+    {
+        get => Console.TreatControlCAsInput;
+        set => Console.TreatControlCAsInput = value;
+    }
+
+    public static int WindowHeight
+    {
+        get => Console.WindowHeight;
+        set => Console.WindowHeight = value;
+    }
+
+    public static int WindowLeft
+    {
+        get => Console.WindowLeft;
+        set => Console.WindowLeft = value;
+    }
+
+    public static int WindowTop
+    {
+        get => Console.WindowTop;
+        set => Console.WindowTop = value;
+    }
+
+    public static int WindowWidth
+    {
+        get => Console.WindowWidth;
+        set => Console.WindowWidth = value;
+    }
+
+    public static event ConsoleCancelEventHandler? CancelKeyPress
+    {
+        //[System.Runtime.CompilerServices.NullableContext(2)]
+        add => Console.CancelKeyPress += value;
+        //[System.Runtime.CompilerServices.NullableContext(2)]
+        remove => Console.CancelKeyPress -= value;
+    }
+
+    public static void Beep() => Console.Beep();
+
+    public static void Beep(int frequency, int duration) => Console.Beep(frequency: frequency, duration: duration);
+
+    public static void Clear()
+    {
+        lock (_syncLock)
+            Console.Clear();
+    }
+
+    public static (int Left, int Top) GetCursorPosition()
+    {
+        lock (_syncLock)
+#if NET
+            return Console.GetCursorPosition();
+#else
+            return (Console.CursorLeft, Console.CursorTop);
+#endif
+    }
+
+    public static void MoveBufferArea(
+        int sourceLeft, int sourceTop, int sourceWidth, int sourceHeight, int targetLeft, int targetTop)
+    {
+        lock (_syncLock)
+            Console.MoveBufferArea(
+                sourceLeft: sourceLeft, sourceTop: sourceTop,
+                sourceWidth: sourceWidth, sourceHeight: sourceHeight,
+                targetLeft: targetLeft, targetTop: targetTop);
+    }
+
+    public static void MoveBufferArea(
+        int sourceLeft, int sourceTop, int sourceWidth, int sourceHeight, int targetLeft, int targetTop,
+        char sourceChar, ConsoleColor sourceForeColor, ConsoleColor sourceBackColor)
+    {
+        lock (_syncLock)
+            Console.MoveBufferArea(
+                sourceLeft: sourceLeft, sourceTop: sourceTop,
+                sourceWidth: sourceWidth, sourceHeight: sourceHeight,
+                targetLeft: targetLeft, targetTop: targetTop,
+                sourceChar: sourceChar, sourceForeColor: sourceForeColor, sourceBackColor: sourceBackColor);
+    }
+
+    public static Stream OpenStandardError() => Console.OpenStandardError();
+
+#if !NETSTANDARD1_3
+    public static Stream OpenStandardError(int bufferSize) => Console.OpenStandardError(bufferSize: bufferSize);
+#endif
+
+    public static Stream OpenStandardInput() => Console.OpenStandardInput();
+
+#if !NETSTANDARD1_3
+    public static Stream OpenStandardInput(int bufferSize) => Console.OpenStandardInput(bufferSize: bufferSize);
+#endif
+
+    public static Stream OpenStandardOutput() => Console.OpenStandardOutput();
+
+#if !NETSTANDARD1_3
+    public static Stream OpenStandardOutput(int bufferSize) => Console.OpenStandardOutput(bufferSize: bufferSize);
+#endif
+
+    public static int Read()
+    {
+        lock (_syncLock)
+            return Console.Read();
+    }
+
+    public static ConsoleKeyInfo ReadKey()
+    {
+        lock (_syncLock)
+            return Console.ReadKey();
+    }
+
+    public static ConsoleKeyInfo ReadKey(bool intercept)
+    {
+        lock (_syncLock)
+            return Console.ReadKey(intercept: intercept);
+    }
+
+    public static void ResetColor()
+    {
+        lock (_syncLock)
+            Console.ResetColor();
+    }
+
+    public static void SetBufferSize(int width, int height)
+    {
+        lock (_syncLock)
+            Console.SetBufferSize(width: width, height: height);
+    }
+
+    public static void SetCursorPosition(int left, int top)
+    {
+        lock (_syncLock)
+            Console.SetCursorPosition(left: left, top: top);
+    }
+
+    public static void SetError(TextWriter newError) => Console.SetError(newError: newError);
+
+    public static void SetIn(TextReader newIn) => Console.SetIn(newIn: newIn);
+
+    public static void SetOut(TextWriter newOut) => Console.SetOut(newOut: newOut);
+
+    public static void SetWindowPosition(int left, int top) => Console.SetWindowPosition(left: left, top: top);
+
+    public static void SetWindowSize(int width, int height)
+    {
+        lock (_syncLock)
+            Console.SetWindowSize(width: width, height: height);
+    }
+
+    #endregion
 }

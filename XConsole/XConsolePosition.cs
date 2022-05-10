@@ -1,58 +1,57 @@
-﻿using System;
+﻿namespace Chubrik.XConsole;
 
-namespace Chubrik.XConsole
-{
+using System;
+
 #if NET
-    using System.Runtime.Versioning;
-    [SupportedOSPlatform("windows")]
-    [UnsupportedOSPlatform("android")]
-    [UnsupportedOSPlatform("browser")]
-    [UnsupportedOSPlatform("ios")]
-    [UnsupportedOSPlatform("tvos")]
+using System.Runtime.Versioning;
+[SupportedOSPlatform("windows")]
+[UnsupportedOSPlatform("android")]
+[UnsupportedOSPlatform("browser")]
+[UnsupportedOSPlatform("ios")]
+[UnsupportedOSPlatform("tvos")]
 #endif
-    public struct XConsolePosition
+public struct XConsolePosition
+{
+    public readonly int Left;
+    public readonly int InitialTop;
+    internal readonly long ShiftTop;
+
+    public XConsolePosition(int left, int top)
     {
-        public readonly int Left;
-        public readonly int InitialTop;
-        internal readonly long ShiftTop;
+        Left = left;
+        InitialTop = top;
+        ShiftTop = XConsole.ShiftTop;
+    }
 
-        public XConsolePosition(int left, int top)
-        {
-            Left = left;
-            InitialTop = top;
-            ShiftTop = XConsole.ShiftTop;
-        }
+    internal XConsolePosition(int left, int top, long shiftTop)
+    {
+        Left = left;
+        InitialTop = top;
+        ShiftTop = shiftTop;
+    }
 
-        internal XConsolePosition(int left, int top, long shiftTop)
-        {
-            Left = left;
-            InitialTop = top;
-            ShiftTop = shiftTop;
-        }
+    public int? ActualTop => XConsole.GetPositionActualTop(this);
 
-        public int? ActualTop => XConsole.GetPositionActualTop(this);
+    [Obsolete("At least one argument should be specified", error: true)]
+    public void Write() => throw new InvalidOperationException();
 
-        [Obsolete("At least one argument should be specified", error: true)]
-        public void Write() => throw new InvalidOperationException();
+    public XConsolePosition Write(params string?[] values)
+    {
+        return XConsole.WriteToPosition(this, values);
+    }
 
-        public XConsolePosition Write(params string?[] values)
+    [Obsolete("At least one argument should be specified", error: true)]
+    public void TryWrite() => throw new InvalidOperationException();
+
+    public XConsolePosition? TryWrite(params string?[] values)
+    {
+        try
         {
             return XConsole.WriteToPosition(this, values);
         }
-
-        [Obsolete("At least one argument should be specified", error: true)]
-        public void TryWrite() => throw new InvalidOperationException();
-
-        public XConsolePosition? TryWrite(params string?[] values)
+        catch (ArgumentOutOfRangeException)
         {
-            try
-            {
-                return XConsole.WriteToPosition(this, values);
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                return null;
-            }
+            return null;
         }
     }
 }
