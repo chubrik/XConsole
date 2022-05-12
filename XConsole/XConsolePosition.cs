@@ -10,11 +10,11 @@ using System.Runtime.Versioning;
 [UnsupportedOSPlatform("ios")]
 [UnsupportedOSPlatform("tvos")]
 #endif
-public struct XConsolePosition
+public readonly struct XConsolePosition
 {
-    public readonly int Left;
-    public readonly int InitialTop;
-    internal readonly long ShiftTop;
+    public int Left { get; }
+    public int InitialTop { get; }
+    internal long ShiftTop { get; }
 
     public XConsolePosition(int left, int top)
     {

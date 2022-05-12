@@ -3,13 +3,13 @@
 using System;
 using System.Diagnostics;
 
-internal struct XConsoleItem
+internal readonly struct XConsoleItem
 {
     public const ConsoleColor NoColor = (ConsoleColor)(-1);
 
-    public readonly string Value;
-    public readonly ConsoleColor BackColor;
-    public readonly ConsoleColor ForeColor;
+    public string Value { get; }
+    public ConsoleColor BackColor { get; }
+    public ConsoleColor ForeColor { get; }
 
     private XConsoleItem(string value, ConsoleColor backColor, ConsoleColor foreColor)
     {
