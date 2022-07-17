@@ -135,7 +135,7 @@ public static class XConsole
 #endif
                 Console.CursorVisible = false;
                 Console.Write(pinClear);
-                Console.SetCursorPosition(0, origTop + 1);
+                Console.SetCursorPosition(0, origTop);
             }
             else
             {
@@ -145,9 +145,9 @@ public static class XConsole
                 (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
                 Console.CursorVisible = false;
-                Console.WriteLine();
             }
 
+            Console.WriteLine();
             WriteItems(pinItems);
             pinEndTop = Console.CursorTop;
 
@@ -548,7 +548,8 @@ public static class XConsole
                     else
                         _pinHeight = pinEndTop - (origTop + 1);
 
-                    Console.SetCursorPosition(0, origTop + 1);
+                    Console.SetCursorPosition(0, origTop);
+                    Console.WriteLine();
                     Console.CursorVisible = _cursorVisible;
                 }
 
@@ -743,7 +744,8 @@ public static class XConsole
                         else
                             _pinHeight = pinEndTop - (endTop + 1);
 
-                        Console.SetCursorPosition(0, endTop + 1);
+                        Console.SetCursorPosition(0, endTop);
+                        Console.WriteLine();
                     }
                     else
                     {
