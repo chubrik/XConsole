@@ -34,9 +34,22 @@ public static class Program
         //
 
         Console.Write("W`Continue?", " [y/n]: ");
-        var yes = Console.ReadKey(true).Key == ConsoleKey.Y;
-        Console.WriteLine(yes ? "G`Yes" : "R`No");
-        if (!yes) return;
+
+        while (true)
+        {
+            var key = Console.ReadKey(true).Key;
+
+            if (key == ConsoleKey.Y)
+            {
+                Console.WriteLine("G`Yes");
+                break;
+            }
+            else if (key == ConsoleKey.N || key == ConsoleKey.Escape)
+            {
+                Console.WriteLine("R`No");
+                return;
+            }
+        }
 
         //
         Console.WriteLine();
