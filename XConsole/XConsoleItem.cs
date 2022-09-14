@@ -38,7 +38,7 @@ internal readonly struct XConsoleItem
 
         if (value[1] == '`')
         {
-            if (char0 <= 121)
+            if (char0 <= 'y')
             {
                 var foreColor = (ConsoleColor)_colorMap[char0];
 
@@ -49,7 +49,7 @@ internal readonly struct XConsoleItem
             return new(value);
         }
 
-        if (value.Length > 2 && value[2] == '`' && char0 <= 121)
+        if (value.Length > 2 && value[2] == '`' && char0 <= 'y')
         {
             var backColor = (ConsoleColor)_colorMap[char0];
 
@@ -57,7 +57,7 @@ internal readonly struct XConsoleItem
             {
                 var char1 = value[1];
 
-                if (char1 <= 121)
+                if (char1 <= 'y')
                 {
                     var foreColor = (ConsoleColor)_colorMap[char1];
 

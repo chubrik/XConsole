@@ -16,6 +16,13 @@ public readonly struct XConsolePosition
     public int InitialTop { get; }
     internal long ShiftTop { get; }
 
+    internal XConsolePosition(int left, int top, long shiftTop)
+    {
+        Left = left;
+        InitialTop = top;
+        ShiftTop = shiftTop;
+    }
+
     public XConsolePosition(int left, int top)
     {
         Left = left;
@@ -23,12 +30,8 @@ public readonly struct XConsolePosition
         ShiftTop = XConsole.ShiftTop;
     }
 
-    internal XConsolePosition(int left, int top, long shiftTop)
-    {
-        Left = left;
-        InitialTop = top;
-        ShiftTop = shiftTop;
-    }
+    [Obsolete("Position arguments should be specified", error: true)]
+    public XConsolePosition() => throw new InvalidOperationException();
 
     public int? ActualTop => XConsole.GetPositionActualTop(this);
 

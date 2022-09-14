@@ -33,7 +33,7 @@ public static class Program
         Console.WriteLine();
         //
 
-        Console.Write("W`Continue?", " [y/n]: ");
+        Console.Write("W`Continue? [Y/n]: ");
 
         while (true)
         {
