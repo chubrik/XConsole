@@ -3,7 +3,7 @@
 using System;
 using System.Diagnostics;
 
-internal readonly struct XConsoleItem
+internal readonly struct ConsoleItem
 {
     public const ConsoleColor NoColor = (ConsoleColor)(-1);
 
@@ -11,21 +11,21 @@ internal readonly struct XConsoleItem
     public ConsoleColor BackColor { get; }
     public ConsoleColor ForeColor { get; }
 
-    private XConsoleItem(string value, ConsoleColor backColor, ConsoleColor foreColor)
+    private ConsoleItem(string value, ConsoleColor backColor, ConsoleColor foreColor)
     {
         Value = value;
         BackColor = backColor;
         ForeColor = foreColor;
     }
 
-    public XConsoleItem(string value)
+    public ConsoleItem(string value)
     {
         Value = value;
         BackColor = NoColor;
         ForeColor = NoColor;
     }
 
-    public static XConsoleItem Parse(string value)
+    public static ConsoleItem Parse(string value)
     {
         Debug.Assert(!string.IsNullOrEmpty(value));
         var char0 = value[0];

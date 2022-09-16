@@ -61,7 +61,7 @@ public static class XConsole
     private static Func<IReadOnlyList<string?>>? _getPinValues = null;
     private static int _pinHeight = 0;
 
-    [Obsolete("At least one argument should be specified", error: true)]
+    [Obsolete("At least one argument should be specified.", error: true)]
     public static void Pin() => throw new InvalidOperationException();
 
     public static void Pin(params string?[] values)
@@ -108,11 +108,11 @@ public static class XConsole
             : string.Empty;
 
         var pinValues = getPinValues();
-        var pinItems = new List<XConsoleItem>(pinValues.Count);
+        var pinItems = new List<ConsoleItem>(pinValues.Count);
 
         foreach (var pinValue in pinValues)
             if (!string.IsNullOrEmpty(pinValue))
-                pinItems.Add(XConsoleItem.Parse(pinValue));
+                pinItems.Add(ConsoleItem.Parse(pinValue));
 
         int pinHeight, origLeft, origTop, pinEndTop;
 
@@ -211,7 +211,7 @@ public static class XConsole
 
     #region Positioning
 
-    public static XConsolePosition CursorPosition
+    public static ConsolePosition CursorPosition
     {
         get
         {
@@ -242,7 +242,7 @@ public static class XConsole
         }
     }
 
-    internal static int? GetPositionActualTop(XConsolePosition position)
+    internal static int? GetPositionActualTop(ConsolePosition position)
     {
         long shiftTop;
         int bufferHeight;
@@ -257,16 +257,16 @@ public static class XConsole
         return actualTop >= 0 && actualTop < bufferHeight ? (int)actualTop : null;
     }
 
-    internal static XConsolePosition WriteToPosition(XConsolePosition position, string?[] values)
+    internal static ConsolePosition WriteToPosition(ConsolePosition position, string?[] values)
     {
         if (!_positioningEnabled)
             return new(0, 0, 0);
 
-        var items = new List<XConsoleItem>(values.Length);
+        var items = new List<ConsoleItem>(values.Length);
 
         foreach (var value in values)
             if (!string.IsNullOrEmpty(value))
-                items.Add(XConsoleItem.Parse(value));
+                items.Add(ConsoleItem.Parse(value));
 
         if (items.Count == 0)
             return position;
@@ -335,16 +335,16 @@ public static class XConsole
             return Console.ReadLine() ?? string.Empty;
     }
 
-    public static string ReadLine(XConsoleReadLineMode mode, char maskChar = '*')
+    public static string ReadLine(ConsoleReadLineMode mode, char maskChar = '*')
     {
         switch (mode)
         {
-            case XConsoleReadLineMode.Default:
+            case ConsoleReadLineMode.Default:
                 return ReadLine();
 
-            case XConsoleReadLineMode.Masked:
-            case XConsoleReadLineMode.Hidden:
-                var isMaskedMode = mode == XConsoleReadLineMode.Masked;
+            case ConsoleReadLineMode.Masked:
+            case ConsoleReadLineMode.Hidden:
+                var isMaskedMode = mode == ConsoleReadLineMode.Masked;
                 var text = string.Empty;
                 ConsoleKeyInfo keyInfo;
 
@@ -385,10 +385,10 @@ public static class XConsole
 
     #region Write, WriteLine
 
-    [Obsolete("At least one argument should be specified", error: true)]
+    [Obsolete("At least one argument should be specified.", error: true)]
     public static void Write() => throw new InvalidOperationException();
 
-    public static (XConsolePosition Begin, XConsolePosition End) Write(string? value)
+    public static (ConsolePosition Begin, ConsolePosition End) Write(string? value)
     {
         if (string.IsNullOrEmpty(value))
         {
@@ -396,16 +396,16 @@ public static class XConsole
             return (position, position);
         }
 
-        return WriteBase(new[] { XConsoleItem.Parse(value) }, isWriteLine: false);
+        return WriteBase(new[] { ConsoleItem.Parse(value) }, isWriteLine: false);
     }
 
-    public static (XConsolePosition Begin, XConsolePosition End) Write(params string?[] values)
+    public static (ConsolePosition Begin, ConsolePosition End) Write(params string?[] values)
     {
-        var items = new List<XConsoleItem>(values.Length);
+        var items = new List<ConsoleItem>(values.Length);
 
         foreach (var value in values)
             if (!string.IsNullOrEmpty(value))
-                items.Add(XConsoleItem.Parse(value));
+                items.Add(ConsoleItem.Parse(value));
 
         if (items.Count == 0)
         {
@@ -416,21 +416,21 @@ public static class XConsole
         return WriteBase(items, isWriteLine: false);
     }
 
-    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(string? value)
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(string? value)
     {
         if (string.IsNullOrEmpty(value))
             return WriteLine();
 
-        return WriteBase(new[] { XConsoleItem.Parse(value) }, isWriteLine: true);
+        return WriteBase(new[] { ConsoleItem.Parse(value) }, isWriteLine: true);
     }
 
-    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(params string?[] values)
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(params string?[] values)
     {
-        var items = new List<XConsoleItem>(values.Length);
+        var items = new List<ConsoleItem>(values.Length);
 
         foreach (var value in values)
             if (!string.IsNullOrEmpty(value))
-                items.Add(XConsoleItem.Parse(value));
+                items.Add(ConsoleItem.Parse(value));
 
         if (items.Count == 0)
             return WriteLine();
@@ -438,7 +438,7 @@ public static class XConsole
         return WriteBase(items, isWriteLine: true);
     }
 
-    public static (XConsolePosition Begin, XConsolePosition End) WriteLine()
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine()
     {
         if (!_positioningEnabled)
         {
@@ -481,11 +481,11 @@ public static class XConsole
                 : string.Empty;
 
             var pinValues = getPinValues();
-            var pinItems = new List<XConsoleItem>(pinValues.Count);
+            var pinItems = new List<ConsoleItem>(pinValues.Count);
 
             foreach (var pinValue in pinValues)
                 if (!string.IsNullOrEmpty(pinValue))
-                    pinItems.Add(XConsoleItem.Parse(pinValue));
+                    pinItems.Add(ConsoleItem.Parse(pinValue));
 
             int pinHeight, pinEndTop;
 
@@ -563,8 +563,8 @@ public static class XConsole
         );
     }
 
-    private static (XConsolePosition Begin, XConsolePosition End) WriteBase(
-        IReadOnlyList<XConsoleItem> logItems, bool isWriteLine)
+    private static (ConsolePosition Begin, ConsolePosition End) WriteBase(
+        IReadOnlyList<ConsoleItem> logItems, bool isWriteLine)
     {
         Debug.Assert(logItems.Count > 0);
 
@@ -640,11 +640,11 @@ public static class XConsole
                 : string.Empty;
 
             var pinValues = getPinValues();
-            var pinItems = new List<XConsoleItem>(pinValues.Count);
+            var pinItems = new List<ConsoleItem>(pinValues.Count);
 
             foreach (var pinValue in pinValues)
                 if (!string.IsNullOrEmpty(pinValue))
-                    pinItems.Add(XConsoleItem.Parse(pinValue));
+                    pinItems.Add(ConsoleItem.Parse(pinValue));
 
             int pinHeight, pinEndTop;
 
@@ -783,13 +783,13 @@ public static class XConsole
 
     #region Overloads
 
-    public static (XConsolePosition Begin, XConsolePosition End) Write(bool value) =>
-        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
+    public static (ConsolePosition Begin, ConsolePosition End) Write(bool value) =>
+        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
 
-    public static (XConsolePosition Begin, XConsolePosition End) Write(char value) =>
-        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
+    public static (ConsolePosition Begin, ConsolePosition End) Write(char value) =>
+        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
 
-    public static (XConsolePosition Begin, XConsolePosition End) Write(char[]? buffer)
+    public static (ConsolePosition Begin, ConsolePosition End) Write(char[]? buffer)
     {
         var value = buffer?.ToString();
 
@@ -799,10 +799,10 @@ public static class XConsole
             return (position, position);
         }
 
-        return WriteBase(new[] { new XConsoleItem(value) }, isWriteLine: false);
+        return WriteBase(new[] { new ConsoleItem(value) }, isWriteLine: false);
     }
 
-    public static (XConsolePosition Begin, XConsolePosition End) Write(char[] buffer, int index, int count)
+    public static (ConsolePosition Begin, ConsolePosition End) Write(char[] buffer, int index, int count)
     {
         var value = buffer.ToString()?.Substring(index, count);
 
@@ -812,22 +812,22 @@ public static class XConsole
             return (position, position);
         }
 
-        return WriteBase(new[] { new XConsoleItem(value) }, isWriteLine: false);
+        return WriteBase(new[] { new ConsoleItem(value) }, isWriteLine: false);
     }
 
-    public static (XConsolePosition Begin, XConsolePosition End) Write(decimal value) =>
-        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
+    public static (ConsolePosition Begin, ConsolePosition End) Write(decimal value) =>
+        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
 
-    public static (XConsolePosition Begin, XConsolePosition End) Write(double value) =>
-        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
+    public static (ConsolePosition Begin, ConsolePosition End) Write(double value) =>
+        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
 
-    public static (XConsolePosition Begin, XConsolePosition End) Write(int value) =>
-        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
+    public static (ConsolePosition Begin, ConsolePosition End) Write(int value) =>
+        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
 
-    public static (XConsolePosition Begin, XConsolePosition End) Write(long value) =>
-        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
+    public static (ConsolePosition Begin, ConsolePosition End) Write(long value) =>
+        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
 
-    public static (XConsolePosition Begin, XConsolePosition End) Write(object? value)
+    public static (ConsolePosition Begin, ConsolePosition End) Write(object? value)
     {
         var valueStr = value?.ToString();
 
@@ -837,13 +837,13 @@ public static class XConsole
             return (position, position);
         }
 
-        return WriteBase(new[] { new XConsoleItem(valueStr) }, isWriteLine: false);
+        return WriteBase(new[] { new ConsoleItem(valueStr) }, isWriteLine: false);
     }
 
-    public static (XConsolePosition Begin, XConsolePosition End) Write(float value) =>
-        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
+    public static (ConsolePosition Begin, ConsolePosition End) Write(float value) =>
+        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
 
-    public static (XConsolePosition Begin, XConsolePosition End) Write(
+    public static (ConsolePosition Begin, ConsolePosition End) Write(
         string format, object? arg0)
     {
         if (string.IsNullOrEmpty(format))
@@ -852,10 +852,10 @@ public static class XConsole
             return (position, position);
         }
 
-        return WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0)) }, isWriteLine: false);
+        return WriteBase(new[] { ConsoleItem.Parse(string.Format(format, arg0)) }, isWriteLine: false);
     }
 
-    public static (XConsolePosition Begin, XConsolePosition End) Write(
+    public static (ConsolePosition Begin, ConsolePosition End) Write(
         string format, object? arg0, object? arg1)
     {
         if (string.IsNullOrEmpty(format))
@@ -864,10 +864,10 @@ public static class XConsole
             return (position, position);
         }
 
-        return WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0, arg1)) }, isWriteLine: false);
+        return WriteBase(new[] { ConsoleItem.Parse(string.Format(format, arg0, arg1)) }, isWriteLine: false);
     }
 
-    public static (XConsolePosition Begin, XConsolePosition End) Write(
+    public static (ConsolePosition Begin, ConsolePosition End) Write(
         string format, object? arg0, object? arg1, object? arg2)
     {
         if (string.IsNullOrEmpty(format))
@@ -876,10 +876,10 @@ public static class XConsole
             return (position, position);
         }
 
-        return WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0, arg1, arg2)) }, isWriteLine: false);
+        return WriteBase(new[] { ConsoleItem.Parse(string.Format(format, arg0, arg1, arg2)) }, isWriteLine: false);
     }
 
-    public static (XConsolePosition Begin, XConsolePosition End) Write(
+    public static (ConsolePosition Begin, ConsolePosition End) Write(
         string format, params object?[]? arg)
     {
         if (string.IsNullOrEmpty(format))
@@ -889,110 +889,110 @@ public static class XConsole
         }
 
         return WriteBase(
-            new[] { XConsoleItem.Parse(string.Format(format, arg ?? Array.Empty<object?>())) },
+            new[] { ConsoleItem.Parse(string.Format(format, arg ?? Array.Empty<object?>())) },
             isWriteLine: false);
     }
 
-    public static (XConsolePosition Begin, XConsolePosition End) Write(uint value) =>
-        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
+    public static (ConsolePosition Begin, ConsolePosition End) Write(uint value) =>
+        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
 
-    public static (XConsolePosition Begin, XConsolePosition End) Write(ulong value) =>
-        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: false);
+    public static (ConsolePosition Begin, ConsolePosition End) Write(ulong value) =>
+        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
 
-    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(bool value) =>
-        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(bool value) =>
+        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
 
-    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(char value) =>
-        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(char value) =>
+        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
 
-    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(char[]? buffer)
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(char[]? buffer)
     {
         var value = buffer?.ToString();
 
         if (string.IsNullOrEmpty(value))
             return WriteLine();
 
-        return WriteBase(new[] { new XConsoleItem(value) }, isWriteLine: true);
+        return WriteBase(new[] { new ConsoleItem(value) }, isWriteLine: true);
     }
 
-    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(char[] buffer, int index, int count)
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(char[] buffer, int index, int count)
     {
         var value = buffer.ToString()?.Substring(index, count);
 
         if (string.IsNullOrEmpty(value))
             return WriteLine();
 
-        return WriteBase(new[] { new XConsoleItem(value) }, isWriteLine: true);
+        return WriteBase(new[] { new ConsoleItem(value) }, isWriteLine: true);
     }
 
-    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(decimal value) =>
-        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(decimal value) =>
+        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
 
-    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(double value) =>
-        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(double value) =>
+        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
 
-    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(int value) =>
-        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(int value) =>
+        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
 
-    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(long value) =>
-        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(long value) =>
+        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
 
-    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(object? value)
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(object? value)
     {
         var valueStr = value?.ToString();
 
         if (string.IsNullOrEmpty(valueStr))
             return WriteLine();
 
-        return WriteBase(new[] { new XConsoleItem(valueStr) }, isWriteLine: true);
+        return WriteBase(new[] { new ConsoleItem(valueStr) }, isWriteLine: true);
     }
 
-    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(float value) =>
-        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(float value) =>
+        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
 
-    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(
         string format, object? arg0)
     {
         if (string.IsNullOrEmpty(format))
             return WriteLine();
 
-        return WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0)) }, isWriteLine: true);
+        return WriteBase(new[] { ConsoleItem.Parse(string.Format(format, arg0)) }, isWriteLine: true);
     }
 
-    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(
         string format, object? arg0, object? arg1)
     {
         if (string.IsNullOrEmpty(format))
             return WriteLine();
 
-        return WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0, arg1)) }, isWriteLine: true);
+        return WriteBase(new[] { ConsoleItem.Parse(string.Format(format, arg0, arg1)) }, isWriteLine: true);
     }
 
-    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(
         string format, object? arg0, object? arg1, object? arg2)
     {
         if (string.IsNullOrEmpty(format))
             return WriteLine();
 
-        return WriteBase(new[] { XConsoleItem.Parse(string.Format(format, arg0, arg1, arg2)) }, isWriteLine: true);
+        return WriteBase(new[] { ConsoleItem.Parse(string.Format(format, arg0, arg1, arg2)) }, isWriteLine: true);
     }
 
-    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(
         string format, params object?[]? arg)
     {
         if (string.IsNullOrEmpty(format))
             return WriteLine();
 
         return WriteBase(
-            new[] { XConsoleItem.Parse(string.Format(format, arg ?? Array.Empty<object?>())) },
+            new[] { ConsoleItem.Parse(string.Format(format, arg ?? Array.Empty<object?>())) },
             isWriteLine: true);
     }
 
-    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(uint value) =>
-        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(uint value) =>
+        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
 
-    public static (XConsolePosition Begin, XConsolePosition End) WriteLine(ulong value) =>
-        WriteBase(new[] { new XConsoleItem(value.ToString()) }, isWriteLine: true);
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(ulong value) =>
+        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
 
     #endregion
 
@@ -1000,15 +1000,15 @@ public static class XConsole
 
     #region Private utils
 
-    private static void WriteItems(IReadOnlyList<XConsoleItem> items)
+    private static void WriteItems(IReadOnlyList<ConsoleItem> items)
     {
         if (_coloringEnabled)
         {
             foreach (var item in items)
             {
-                if (item.BackColor == XConsoleItem.NoColor)
+                if (item.BackColor == ConsoleItem.NoColor)
                 {
-                    if (item.ForeColor == XConsoleItem.NoColor)
+                    if (item.ForeColor == ConsoleItem.NoColor)
                     {
                         Console.Write(item.Value);
                     }
@@ -1022,7 +1022,7 @@ public static class XConsole
                 }
                 else
                 {
-                    if (item.ForeColor == XConsoleItem.NoColor)
+                    if (item.ForeColor == ConsoleItem.NoColor)
                     {
                         var origBackColor = Console.BackgroundColor;
                         Console.BackgroundColor = item.BackColor;
@@ -1047,7 +1047,7 @@ public static class XConsole
                 Console.Write(item.Value);
     }
 
-    private static int GetLineWrapCount(IReadOnlyList<XConsoleItem> items, int beginLeft)
+    private static int GetLineWrapCount(IReadOnlyList<ConsoleItem> items, int beginLeft)
     {
         var lineWrapCount = 0;
         var left = beginLeft;
@@ -1420,6 +1420,16 @@ public static class XConsole
     {
         lock (_syncLock)
             Console.SetWindowSize(width: width, height: height);
+    }
+
+    #endregion
+
+    #region Obsolete
+
+    [Obsolete("This method is deprecated. Use overload with ConsoleReadLineMode argument instead.")]
+    public static string ReadLine(XConsoleReadLineMode mode, char maskChar = '*')
+    {
+        return ReadLine((ConsoleReadLineMode)mode, maskChar);
     }
 
     #endregion

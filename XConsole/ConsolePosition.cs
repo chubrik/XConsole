@@ -10,43 +10,43 @@ using System.Runtime.Versioning;
 [UnsupportedOSPlatform("ios")]
 [UnsupportedOSPlatform("tvos")]
 #endif
-public readonly struct XConsolePosition
+public readonly struct ConsolePosition
 {
     public int Left { get; }
     public int InitialTop { get; }
     internal long ShiftTop { get; }
 
-    internal XConsolePosition(int left, int top, long shiftTop)
+    internal ConsolePosition(int left, int top, long shiftTop)
     {
         Left = left;
         InitialTop = top;
         ShiftTop = shiftTop;
     }
 
-    public XConsolePosition(int left, int top)
+    public ConsolePosition(int left, int top)
     {
         Left = left;
         InitialTop = top;
         ShiftTop = XConsole.ShiftTop;
     }
 
-    [Obsolete("Position arguments should be specified", error: true)]
-    public XConsolePosition() => throw new InvalidOperationException();
+    [Obsolete("Arguments should be specified.", error: true)]
+    public ConsolePosition() => throw new InvalidOperationException();
 
     public int? ActualTop => XConsole.GetPositionActualTop(this);
 
-    [Obsolete("At least one argument should be specified", error: true)]
+    [Obsolete("At least one argument should be specified.", error: true)]
     public void Write() => throw new InvalidOperationException();
 
-    public XConsolePosition Write(params string?[] values)
+    public ConsolePosition Write(params string?[] values)
     {
         return XConsole.WriteToPosition(this, values);
     }
 
-    [Obsolete("At least one argument should be specified", error: true)]
+    [Obsolete("At least one argument should be specified.", error: true)]
     public void TryWrite() => throw new InvalidOperationException();
 
-    public XConsolePosition? TryWrite(params string?[] values)
+    public ConsolePosition? TryWrite(params string?[] values)
     {
         try
         {

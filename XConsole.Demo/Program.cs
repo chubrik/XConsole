@@ -27,7 +27,7 @@ public static class Program
 
         //
 
-        new XConsolePosition(30, 1).Write("Y`Custom position");
+        new ConsolePosition(30, 1).Write("Y`Custom position");
 
         //
         Console.WriteLine();
@@ -65,7 +65,7 @@ public static class Program
         var files = sysFolder.GetFiles("*.exe");
         var fileIndex = 0;
         Console.Pin(() => new[] { "m`This is pin!\n", $"g`Number of files: ", $"W`{fileIndex}" });
-        var endPosList = new List<XConsolePosition>();
+        var endPosList = new List<ConsolePosition>();
 
         for (; fileIndex < Math.Min(100, files.Length); fileIndex++)
         {

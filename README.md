@@ -120,14 +120,14 @@ Console.Unpin(); // Remove pin
 <br>
 
 ## <a name="positioning"></a>Positioning
-XConsole provides an `XConsolePosition` structure, which is a position in the console area.
+XConsole provides an `ConsolePosition` structure, which is a position in the console area.
 This is an important feature if you have a lot of log messages.
 This structure is resistant to console buffer overflows (9000+ log lines)
 and always points to the correct position in the console area.
 
 Each `Write` and `WriteLine` method returns a start and end position.
 You can save them and use later to rewrite the text or add text to the end of the message.
-To do this, `XConsolePosition` has its own `Write` method, which returns a new end position.
+To do this, `ConsolePosition` has its own `Write` method, which returns a new end position.
 
 **NB!** The end position of `WriteLine` means the position
 after the last character *before* the line break.
@@ -140,10 +140,10 @@ end.Write("Y`!");
 ```
 ![XConsole positioning](https://raw.githubusercontent.com/chubrik/XConsole/main/img/positioning.png)
 <br><br>
-You can also get or set `XConsolePosition` of the cursor using the `CursorPosition` property:
+You can also get or set the cursor position using the `ConsolePosition` structure:
 ```csharp
-XConsolePosition position = Console.CursorPosition;              // Get cursor position
-Console.CursorPosition = new XConsolePosition(left: 15, top: 5); // Set cursor position
+ConsolePosition position = Console.CursorPosition;              // Get cursor position
+Console.CursorPosition = new ConsolePosition(left: 15, top: 5); // Set cursor position
 ```
 <br>
 
