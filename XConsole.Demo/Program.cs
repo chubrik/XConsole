@@ -2,12 +2,13 @@
 #pragma warning disable CA1416 // Validate platform compatibility
 #endif
 
+using Chubrik.Console;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Chubrik.XConsole.Demo;
+namespace Demo;
 
 public static class Program
 {
