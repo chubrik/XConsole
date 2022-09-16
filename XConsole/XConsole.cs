@@ -1423,14 +1423,4 @@ public static class XConsole
     }
 
     #endregion
-
-    #region Obsolete
-
-    [Obsolete("This method is deprecated. Use overload with ConsoleReadLineMode argument instead.")]
-    public static string ReadLine(XConsoleReadLineMode mode, char maskChar = '*')
-    {
-        return ReadLine((ConsoleReadLineMode)mode, maskChar);
-    }
-
-    #endregion
 }

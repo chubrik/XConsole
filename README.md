@@ -120,7 +120,7 @@ Console.Unpin(); // Remove pin
 <br>
 
 ## <a name="positioning"></a>Positioning
-XConsole provides an `ConsolePosition` structure, which is a position in the console area.
+XConsole provides a `ConsolePosition` structure, which is a position in the console area.
 This is an important feature if you have a lot of log messages.
 This structure is resistant to console buffer overflows (9000+ log lines)
 and always points to the correct position in the console area.
