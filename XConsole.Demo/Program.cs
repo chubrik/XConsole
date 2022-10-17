@@ -6,9 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using XConsole;
+using XConsole.Utils;
 
-namespace Demo;
+namespace XConsole.Demo;
 
 public static class Program
 {
@@ -67,15 +67,22 @@ public static class Program
         var fileIndex = 0;
         Console.Pin(() => new[] { "m`This is pin!\n", $"g`Number of files: ", $"W`{fileIndex}" });
         var endPosList = new List<ConsolePosition>();
+        var processList = new List<ProcessAnimation>();
 
         for (; fileIndex < Math.Min(100, files.Length); fileIndex++)
         {
             await Task.Delay(50);
-            var endPos = Console.WriteLine(files[fileIndex].Name).End;
+            var endPos = Console.WriteLine(files[fileIndex].Name + ' ').End;
             endPosList.Add(endPos);
 
             if ((fileIndex + 1) % 10 == 0)
-                endPosList[fileIndex - 7].Write(" - ", "bC`Ok");
+                processList.Add(endPosList[fileIndex - 7].StartProcessAnimation());
+        }
+
+        foreach (var process in processList)
+        {
+            await Task.Delay(300);
+            process.StopAndTryWrite("bC`ok");
         }
     }
 }

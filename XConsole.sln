@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XConsole", "XConsole\XConso
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XConsole.Demo", "XConsole.Demo\XConsole.Demo.csproj", "{36539157-A00F-4882-8940-37F2E7262790}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XConsole.Utils", "XConsole.Utils\XConsole.Utils.csproj", "{F6DB7D38-C02A-473B-BBD5-729AE6CA2DAD}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B2113C1E-0518-4012-967A-DB01EC0D9EFF}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
@@ -27,6 +29,10 @@ Global
 		{36539157-A00F-4882-8940-37F2E7262790}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{36539157-A00F-4882-8940-37F2E7262790}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{36539157-A00F-4882-8940-37F2E7262790}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6DB7D38-C02A-473B-BBD5-729AE6CA2DAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6DB7D38-C02A-473B-BBD5-729AE6CA2DAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6DB7D38-C02A-473B-BBD5-729AE6CA2DAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6DB7D38-C02A-473B-BBD5-729AE6CA2DAD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
