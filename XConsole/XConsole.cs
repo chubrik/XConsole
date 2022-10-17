@@ -317,6 +317,8 @@ public static class XConsole
                 origTop -= shift;
                 _shiftTop = shiftTop;
             }
+            else if (_pinHeight > 0)
+                Console.SetCursorPosition(0, origTop + _pinHeight);
 
             Console.SetCursorPosition(origLeft, origTop);
             Console.CursorVisible = _cursorVisible;
