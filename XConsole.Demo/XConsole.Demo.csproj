@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <!-- Safely upgrade an entire project to XConsole -->
-    <Using Include="Chubrik.Console.XConsole" Alias="Console" />
+    <Using Include="XConsole.XConsole" Alias="Console" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-﻿namespace Chubrik.Console;
+﻿namespace XConsole;
 
 public enum ConsoleReadLineMode
 {

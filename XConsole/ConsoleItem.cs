@@ -1,4 +1,4 @@
-﻿namespace Chubrik.Console;
+﻿namespace XConsole;
 
 using System;
 using System.Diagnostics;
