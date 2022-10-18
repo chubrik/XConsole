@@ -13,15 +13,27 @@ using System.Runtime.Versioning;
 
 public static class ConsolePositionExtensions
 {
-    public static ProcessAnimation StartProcessAnimation(
+    public static EllipsisAnimation StartEllipsisAnimation(
         this ConsolePosition position)
     {
-        return new ProcessAnimation(position);
+        return new(position);
     }
 
-    public static ProcessAnimation StartProcessAnimation(
+    public static EllipsisAnimation StartEllipsisAnimation(
         this ConsolePosition position, CancellationToken cancellationToken)
     {
-        return new ProcessAnimation(position, cancellationToken);
+        return new(position, cancellationToken);
+    }
+
+    public static SpinnerAnimation StartSpinnerAnimation(
+        this ConsolePosition position)
+    {
+        return new(position);
+    }
+
+    public static SpinnerAnimation StartSpinnerAnimation(
+        this ConsolePosition position, CancellationToken cancellationToken)
+    {
+        return new(position, cancellationToken);
     }
 }

@@ -67,7 +67,7 @@ public static class Program
         var fileIndex = 0;
         Console.Pin(() => new[] { "m`This is pin!\n", $"g`Number of files: ", $"W`{fileIndex}" });
         var endPosList = new List<ConsolePosition>();
-        var processList = new List<ProcessAnimation>();
+        var animationList = new List<IConsoleAnimation>();
 
         for (; fileIndex < Math.Min(100, files.Length); fileIndex++)
         {
@@ -76,13 +76,16 @@ public static class Program
             endPosList.Add(endPos);
 
             if ((fileIndex + 1) % 10 == 0)
-                processList.Add(endPosList[fileIndex - 7].StartProcessAnimation());
+            {
+                var animation = endPosList[fileIndex - 7].StartEllipsisAnimation();
+                animationList.Add(animation);
+            }
         }
 
-        foreach (var process in processList)
+        foreach (var animation in animationList)
         {
             await Task.Delay(300);
-            process.StopAndTryWrite("bC`ok");
+            animation.StopAndTryWrite("bC`ok");
         }
     }
 }

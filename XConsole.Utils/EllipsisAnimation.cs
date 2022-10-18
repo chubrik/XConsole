@@ -13,25 +13,24 @@ using System.Runtime.Versioning;
 [UnsupportedOSPlatform("tvos")]
 #endif
 
-public sealed class ProcessAnimation : IDisposable
+public sealed class EllipsisAnimation : IConsoleAnimation
 {
     private static readonly Random _random = new();
 
-    private readonly CancellationTokenSource _cts;
     private readonly ConsolePosition _position;
-    private Task? _task;
+    private readonly CancellationTokenSource _cts;
 
-    public ProcessAnimation(ConsolePosition position)
+    public EllipsisAnimation(ConsolePosition position)
         : this(position, new CancellationTokenSource()) { }
 
-    public ProcessAnimation(ConsolePosition position, CancellationToken cancellationToken)
+    public EllipsisAnimation(ConsolePosition position, CancellationToken cancellationToken)
         : this(position, CancellationTokenSource.CreateLinkedTokenSource(cancellationToken)) { }
 
-    private ProcessAnimation(ConsolePosition position, CancellationTokenSource cts)
+    private EllipsisAnimation(ConsolePosition position, CancellationTokenSource cts)
     {
-        _cts = cts;
         _position = position;
-        _task = StartAsync();
+        _cts = cts;
+        _ = StartAsync();
     }
 
     private async Task StartAsync()
@@ -41,30 +40,34 @@ public sealed class ProcessAnimation : IDisposable
         var position = _position;
         var ct = _cts.Token;
 
-        try
+        for (; ; )
         {
-            for (; ; )
+            try
             {
-                position.TryWrite("d`.");
-                await Task.Delay(delay, ct);
-                position.TryWrite(".", "d`.");
-                await Task.Delay(delay, ct);
-                position.TryWrite("d`.", ".", "d`.");
-                await Task.Delay(delay, ct);
-                position.TryWrite("d` .", ".");
-                await Task.Delay(delay, ct);
-                position.TryWrite("d`  .");
-                await Task.Delay(delay, ct);
-                position.TryWrite("   ");
-                await Task.Delay(delayX2, ct);
+                for (; ; )
+                {
+                    position.Write("d`.");
+                    await Task.Delay(delay, ct);
+                    position.Write(".", "d`.");
+                    await Task.Delay(delay, ct);
+                    position.Write("d`.", ".", "d`.");
+                    await Task.Delay(delay, ct);
+                    position.Write("d` .", ".");
+                    await Task.Delay(delay, ct);
+                    position.Write("d`  .");
+                    await Task.Delay(delay, ct);
+                    position.Write("   ");
+                    await Task.Delay(delayX2, ct);
+                }
             }
-        }
-        catch (TaskCanceledException)
-        {
-        }
-        finally
-        {
-            position.TryWrite("   ");
+            catch (TaskCanceledException)
+            {
+                position.TryWrite("   ");
+                return;
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+            }
         }
     }
 
@@ -72,11 +75,7 @@ public sealed class ProcessAnimation : IDisposable
     {
         lock (this)
             if (!_cts.IsCancellationRequested)
-            {
                 _cts.Cancel();
-                _task?.Wait();
-                _task = null;
-            }
     }
 
     [Obsolete("At least one argument should be specified.", error: true)]
