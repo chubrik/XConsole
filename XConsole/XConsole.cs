@@ -31,6 +31,8 @@ public static class XConsole
 
     static XConsole()
     {
+        Console.OutputEncoding = Encoding.UTF8;
+
         try
         {
             _cursorVisible = Console.CursorVisible;
@@ -337,7 +339,7 @@ public static class XConsole
             return Console.ReadLine() ?? string.Empty;
     }
 
-    public static string ReadLine(ConsoleReadLineMode mode, char maskChar = '*')
+    public static string ReadLine(ConsoleReadLineMode mode, char maskChar = '\u2022')
     {
         switch (mode)
         {
@@ -418,6 +420,23 @@ public static class XConsole
         return WriteBase(items, isWriteLine: false);
     }
 
+    public static (ConsolePosition Begin, ConsolePosition End) Write(IEnumerable<string?> values)
+    {
+        var items = new List<ConsoleItem>();
+
+        foreach (var value in values)
+            if (!string.IsNullOrEmpty(value))
+                items.Add(ConsoleItem.Parse(value));
+
+        if (items.Count == 0)
+        {
+            var position = CursorPosition;
+            return (position, position);
+        }
+
+        return WriteBase(items, isWriteLine: false);
+    }
+
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(string? value)
     {
         if (string.IsNullOrEmpty(value))
@@ -429,6 +448,20 @@ public static class XConsole
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(params string?[] values)
     {
         var items = new List<ConsoleItem>(values.Length);
+
+        foreach (var value in values)
+            if (!string.IsNullOrEmpty(value))
+                items.Add(ConsoleItem.Parse(value));
+
+        if (items.Count == 0)
+            return WriteLine();
+
+        return WriteBase(items, isWriteLine: true);
+    }
+
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(IEnumerable<string?> values)
+    {
+        var items = new List<ConsoleItem>();
 
         foreach (var value in values)
             if (!string.IsNullOrEmpty(value))
