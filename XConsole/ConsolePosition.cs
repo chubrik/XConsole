@@ -1,6 +1,7 @@
 ﻿namespace Chubrik.Console;
 
 using System;
+using System.Collections.Generic;
 
 #if NET
 using System.Runtime.Versioning;
@@ -43,10 +44,27 @@ public readonly struct ConsolePosition
         return XConsole.WriteToPosition(this, values);
     }
 
+    public ConsolePosition Write(IReadOnlyList<string?> values)
+    {
+        return XConsole.WriteToPosition(this, values);
+    }
+
     [Obsolete("At least one argument should be specified.", error: true)]
     public void TryWrite() => throw new InvalidOperationException();
 
     public ConsolePosition? TryWrite(params string?[] values)
+    {
+        try
+        {
+            return XConsole.WriteToPosition(this, values);
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            return null;
+        }
+    }
+
+    public ConsolePosition? TryWrite(IReadOnlyList<string?> values)
     {
         try
         {

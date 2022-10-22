@@ -18,7 +18,6 @@ using System.Runtime.Versioning;
 [UnsupportedOSPlatform("ios")]
 [UnsupportedOSPlatform("tvos")]
 #endif
-
 public static class XConsole
 {
     private static readonly object _syncLock = new();
@@ -67,6 +66,15 @@ public static class XConsole
     public static void Pin() => throw new InvalidOperationException();
 
     public static void Pin(params string?[] values)
+    {
+        if (!_positioningEnabled)
+            return;
+
+        _getPinValues = () => values;
+        UpdatePin();
+    }
+
+    public static void Pin(IReadOnlyList<string?> values)
     {
         if (!_positioningEnabled)
             return;
@@ -259,12 +267,12 @@ public static class XConsole
         return actualTop >= 0 && actualTop < bufferHeight ? (int)actualTop : null;
     }
 
-    internal static ConsolePosition WriteToPosition(ConsolePosition position, string?[] values)
+    internal static ConsolePosition WriteToPosition(ConsolePosition position, IReadOnlyList<string?> values)
     {
         if (!_positioningEnabled)
             return new(0, 0, 0);
 
-        var items = new List<ConsoleItem>(values.Length);
+        var items = new List<ConsoleItem>(values.Count);
 
         foreach (var value in values)
             if (!string.IsNullOrEmpty(value))
@@ -420,9 +428,9 @@ public static class XConsole
         return WriteBase(items, isWriteLine: false);
     }
 
-    public static (ConsolePosition Begin, ConsolePosition End) Write(IEnumerable<string?> values)
+    public static (ConsolePosition Begin, ConsolePosition End) Write(IReadOnlyList<string?> values)
     {
-        var items = new List<ConsoleItem>();
+        var items = new List<ConsoleItem>(values.Count);
 
         foreach (var value in values)
             if (!string.IsNullOrEmpty(value))
@@ -459,9 +467,9 @@ public static class XConsole
         return WriteBase(items, isWriteLine: true);
     }
 
-    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(IEnumerable<string?> values)
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(IReadOnlyList<string?> values)
     {
-        var items = new List<ConsoleItem>();
+        var items = new List<ConsoleItem>(values.Count);
 
         foreach (var value in values)
             if (!string.IsNullOrEmpty(value))
