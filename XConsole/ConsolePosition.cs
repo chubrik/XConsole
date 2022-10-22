@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 #if NET
 using System.Runtime.Versioning;
@@ -41,6 +42,7 @@ public readonly struct ConsolePosition
 
     public ConsolePosition Write(params string?[] values)
     {
+        Debug.Assert(values.Length > 0);
         return XConsole.WriteToPosition(this, values);
     }
 
@@ -54,6 +56,8 @@ public readonly struct ConsolePosition
 
     public ConsolePosition? TryWrite(params string?[] values)
     {
+        Debug.Assert(values.Length > 0);
+
         try
         {
             return XConsole.WriteToPosition(this, values);
