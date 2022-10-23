@@ -1,11 +1,11 @@
 ﻿namespace XConsole;
 
 using System;
-using System.Diagnostics;
 
 internal readonly struct ConsoleItem
 {
     public const ConsoleColor NoColor = (ConsoleColor)(-1);
+    private static readonly ConsoleItem Empty = new(string.Empty);
 
     public string Value { get; }
     public ConsoleColor BackColor { get; }
@@ -25,9 +25,11 @@ internal readonly struct ConsoleItem
         ForeColor = NoColor;
     }
 
-    public static ConsoleItem Parse(string value)
+    public static ConsoleItem Parse(string? value)
     {
-        Debug.Assert(!string.IsNullOrEmpty(value));
+        if (string.IsNullOrEmpty(value))
+            return Empty;
+
         var char0 = value[0];
 
         if (char0 == '`')

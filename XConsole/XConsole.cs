@@ -18,7 +18,6 @@ using System.Runtime.Versioning;
 [UnsupportedOSPlatform("ios")]
 [UnsupportedOSPlatform("tvos")]
 #endif
-
 public static class XConsole
 {
     private static readonly object _syncLock = new();
@@ -33,6 +32,8 @@ public static class XConsole
 
     static XConsole()
     {
+        Console.OutputEncoding = Encoding.UTF8;
+
         try
         {
             _cursorVisible = Console.CursorVisible;
@@ -67,6 +68,17 @@ public static class XConsole
     public static void Pin() => throw new InvalidOperationException();
 
     public static void Pin(params string?[] values)
+    {
+        Debug.Assert(values.Length > 0);
+
+        if (!_positioningEnabled)
+            return;
+
+        _getPinValues = () => values;
+        UpdatePin();
+    }
+
+    public static void Pin(IReadOnlyList<string?> values)
     {
         if (!_positioningEnabled)
             return;
@@ -110,11 +122,10 @@ public static class XConsole
             : string.Empty;
 
         var pinValues = getPinValues();
-        var pinItems = new List<ConsoleItem>(pinValues.Count);
+        var pinItems = new ConsoleItem[pinValues.Count];
 
-        foreach (var pinValue in pinValues)
-            if (!string.IsNullOrEmpty(pinValue))
-                pinItems.Add(ConsoleItem.Parse(pinValue));
+        for (var i = 0; i < pinValues.Count; i++)
+            pinItems[i] = ConsoleItem.Parse(pinValues[i]);
 
         int pinHeight, origLeft, origTop, pinEndTop;
 
@@ -259,19 +270,15 @@ public static class XConsole
         return actualTop >= 0 && actualTop < bufferHeight ? (int)actualTop : null;
     }
 
-    internal static ConsolePosition WriteToPosition(ConsolePosition position, string?[] values)
+    internal static ConsolePosition WriteToPosition(ConsolePosition position, IReadOnlyList<string?> values)
     {
         if (!_positioningEnabled)
             return new(0, 0, 0);
 
-        var items = new List<ConsoleItem>(values.Length);
+        var items = new ConsoleItem[values.Count];
 
-        foreach (var value in values)
-            if (!string.IsNullOrEmpty(value))
-                items.Add(ConsoleItem.Parse(value));
-
-        if (items.Count == 0)
-            return position;
+        for (var i = 0; i < values.Count; i++)
+            items[i] = ConsoleItem.Parse(values[i]);
 
         int origLeft, origTop, endLeft, endTop;
         long shiftTop, positionActualTop;
@@ -339,7 +346,7 @@ public static class XConsole
             return Console.ReadLine() ?? string.Empty;
     }
 
-    public static string ReadLine(ConsoleReadLineMode mode, char maskChar = '*')
+    public static string ReadLine(ConsoleReadLineMode mode, char maskChar = '\u2022')
     {
         switch (mode)
         {
@@ -394,50 +401,52 @@ public static class XConsole
 
     public static (ConsolePosition Begin, ConsolePosition End) Write(string? value)
     {
-        if (string.IsNullOrEmpty(value))
-        {
-            var position = CursorPosition;
-            return (position, position);
-        }
-
         return WriteBase(new[] { ConsoleItem.Parse(value) }, isWriteLine: false);
     }
 
     public static (ConsolePosition Begin, ConsolePosition End) Write(params string?[] values)
     {
-        var items = new List<ConsoleItem>(values.Length);
+        Debug.Assert(values.Length > 0);
+        var items = new ConsoleItem[values.Length];
 
-        foreach (var value in values)
-            if (!string.IsNullOrEmpty(value))
-                items.Add(ConsoleItem.Parse(value));
+        for (var i = 0; i < values.Length; i++)
+            items[i] = ConsoleItem.Parse(values[i]);
 
-        if (items.Count == 0)
-        {
-            var position = CursorPosition;
-            return (position, position);
-        }
+        return WriteBase(items, isWriteLine: false);
+    }
+
+    public static (ConsolePosition Begin, ConsolePosition End) Write(IReadOnlyList<string?> values)
+    {
+        var items = new ConsoleItem[values.Count];
+
+        for (var i = 0; i < values.Count; i++)
+            items[i] = ConsoleItem.Parse(values[i]);
 
         return WriteBase(items, isWriteLine: false);
     }
 
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(string? value)
     {
-        if (string.IsNullOrEmpty(value))
-            return WriteLine();
-
         return WriteBase(new[] { ConsoleItem.Parse(value) }, isWriteLine: true);
     }
 
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(params string?[] values)
     {
-        var items = new List<ConsoleItem>(values.Length);
+        Debug.Assert(values.Length > 0);
+        var items = new ConsoleItem[values.Length];
 
-        foreach (var value in values)
-            if (!string.IsNullOrEmpty(value))
-                items.Add(ConsoleItem.Parse(value));
+        for (var i = 0; i < values.Length; i++)
+            items[i] = ConsoleItem.Parse(values[i]);
 
-        if (items.Count == 0)
-            return WriteLine();
+        return WriteBase(items, isWriteLine: true);
+    }
+
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(IReadOnlyList<string?> values)
+    {
+        var items = new ConsoleItem[values.Count];
+
+        for (var i = 0; i < values.Count; i++)
+            items[i] = ConsoleItem.Parse(values[i]);
 
         return WriteBase(items, isWriteLine: true);
     }
@@ -485,11 +494,10 @@ public static class XConsole
                 : string.Empty;
 
             var pinValues = getPinValues();
-            var pinItems = new List<ConsoleItem>(pinValues.Count);
+            var pinItems = new ConsoleItem[pinValues.Count];
 
-            foreach (var pinValue in pinValues)
-                if (!string.IsNullOrEmpty(pinValue))
-                    pinItems.Add(ConsoleItem.Parse(pinValue));
+            for (var i = 0; i < pinValues.Count; i++)
+                pinItems[i] = ConsoleItem.Parse(pinValues[i]);
 
             int pinHeight, pinEndTop;
 
@@ -567,11 +575,8 @@ public static class XConsole
         );
     }
 
-    private static (ConsolePosition Begin, ConsolePosition End) WriteBase(
-        IReadOnlyList<ConsoleItem> logItems, bool isWriteLine)
+    private static (ConsolePosition Begin, ConsolePosition End) WriteBase(ConsoleItem[] logItems, bool isWriteLine)
     {
-        Debug.Assert(logItems.Count > 0);
-
         if (!_positioningEnabled)
         {
             lock (_syncLock)
@@ -644,11 +649,10 @@ public static class XConsole
                 : string.Empty;
 
             var pinValues = getPinValues();
-            var pinItems = new List<ConsoleItem>(pinValues.Count);
+            var pinItems = new ConsoleItem[pinValues.Count];
 
-            foreach (var pinValue in pinValues)
-                if (!string.IsNullOrEmpty(pinValue))
-                    pinItems.Add(ConsoleItem.Parse(pinValue));
+            for (var i = 0; i < pinValues.Count; i++)
+                pinItems[i] = ConsoleItem.Parse(pinValues[i]);
 
             int pinHeight, pinEndTop;
 
@@ -1004,12 +1008,16 @@ public static class XConsole
 
     #region Private utils
 
-    private static void WriteItems(IReadOnlyList<ConsoleItem> items)
+    private static void WriteItems(ConsoleItem[] items)
     {
         if (_coloringEnabled)
         {
-            foreach (var item in items)
+            ConsoleItem item;
+
+            for (var i = 0; i < items.Length; i++)
             {
+                item = items[i];
+
                 if (item.BackColor == ConsoleItem.NoColor)
                 {
                     if (item.ForeColor == ConsoleItem.NoColor)
@@ -1047,11 +1055,11 @@ public static class XConsole
             }
         }
         else
-            foreach (var item in items)
-                Console.Write(item.Value);
+            for (var i = 0; i < items.Length; i++)
+                Console.Write(items[i].Value);
     }
 
-    private static int GetLineWrapCount(IReadOnlyList<ConsoleItem> items, int beginLeft)
+    private static int GetLineWrapCount(ConsoleItem[] items, int beginLeft)
     {
         var lineWrapCount = 0;
         var left = beginLeft;
@@ -1060,7 +1068,7 @@ public static class XConsole
         int charCount, charIndex;
         char chr;
 
-        for (var itemIndex = 0; itemIndex < items.Count; itemIndex++)
+        for (var itemIndex = 0; itemIndex < items.Length; itemIndex++)
         {
             chars = items[itemIndex].Value;
             charCount = chars.Length;
