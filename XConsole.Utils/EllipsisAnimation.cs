@@ -16,8 +16,9 @@ internal sealed class EllipsisAnimation : IConsoleAnimation
 {
     private static readonly Random _random = new();
 
-    private readonly ConsolePosition _position;
     private readonly CancellationTokenSource _cts;
+    private readonly ConsolePosition _position;
+    private readonly Task _task;
 
     public EllipsisAnimation(ConsolePosition position)
         : this(position, new CancellationTokenSource()) { }
@@ -27,17 +28,16 @@ internal sealed class EllipsisAnimation : IConsoleAnimation
 
     private EllipsisAnimation(ConsolePosition position, CancellationTokenSource cts)
     {
-        _position = position;
         _cts = cts;
-        _ = StartAsync();
+        _position = position;
+        _task = StartAsync(_cts.Token);
     }
 
-    private async Task StartAsync()
+    private async Task StartAsync(CancellationToken ct)
     {
         var delay = _random.Next(100, 150);
         var delayX2 = delay * 2;
         var position = _position;
-        var ct = _cts.Token;
 
         for (; ; )
         {
@@ -75,6 +75,8 @@ internal sealed class EllipsisAnimation : IConsoleAnimation
         lock (this)
             if (!_cts.IsCancellationRequested)
                 _cts.Cancel();
+
+        _task.Wait();
     }
 
     [Obsolete("At least one argument should be specified.", error: true)]
@@ -95,5 +97,12 @@ internal sealed class EllipsisAnimation : IConsoleAnimation
         return _position.TryWrite(values);
     }
 
-    public void Dispose() => Stop();
+    public void Dispose()
+    {
+        Stop();
+#if !NETSTANDARD1_3
+        _task.Dispose();
+#endif
+        _cts.Dispose();
+    }
 }

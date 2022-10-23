@@ -16,8 +16,9 @@ internal sealed class SpinnerAnimation : IConsoleAnimation
 {
     private static readonly Random _random = new();
 
-    private readonly ConsolePosition _position;
     private readonly CancellationTokenSource _cts;
+    private readonly ConsolePosition _position;
+    private readonly Task _task;
 
     public SpinnerAnimation(ConsolePosition position)
         : this(position, new CancellationTokenSource()) { }
@@ -27,16 +28,15 @@ internal sealed class SpinnerAnimation : IConsoleAnimation
 
     private SpinnerAnimation(ConsolePosition position, CancellationTokenSource cts)
     {
-        _position = position;
         _cts = cts;
-        _ = StartAsync();
+        _position = position;
+        _task = StartAsync(_cts.Token);
     }
 
-    private async Task StartAsync()
+    private async Task StartAsync(CancellationToken ct)
     {
         var delay = _random.Next(80, 125);
         var position = _position;
-        var ct = _cts.Token;
 
         for (; ; )
         {
@@ -48,7 +48,7 @@ internal sealed class SpinnerAnimation : IConsoleAnimation
                     await Task.Delay(delay, ct);
                     position.Write("/");
                     await Task.Delay(delay, ct);
-                    position.Write("—");
+                    position.Write("\u2014");
                     await Task.Delay(delay, ct);
                     position.Write("\\");
                     await Task.Delay(delay, ct);
@@ -56,7 +56,7 @@ internal sealed class SpinnerAnimation : IConsoleAnimation
             }
             catch (TaskCanceledException)
             {
-                position.TryWrite("   ");
+                position.TryWrite(" ");
                 return;
             }
             catch (ArgumentOutOfRangeException)
@@ -70,6 +70,8 @@ internal sealed class SpinnerAnimation : IConsoleAnimation
         lock (this)
             if (!_cts.IsCancellationRequested)
                 _cts.Cancel();
+
+        _task.Wait();
     }
 
     [Obsolete("At least one argument should be specified.", error: true)]
@@ -90,5 +92,12 @@ internal sealed class SpinnerAnimation : IConsoleAnimation
         return _position.TryWrite(values);
     }
 
-    public void Dispose() => Stop();
+    public void Dispose()
+    {
+        Stop();
+#if !NETSTANDARD1_3
+        _task.Dispose();
+#endif
+        _cts.Dispose();
+    }
 }
