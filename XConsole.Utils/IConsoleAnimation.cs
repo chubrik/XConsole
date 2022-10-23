@@ -1,4 +1,4 @@
-﻿namespace XConsole.Utils;
+﻿namespace Chubrik.XConsole.Utils;
 
 using System;
 

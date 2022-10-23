@@ -2,7 +2,7 @@
 #pragma warning disable CS8604 // Possible null reference argument.
 #endif
 
-namespace XConsole;
+namespace Chubrik.XConsole;
 
 using System;
 using System.Collections.Generic;

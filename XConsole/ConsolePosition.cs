@@ -1,4 +1,4 @@
-﻿namespace XConsole;
+﻿namespace Chubrik.XConsole;
 
 using System;
 using System.Collections.Generic;

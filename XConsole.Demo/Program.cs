@@ -6,9 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using XConsole.Utils;
+using Chubrik.XConsole.Utils;
 
-namespace XConsole.Demo;
+namespace Chubrik.XConsole.Demo;
 
 public static class Program
 {

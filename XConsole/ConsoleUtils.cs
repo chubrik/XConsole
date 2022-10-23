@@ -1,4 +1,4 @@
-﻿namespace XConsole;
+﻿namespace Chubrik.XConsole;
 
 public sealed class ConsoleUtils
 {
