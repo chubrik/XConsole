@@ -29,6 +29,8 @@ public static class XConsole
     private static bool _cursorVisible;
     private static int _maxTop;
 
+    public static ConsoleUtils Utils { get; } = new();
+
     static XConsole()
     {
         try

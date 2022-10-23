@@ -12,8 +12,7 @@ using System.Runtime.Versioning;
 [UnsupportedOSPlatform("ios")]
 [UnsupportedOSPlatform("tvos")]
 #endif
-
-public sealed class SpinnerAnimation : IConsoleAnimation
+internal sealed class SpinnerAnimation : IConsoleAnimation
 {
     private static readonly Random _random = new();
 

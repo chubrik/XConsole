@@ -10,30 +10,25 @@ using System.Runtime.Versioning;
 [UnsupportedOSPlatform("ios")]
 [UnsupportedOSPlatform("tvos")]
 #endif
-
 public static class ConsolePositionExtensions
 {
-    public static EllipsisAnimation StartEllipsisAnimation(
-        this ConsolePosition position)
+    public static IConsoleAnimation AnimateEllipsis(this ConsolePosition position)
     {
-        return new(position);
+        return new EllipsisAnimation(position);
     }
 
-    public static EllipsisAnimation StartEllipsisAnimation(
-        this ConsolePosition position, CancellationToken cancellationToken)
+    public static IConsoleAnimation AnimateEllipsis(this ConsolePosition position, CancellationToken cancellationToken)
     {
-        return new(position, cancellationToken);
+        return new EllipsisAnimation(position, cancellationToken);
     }
 
-    public static SpinnerAnimation StartSpinnerAnimation(
-        this ConsolePosition position)
+    public static IConsoleAnimation AnimateSpinner(this ConsolePosition position)
     {
-        return new(position);
+        return new SpinnerAnimation(position);
     }
 
-    public static SpinnerAnimation StartSpinnerAnimation(
-        this ConsolePosition position, CancellationToken cancellationToken)
+    public static IConsoleAnimation AnimateSpinner(this ConsolePosition position, CancellationToken cancellationToken)
     {
-        return new(position, cancellationToken);
+        return new SpinnerAnimation(position, cancellationToken);
     }
 }

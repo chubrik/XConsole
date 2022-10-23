@@ -77,7 +77,7 @@ public static class Program
 
             if ((fileIndex + 1) % 10 == 0)
             {
-                var animation = endPosList[fileIndex - 7].StartEllipsisAnimation();
+                var animation = endPosList[fileIndex - 7].AnimateEllipsis();
                 animationList.Add(animation);
             }
         }

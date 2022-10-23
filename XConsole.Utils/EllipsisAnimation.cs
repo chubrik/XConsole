@@ -12,8 +12,7 @@ using System.Runtime.Versioning;
 [UnsupportedOSPlatform("ios")]
 [UnsupportedOSPlatform("tvos")]
 #endif
-
-public sealed class EllipsisAnimation : IConsoleAnimation
+internal sealed class EllipsisAnimation : IConsoleAnimation
 {
     private static readonly Random _random = new();
 
