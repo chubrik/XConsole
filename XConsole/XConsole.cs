@@ -20,15 +20,14 @@ using System.Runtime.Versioning;
 #endif
 public static class XConsole
 {
-    private static readonly object _syncLock = new();
     private static readonly string _newLine = Environment.NewLine;
     private static readonly bool _positioningEnabled = true;
+    private static readonly object _syncLock = new();
+
     private static bool _coloringEnabled = Environment.GetEnvironmentVariable("NO_COLOR") == null;
-    private static long _shiftTop = 0;
     private static bool _cursorVisible;
     private static int _maxTop;
-
-    public static ConsoleUtils Utils { get; } = new();
+    private static long _shiftTop = 0;
 
     static XConsole()
     {
@@ -45,18 +44,26 @@ public static class XConsole
         }
     }
 
-    internal static long ShiftTop => _shiftTop;
-
     public static bool NO_COLOR
     {
         get => !_coloringEnabled;
         set => _coloringEnabled = !value;
     }
 
+    public static ConsoleUtils Utils { get; } = new();
+
+    internal static long ShiftTop => _shiftTop;
+
     public static void Sync(Action action)
     {
         lock (_syncLock)
             action();
+    }
+
+    public static T Sync<T>(Func<T> action)
+    {
+        lock (_syncLock)
+            return action();
     }
 
     #region Pinning

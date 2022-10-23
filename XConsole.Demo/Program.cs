@@ -2,11 +2,11 @@
 #pragma warning disable CA1416 // Validate platform compatibility
 #endif
 
+using Chubrik.XConsole.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using Chubrik.XConsole.Utils;
 
 namespace Chubrik.XConsole.Demo;
 
@@ -34,23 +34,8 @@ public static class Program
         Console.WriteLine();
         //
 
-        Console.Write("W`Continue? [Y/n]: ");
-
-        while (true)
-        {
-            var key = Console.ReadKey(true).Key;
-
-            if (key == ConsoleKey.Y)
-            {
-                Console.WriteLine("G`Yes");
-                break;
-            }
-            else if (key == ConsoleKey.N || key == ConsoleKey.Escape)
-            {
-                Console.WriteLine("R`No");
-                return;
-            }
-        }
+        if (!Console.Utils.Confirm(yes: "G`Yes", no: "R`No"))
+            return;
 
         //
         Console.WriteLine();
