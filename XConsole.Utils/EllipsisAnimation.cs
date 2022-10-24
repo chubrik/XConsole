@@ -1,6 +1,7 @@
 ﻿namespace Chubrik.XConsole.Utils;
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -33,7 +34,7 @@ internal sealed class EllipsisAnimation : IConsoleAnimation
         _task = StartAsync(_cts.Token);
     }
 
-    private async Task StartAsync(CancellationToken ct)
+    private async Task StartAsync(CancellationToken cancellationToken)
     {
         var delay = _random.Next(100, 150);
         var delayX2 = delay * 2;
@@ -46,17 +47,17 @@ internal sealed class EllipsisAnimation : IConsoleAnimation
                 for (; ; )
                 {
                     position.Write("d`.");
-                    await Task.Delay(delay, ct);
+                    await Task.Delay(delay, cancellationToken);
                     position.Write(".", "d`.");
-                    await Task.Delay(delay, ct);
+                    await Task.Delay(delay, cancellationToken);
                     position.Write("d`.", ".", "d`.");
-                    await Task.Delay(delay, ct);
+                    await Task.Delay(delay, cancellationToken);
                     position.Write("d` .", ".");
-                    await Task.Delay(delay, ct);
+                    await Task.Delay(delay, cancellationToken);
                     position.Write("d`  .");
-                    await Task.Delay(delay, ct);
+                    await Task.Delay(delay, cancellationToken);
                     position.Write("   ");
-                    await Task.Delay(delayX2, ct);
+                    await Task.Delay(delayX2, cancellationToken);
                 }
             }
             catch (TaskCanceledException)
@@ -88,10 +89,22 @@ internal sealed class EllipsisAnimation : IConsoleAnimation
         return _position.Write(values);
     }
 
+    public ConsolePosition StopAndWrite(IReadOnlyList<string?> values)
+    {
+        Stop();
+        return _position.Write(values);
+    }
+
     [Obsolete("At least one argument should be specified.", error: true)]
     public void StopAndTryWrite() => throw new InvalidOperationException();
 
     public ConsolePosition? StopAndTryWrite(params string?[] values)
+    {
+        Stop();
+        return _position.TryWrite(values);
+    }
+
+    public ConsolePosition? StopAndTryWrite(IReadOnlyList<string?> values)
     {
         Stop();
         return _position.TryWrite(values);

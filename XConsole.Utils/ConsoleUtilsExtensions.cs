@@ -15,22 +15,22 @@ public static class ConsoleUtilsExtensions
 {
     public static IConsoleAnimation AnimateEllipsis(this ConsoleUtils _)
     {
-        return XConsole.CursorPosition.AnimateEllipsis();
+        return new EllipsisAnimation(XConsole.CursorPosition);
     }
 
     public static IConsoleAnimation AnimateEllipsis(this ConsoleUtils _, CancellationToken cancellationToken)
     {
-        return XConsole.CursorPosition.AnimateEllipsis(cancellationToken);
+        return new EllipsisAnimation(XConsole.CursorPosition, cancellationToken);
     }
 
     public static IConsoleAnimation AnimateSpinner(this ConsoleUtils _)
     {
-        return XConsole.CursorPosition.AnimateSpinner();
+        return new SpinnerAnimation(XConsole.CursorPosition);
     }
 
     public static IConsoleAnimation AnimateSpinner(this ConsoleUtils _, CancellationToken cancellationToken)
     {
-        return XConsole.CursorPosition.AnimateSpinner(cancellationToken);
+        return new SpinnerAnimation(XConsole.CursorPosition, cancellationToken);
     }
 
     public static bool Confirm(
@@ -42,7 +42,7 @@ public static class ConsoleUtilsExtensions
 
             for (; ; )
             {
-                var key = Console.ReadKey(true).Key;
+                var key = Console.ReadKey(intercept: true).Key;
 
                 if (key == ConsoleKey.Y)
                 {

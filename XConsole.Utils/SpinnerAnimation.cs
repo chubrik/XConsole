@@ -1,6 +1,7 @@
 ﻿namespace Chubrik.XConsole.Utils;
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -33,7 +34,7 @@ internal sealed class SpinnerAnimation : IConsoleAnimation
         _task = StartAsync(_cts.Token);
     }
 
-    private async Task StartAsync(CancellationToken ct)
+    private async Task StartAsync(CancellationToken cancellationToken)
     {
         var delay = _random.Next(80, 125);
         var position = _position;
@@ -44,14 +45,14 @@ internal sealed class SpinnerAnimation : IConsoleAnimation
             {
                 for (; ; )
                 {
-                    position.Write("|");
-                    await Task.Delay(delay, ct);
                     position.Write("/");
-                    await Task.Delay(delay, ct);
+                    await Task.Delay(delay, cancellationToken);
                     position.Write("\u2014");
-                    await Task.Delay(delay, ct);
+                    await Task.Delay(delay, cancellationToken);
                     position.Write("\\");
-                    await Task.Delay(delay, ct);
+                    await Task.Delay(delay, cancellationToken);
+                    position.Write("|");
+                    await Task.Delay(delay, cancellationToken);
                 }
             }
             catch (TaskCanceledException)
@@ -83,10 +84,22 @@ internal sealed class SpinnerAnimation : IConsoleAnimation
         return _position.Write(values);
     }
 
+    public ConsolePosition StopAndWrite(IReadOnlyList<string?> values)
+    {
+        Stop();
+        return _position.Write(values);
+    }
+
     [Obsolete("At least one argument should be specified.", error: true)]
     public void StopAndTryWrite() => throw new InvalidOperationException();
 
     public ConsolePosition? StopAndTryWrite(params string?[] values)
+    {
+        Stop();
+        return _position.TryWrite(values);
+    }
+
+    public ConsolePosition? StopAndTryWrite(IReadOnlyList<string?> values)
     {
         Stop();
         return _position.TryWrite(values);
