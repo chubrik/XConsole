@@ -34,7 +34,7 @@ public static class Program
         Console.WriteLine();
         //
 
-        if (!Console.Utils.Confirm(yes: "G`Yes", no: "R`No"))
+        if (!Console.Utils.Confirm())
             return;
 
         //
