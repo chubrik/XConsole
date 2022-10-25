@@ -14,22 +14,22 @@ using System.Runtime.InteropServices;
 #endif
 public static class ConsoleUtilsExtensions
 {
-    public static IConsoleAnimation AnimateEllipsis(this ConsoleUtils _)
+    public static ConsoleAnimation AnimateEllipsis(this ConsoleUtils _)
     {
         return new EllipsisAnimation(XConsole.CursorPosition);
     }
 
-    public static IConsoleAnimation AnimateEllipsis(this ConsoleUtils _, CancellationToken cancellationToken)
+    public static ConsoleAnimation AnimateEllipsis(this ConsoleUtils _, CancellationToken cancellationToken)
     {
         return new EllipsisAnimation(XConsole.CursorPosition, cancellationToken);
     }
 
-    public static IConsoleAnimation AnimateSpinner(this ConsoleUtils _)
+    public static ConsoleAnimation AnimateSpinner(this ConsoleUtils _)
     {
         return new SpinnerAnimation(XConsole.CursorPosition);
     }
 
-    public static IConsoleAnimation AnimateSpinner(this ConsoleUtils _, CancellationToken cancellationToken)
+    public static ConsoleAnimation AnimateSpinner(this ConsoleUtils _, CancellationToken cancellationToken)
     {
         return new SpinnerAnimation(XConsole.CursorPosition, cancellationToken);
     }

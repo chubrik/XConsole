@@ -52,7 +52,7 @@ public static class Program
         var fileIndex = 0;
         Console.Pin(() => new[] { "m`This is pin!\n", $"g`Number of files: ", $"W`{fileIndex}" });
         var endPosList = new List<ConsolePosition>();
-        var animationList = new List<IConsoleAnimation>();
+        var animationList = new List<ConsoleAnimation>();
 
         for (; fileIndex < Math.Min(100, files.Length); fileIndex++)
         {
