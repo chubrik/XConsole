@@ -70,7 +70,7 @@ public static class Program
         foreach (var animation in animationList)
         {
             await Task.Delay(300);
-            animation.StopAndTryWrite("bC`ok");
+            animation.Stop().TryWrite("bC`ok");
         }
     }
 }

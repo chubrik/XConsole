@@ -14,6 +14,8 @@ using System.Runtime.InteropServices;
 #endif
 public static class ConsoleUtilsExtensions
 {
+    #region Animations
+
     public static ConsoleAnimation AnimateEllipsis(this ConsoleUtils _)
     {
         return new EllipsisAnimation(XConsole.CursorPosition);
@@ -33,6 +35,8 @@ public static class ConsoleUtilsExtensions
     {
         return new SpinnerAnimation(XConsole.CursorPosition, cancellationToken);
     }
+
+    #endregion
 
     public static bool Confirm(
         this ConsoleUtils _, string message = "W`Continue? [Y/n]: ", string yes = "G`Yes", string no = "R`No")

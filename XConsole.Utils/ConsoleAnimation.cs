@@ -1,7 +1,6 @@
 ﻿namespace Chubrik.XConsole.Utils;
 
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,11 +14,13 @@ using System.Runtime.Versioning;
 #endif
 public abstract class ConsoleAnimation : IDisposable
 {
-    private readonly CancellationTokenSource _cts;
-    private readonly Task _task;
     protected static readonly Random _random = new();
 
+    private readonly CancellationTokenSource _cts;
+    private readonly Task _task;
+
     public ConsolePosition Position { get; }
+    protected abstract string Clear { get; }
 
     public ConsoleAnimation(ConsolePosition position)
         : this(position, new CancellationTokenSource()) { }
@@ -34,45 +35,36 @@ public abstract class ConsoleAnimation : IDisposable
         _task = StartAsync(_cts.Token);
     }
 
-    protected abstract Task StartAsync(CancellationToken cancellationToken);
+    private async Task StartAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            for (; ; )
+                try
+                {
+                    await LoopAsync(cancellationToken).ConfigureAwait(false);
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    await Task.Delay(1000, cancellationToken).ConfigureAwait(false);
+                }
+        }
+        catch (TaskCanceledException)
+        {
+            Position.TryWrite(Clear);
+        }
+    }
 
-    public void Stop()
+    protected abstract Task LoopAsync(CancellationToken cancellationToken);
+
+    public ConsolePosition Stop()
     {
         lock (this)
             if (!_cts.IsCancellationRequested)
                 _cts.Cancel();
 
         _task.Wait();
-    }
-
-    [Obsolete("At least one argument should be specified.", error: true)]
-    public void StopAndWrite() => throw new InvalidOperationException();
-
-    public ConsolePosition StopAndWrite(params string?[] values)
-    {
-        Stop();
-        return Position.Write(values);
-    }
-
-    public ConsolePosition StopAndWrite(IReadOnlyList<string?> values)
-    {
-        Stop();
-        return Position.Write(values);
-    }
-
-    [Obsolete("At least one argument should be specified.", error: true)]
-    public void StopAndTryWrite() => throw new InvalidOperationException();
-
-    public ConsolePosition? StopAndTryWrite(params string?[] values)
-    {
-        Stop();
-        return Position.TryWrite(values);
-    }
-
-    public ConsolePosition? StopAndTryWrite(IReadOnlyList<string?> values)
-    {
-        Stop();
-        return Position.TryWrite(values);
+        return Position;
     }
 
     public void Dispose()
