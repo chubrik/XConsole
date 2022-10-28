@@ -277,15 +277,10 @@ public static class XConsole
         return actualTop >= 0 && actualTop < bufferHeight ? (int)actualTop : null;
     }
 
-    internal static ConsolePosition WriteToPosition(ConsolePosition position, IReadOnlyList<string?> values)
+    internal static ConsolePosition WriteToPosition(ConsolePosition position, ConsoleItem[] items)
     {
         if (!_positioningEnabled)
             return new(0, 0, 0);
-
-        var items = new ConsoleItem[values.Count];
-
-        for (var i = 0; i < values.Count; i++)
-            items[i] = ConsoleItem.Parse(values[i]);
 
         int origLeft, origTop, endLeft, endTop;
         long shiftTop, positionActualTop;
@@ -798,13 +793,17 @@ public static class XConsole
         );
     }
 
-    #region Overloads
+    #region Write overloads
 
-    public static (ConsolePosition Begin, ConsolePosition End) Write(bool value) =>
-        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
+    public static (ConsolePosition Begin, ConsolePosition End) Write(bool value)
+    {
+        return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
+    }
 
-    public static (ConsolePosition Begin, ConsolePosition End) Write(char value) =>
-        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
+    public static (ConsolePosition Begin, ConsolePosition End) Write(char value)
+    {
+        return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
+    }
 
     public static (ConsolePosition Begin, ConsolePosition End) Write(char[]? buffer)
     {
@@ -832,17 +831,25 @@ public static class XConsole
         return WriteBase(new[] { new ConsoleItem(value) }, isWriteLine: false);
     }
 
-    public static (ConsolePosition Begin, ConsolePosition End) Write(decimal value) =>
-        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
+    public static (ConsolePosition Begin, ConsolePosition End) Write(decimal value)
+    {
+        return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
+    }
 
-    public static (ConsolePosition Begin, ConsolePosition End) Write(double value) =>
-        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
+    public static (ConsolePosition Begin, ConsolePosition End) Write(double value)
+    {
+        return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
+    }
 
-    public static (ConsolePosition Begin, ConsolePosition End) Write(int value) =>
-        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
+    public static (ConsolePosition Begin, ConsolePosition End) Write(int value)
+    {
+        return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
+    }
 
-    public static (ConsolePosition Begin, ConsolePosition End) Write(long value) =>
-        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
+    public static (ConsolePosition Begin, ConsolePosition End) Write(long value)
+    {
+        return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
+    }
 
     public static (ConsolePosition Begin, ConsolePosition End) Write(object? value)
     {
@@ -857,8 +864,10 @@ public static class XConsole
         return WriteBase(new[] { new ConsoleItem(valueStr) }, isWriteLine: false);
     }
 
-    public static (ConsolePosition Begin, ConsolePosition End) Write(float value) =>
-        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
+    public static (ConsolePosition Begin, ConsolePosition End) Write(float value)
+    {
+        return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
+    }
 
     public static (ConsolePosition Begin, ConsolePosition End) Write(
         string format, object? arg0)
@@ -910,17 +919,29 @@ public static class XConsole
             isWriteLine: false);
     }
 
-    public static (ConsolePosition Begin, ConsolePosition End) Write(uint value) =>
-        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
+    public static (ConsolePosition Begin, ConsolePosition End) Write(uint value)
+    {
+        return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
+    }
 
-    public static (ConsolePosition Begin, ConsolePosition End) Write(ulong value) =>
-        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
+    public static (ConsolePosition Begin, ConsolePosition End) Write(ulong value)
+    {
+        return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
+    }
 
-    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(bool value) =>
-        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
+    #endregion
 
-    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(char value) =>
-        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
+    #region WriteLine overloads
+
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(bool value)
+    {
+        return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
+    }
+
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(char value)
+    {
+        return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
+    }
 
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(char[]? buffer)
     {
@@ -942,17 +963,25 @@ public static class XConsole
         return WriteBase(new[] { new ConsoleItem(value) }, isWriteLine: true);
     }
 
-    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(decimal value) =>
-        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(decimal value)
+    {
+        return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
+    }
 
-    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(double value) =>
-        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(double value)
+    {
+        return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
+    }
 
-    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(int value) =>
-        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(int value)
+    {
+        return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
+    }
 
-    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(long value) =>
-        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(long value)
+    {
+        return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
+    }
 
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(object? value)
     {
@@ -964,8 +993,10 @@ public static class XConsole
         return WriteBase(new[] { new ConsoleItem(valueStr) }, isWriteLine: true);
     }
 
-    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(float value) =>
-        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(float value)
+    {
+        return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
+    }
 
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(
         string format, object? arg0)
@@ -1005,11 +1036,15 @@ public static class XConsole
             isWriteLine: true);
     }
 
-    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(uint value) =>
-        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(uint value)
+    {
+        return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
+    }
 
-    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(ulong value) =>
-        WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(ulong value)
+    {
+        return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
+    }
 
     #endregion
 
