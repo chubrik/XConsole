@@ -5,7 +5,6 @@ using System;
 internal readonly struct ConsoleItem
 {
     public const ConsoleColor NoColor = (ConsoleColor)(-1);
-    private static readonly ConsoleItem Empty = new(string.Empty);
 
     public string Value { get; }
     public ConsoleColor BackColor { get; }
@@ -28,9 +27,13 @@ internal readonly struct ConsoleItem
     public static ConsoleItem Parse(string? value)
     {
         if (string.IsNullOrEmpty(value))
-            return Empty;
+            return new(string.Empty);
 
+#if NET
         var char0 = value[0];
+#else
+        var char0 = value![0];
+#endif
 
         if (char0 == '`')
             return new(value.Substring(1));
