@@ -63,6 +63,47 @@ public static class ConsoleUtilsExtensions
         });
     }
 
+    #region ReadLine
+
+    public static string ReadLineHidden(this ConsoleUtils _) => ReadLineBase(maskChar: null);
+
+    public static string ReadLineMasked(this ConsoleUtils _, char maskChar = '\u2022') => ReadLineBase(maskChar);
+
+    private static string ReadLineBase(char? maskChar)
+    {
+        return XConsole.Sync(() =>
+        {
+            var text = string.Empty;
+            ConsoleKeyInfo keyInfo;
+
+            do
+            {
+                keyInfo = XConsole.ReadKey(intercept: true);
+
+                if (keyInfo.Key == ConsoleKey.Backspace && text.Length > 0)
+                {
+                    if (maskChar != null)
+                        XConsole.Write("\b \b");
+
+                    text = text.Substring(0, text.Length - 1);
+                }
+                else if (!char.IsControl(keyInfo.KeyChar))
+                {
+                    if (maskChar != null)
+                        XConsole.Write(maskChar.Value);
+
+                    text += keyInfo.KeyChar;
+                }
+            }
+            while (keyInfo.Key != ConsoleKey.Enter);
+
+            XConsole.WriteLine();
+            return text;
+        });
+    }
+
+    #endregion
+
     #region Window resize
 
 #if NET

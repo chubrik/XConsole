@@ -353,6 +353,8 @@ public static class XConsole
             return Console.ReadLine() ?? string.Empty;
     }
 
+    [Obsolete("This overload is deprecated. Please install the package 'XConsole.Utils' " +
+        "and use XConsole.Utils.ReadLineMasked() or XConsole.Utils.ReadLineHidden() instead.")]
     public static string ReadLine(ConsoleReadLineMode mode, char maskChar = '\u2022')
     {
         switch (mode)
