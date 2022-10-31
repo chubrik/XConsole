@@ -50,6 +50,9 @@ public static class XConsole
         set => _coloringEnabled = !value;
     }
 
+    /// <summary>
+    /// Special property for making XConsole extensions
+    /// </summary>
     public static ConsoleUtils Utils { get; } = new();
 
     internal static long ShiftTop => _shiftTop;
@@ -173,7 +176,7 @@ public static class XConsole
 
             if (pinEndTop == _maxTop)
             {
-                _pinHeight = 1 + GetLineWrapCount(pinItems, beginLeft: 0);
+                _pinHeight = 1 + CalcLineWrapCount(pinItems, beginLeft: 0);
                 var shift = origTop + _pinHeight - _maxTop;
                 _shiftTop += shift;
                 origTop -= shift;
@@ -322,7 +325,7 @@ public static class XConsole
 
             if (endTop == _maxTop)
             {
-                var lineWrapCount = GetLineWrapCount(items, origLeft);
+                var lineWrapCount = CalcLineWrapCount(items, origLeft);
                 var shift = origTop + lineWrapCount - endTop;
                 shiftTop += shift;
                 origTop -= shift;
@@ -556,7 +559,7 @@ public static class XConsole
 
                     if (pinEndTop == _maxTop)
                     {
-                        _pinHeight = 1 + GetLineWrapCount(pinItems, beginLeft: 0);
+                        _pinHeight = 1 + CalcLineWrapCount(pinItems, beginLeft: 0);
                         var shift = origTop + 1 + _pinHeight - _maxTop;
                         _shiftTop += shift;
                         origTop -= shift;
@@ -621,7 +624,7 @@ public static class XConsole
 
                     if (endTop == _maxTop)
                     {
-                        var logLineWrapCount = GetLineWrapCount(logItems, beginLeft);
+                        var logLineWrapCount = CalcLineWrapCount(logItems, beginLeft);
                         var shift = beginTop + logLineWrapCount + 1 - endTop;
                         _shiftTop += shift;
                         beginTop -= shift;
@@ -634,7 +637,7 @@ public static class XConsole
 
                     if (endTop == _maxTop)
                     {
-                        var logLineWrapCount = GetLineWrapCount(logItems, beginLeft);
+                        var logLineWrapCount = CalcLineWrapCount(logItems, beginLeft);
                         var shift = beginTop + logLineWrapCount - endTop;
                         _shiftTop += shift;
                         beginTop -= shift;
@@ -683,7 +686,7 @@ public static class XConsole
 
                         if (endTop == _maxTop)
                         {
-                            var logLineWrapCount = GetLineWrapCount(logItems, beginLeft);
+                            var logLineWrapCount = CalcLineWrapCount(logItems, beginLeft);
                             var shift = beginTop + logLineWrapCount + 1 - endTop;
                             _shiftTop += shift;
                             beginTop -= shift;
@@ -696,7 +699,7 @@ public static class XConsole
 
                         if (endTop == _maxTop)
                         {
-                            var logLineWrapCount = GetLineWrapCount(logItems, beginLeft);
+                            var logLineWrapCount = CalcLineWrapCount(logItems, beginLeft);
                             var shift = beginTop + logLineWrapCount - endTop;
                             _shiftTop += shift;
                             beginTop -= shift;
@@ -746,8 +749,8 @@ public static class XConsole
 
                         if (pinEndTop == _maxTop)
                         {
-                            var logLineWrapCount = GetLineWrapCount(logItems, beginLeft);
-                            _pinHeight = 1 + GetLineWrapCount(pinItems, beginLeft: 0);
+                            var logLineWrapCount = CalcLineWrapCount(logItems, beginLeft);
+                            _pinHeight = 1 + CalcLineWrapCount(pinItems, beginLeft: 0);
                             var shift = beginTop + logLineWrapCount + 1 + _pinHeight - _maxTop;
                             _shiftTop += shift;
                             beginTop -= shift;
@@ -767,8 +770,8 @@ public static class XConsole
 
                         if (pinEndTop == _maxTop)
                         {
-                            var logLineWrapCount = GetLineWrapCount(logItems, beginLeft);
-                            _pinHeight = 1 + GetLineWrapCount(pinItems, beginLeft: 0);
+                            var logLineWrapCount = CalcLineWrapCount(logItems, beginLeft);
+                            _pinHeight = 1 + CalcLineWrapCount(pinItems, beginLeft: 0);
                             var shift = beginTop + logLineWrapCount + _pinHeight - _maxTop;
                             _shiftTop += shift;
                             beginTop -= shift;
@@ -1103,7 +1106,7 @@ public static class XConsole
                 Console.Write(items[i].Value);
     }
 
-    private static int GetLineWrapCount(ConsoleItem[] items, int beginLeft)
+    private static int CalcLineWrapCount(ConsoleItem[] items, int beginLeft)
     {
         var lineWrapCount = 0;
         var left = beginLeft;
@@ -1121,7 +1124,7 @@ public static class XConsole
             {
                 chr = chars[charIndex];
 
-                if (chr >= 32)
+                if (chr >= ' ')
                     left++;
                 else
                     switch (chr)
@@ -1143,6 +1146,18 @@ public static class XConsole
 
                             if (left > 0)
                                 left--;
+
+                            continue;
+
+                        case '\x1b':
+
+                            for (charIndex++; charIndex < charCount; charIndex++)
+                            {
+                                chr = chars[charIndex];
+
+                                if ((chr >= 'A' && chr <= 'Z') || (chr >= 'a' && chr <= 'z'))
+                                    break;
+                            }
 
                             continue;
 
