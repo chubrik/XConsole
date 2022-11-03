@@ -12,6 +12,7 @@ using System.Text;
 
 #if NET
 using System.Runtime.Versioning;
+using System.Runtime.InteropServices;
 [SupportedOSPlatform("windows")]
 [UnsupportedOSPlatform("android")]
 [UnsupportedOSPlatform("browser")]
@@ -21,8 +22,11 @@ using System.Runtime.Versioning;
 public static class XConsole
 {
     private static readonly string _newLine = Environment.NewLine;
-    private static readonly bool _positioningEnabled = true;
+    private static readonly bool _positioningEnabled;
     private static readonly object _syncLock = new();
+#if NET
+    private static readonly bool _virtualTerminalEnabled;
+#endif
 
     private static bool _coloringEnabled = Environment.GetEnvironmentVariable("NO_COLOR") == null;
     private static bool _cursorVisible;
@@ -37,11 +41,13 @@ public static class XConsole
         {
             _cursorVisible = Console.CursorVisible;
             _maxTop = Console.BufferHeight - 1;
+            _positioningEnabled = true;
         }
-        catch
-        {
-            _positioningEnabled = false;
-        }
+        catch { }
+
+#if NET
+        _virtualTerminalEnabled = EnableVirtualTerminal();
+#endif
     }
 
     public static bool NO_COLOR
@@ -1151,15 +1157,27 @@ public static class XConsole
 
                         case '\x1b':
 
-                            for (charIndex++; charIndex < charCount; charIndex++)
+#if NET
+                            if (_virtualTerminalEnabled)
                             {
-                                chr = chars[charIndex];
+                                for (charIndex++; charIndex < charCount; charIndex++)
+                                {
+                                    chr = chars[charIndex];
 
-                                if ((chr >= 'A' && chr <= 'Z') || (chr >= 'a' && chr <= 'z'))
-                                    break;
+                                    if ((chr >= 'A' && chr <= 'Z') || (chr >= 'a' && chr <= 'z'))
+                                        break;
+                                }
+
+                                continue;
                             }
-
-                            continue;
+                            else
+                            {
+#endif
+                                left++;
+                                break;
+#if NET
+                            }
+#endif
 
                         default:
                             continue;
@@ -1175,6 +1193,37 @@ public static class XConsole
 
         return lineWrapCount;
     }
+
+    #region Virtual terminal
+
+#if NET
+    // https://learn.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences
+
+    private const int STD_OUTPUT_HANDLE = -11;
+    private const uint ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004;
+
+    private static readonly IntPtr INVALID_HANDLE_VALUE = new(-1);
+
+    private static bool EnableVirtualTerminal()
+    {
+        var hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+
+        return hOut != INVALID_HANDLE_VALUE &&
+               GetConsoleMode(hOut, out var dwMode) &&
+               SetConsoleMode(hOut, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+    }
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern IntPtr GetStdHandle(int nStdHandle);
+
+    [DllImport("kernel32.dll")]
+    private static extern bool GetConsoleMode(IntPtr hConsoleHandle, out uint lpMode);
+
+    [DllImport("kernel32.dll")]
+    private static extern bool SetConsoleMode(IntPtr hConsoleHandle, uint dwMode);
+#endif
+
+    #endregion
 
     #endregion
 
