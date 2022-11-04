@@ -2,7 +2,6 @@
 #pragma warning disable CA1416 // Validate platform compatibility
 #endif
 
-using Chubrik.XConsole.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;

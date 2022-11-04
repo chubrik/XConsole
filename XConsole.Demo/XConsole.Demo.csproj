@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\XConsole.Utils\XConsole.Utils.csproj" />
+    <ProjectReference Include="..\XConsole\XConsole.csproj" />
   </ItemGroup>
 
   <ItemGroup>

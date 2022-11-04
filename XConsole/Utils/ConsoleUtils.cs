@@ -1,45 +1,46 @@
-﻿namespace Chubrik.XConsole.Utils;
+﻿namespace Chubrik.XConsole;
 
 using System;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 #if NET
 using System.Runtime.Versioning;
-using System.Runtime.InteropServices;
 [SupportedOSPlatform("windows")]
 [UnsupportedOSPlatform("android")]
 [UnsupportedOSPlatform("browser")]
 [UnsupportedOSPlatform("ios")]
 [UnsupportedOSPlatform("tvos")]
 #endif
-public static class ConsoleUtilsExtensions
+public sealed class ConsoleUtils
 {
+    internal ConsoleUtils() { }
+
     #region Animations
 
-    public static ConsoleAnimation AnimateEllipsis(this ConsoleUtils _)
+    public ConsoleAnimation AnimateEllipsis()
     {
         return new EllipsisAnimation(XConsole.CursorPosition);
     }
 
-    public static ConsoleAnimation AnimateEllipsis(this ConsoleUtils _, CancellationToken cancellationToken)
+    public ConsoleAnimation AnimateEllipsis(CancellationToken cancellationToken)
     {
         return new EllipsisAnimation(XConsole.CursorPosition, cancellationToken);
     }
 
-    public static ConsoleAnimation AnimateSpinner(this ConsoleUtils _)
+    public ConsoleAnimation AnimateSpinner()
     {
         return new SpinnerAnimation(XConsole.CursorPosition);
     }
 
-    public static ConsoleAnimation AnimateSpinner(this ConsoleUtils _, CancellationToken cancellationToken)
+    public ConsoleAnimation AnimateSpinner(CancellationToken cancellationToken)
     {
         return new SpinnerAnimation(XConsole.CursorPosition, cancellationToken);
     }
 
     #endregion
 
-    public static bool Confirm(
-        this ConsoleUtils _, string message = "W`Continue? [Y/n]: ", string yes = "G`Yes", string no = "R`No")
+    public bool Confirm(string message = "W`Continue? [Y/n]: ", string yes = "G`Yes", string no = "R`No")
     {
         return XConsole.Sync(() =>
         {
@@ -65,11 +66,11 @@ public static class ConsoleUtilsExtensions
 
     #region ReadLine
 
-    public static string ReadLineHidden(this ConsoleUtils _) => ReadLineBase(maskChar: null);
+    public string ReadLineHidden() => ReadLineBase(maskChar: null);
 
-    public static string ReadLineMasked(this ConsoleUtils _, char maskChar = '\u2022') => ReadLineBase(maskChar);
+    public string ReadLineMasked(char maskChar = '\u2022') => ReadLineBase(maskChar);
 
-    private static string ReadLineBase(char? maskChar)
+    private string ReadLineBase(char? maskChar)
     {
         return XConsole.Sync(() =>
         {
@@ -114,18 +115,18 @@ public static class ConsoleUtilsExtensions
     private const int SW_MINIMIZE = 6;
     private const int SW_RESTORE = 9;
 
+    private static readonly IntPtr _consolePtr = GetConsoleWindow();
+
+    public void HideWindow() => ShowWindow(_consolePtr, SW_HIDE);
+    public void MaximizeWindow() => ShowWindow(_consolePtr, SW_MAXIMIZE);
+    public void MinimizeWindow() => ShowWindow(_consolePtr, SW_MINIMIZE);
+    public void RestoreWindow() => ShowWindow(_consolePtr, SW_RESTORE);
+
     [DllImport("kernel32.dll", ExactSpelling = true)]
     private static extern IntPtr GetConsoleWindow();
 
     [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
     private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-
-    private static readonly IntPtr _consolePtr = GetConsoleWindow();
-
-    public static void HideWindow(this ConsoleUtils _) => ShowWindow(_consolePtr, SW_HIDE);
-    public static void MaximizeWindow(this ConsoleUtils _) => ShowWindow(_consolePtr, SW_MAXIMIZE);
-    public static void MinimizeWindow(this ConsoleUtils _) => ShowWindow(_consolePtr, SW_MINIMIZE);
-    public static void RestoreWindow(this ConsoleUtils _) => ShowWindow(_consolePtr, SW_RESTORE);
 #endif
 
     #endregion

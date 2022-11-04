@@ -66,9 +66,6 @@ public static class XConsole
         set => _coloringEnabled = !value;
     }
 
-    /// <summary>
-    /// Special property for making XConsole extensions
-    /// </summary>
     public static ConsoleUtils Utils { get; } = new();
 
     public static void Sync(Action action)
