@@ -1079,30 +1079,30 @@ public static class XConsole
             {
                 item = items[i];
 
-                if (item.BackColor == ConsoleItem.NoColor)
+                switch (item.Type)
                 {
-                    if (item.ForeColor == ConsoleItem.NoColor)
+                    case ConsoleItemType.Plain:
                     {
                         Console.Write(item.Value);
+                        continue;
                     }
-                    else
+                    case ConsoleItemType.ForeColor:
                     {
                         var origForeColor = Console.ForegroundColor;
                         Console.ForegroundColor = item.ForeColor;
                         Console.Write(item.Value);
                         Console.ForegroundColor = origForeColor;
+                        continue;
                     }
-                }
-                else
-                {
-                    if (item.ForeColor == ConsoleItem.NoColor)
+                    case ConsoleItemType.BackColor:
                     {
                         var origBackColor = Console.BackgroundColor;
                         Console.BackgroundColor = item.BackColor;
                         Console.Write(item.Value);
                         Console.BackgroundColor = origBackColor;
+                        continue;
                     }
-                    else
+                    case ConsoleItemType.BothColors:
                     {
                         var origBackColor = Console.BackgroundColor;
                         var origForeColor = Console.ForegroundColor;
@@ -1111,7 +1111,19 @@ public static class XConsole
                         Console.Write(item.Value);
                         Console.BackgroundColor = origBackColor;
                         Console.ForegroundColor = origForeColor;
+                        continue;
                     }
+                    case ConsoleItemType.Ansi:
+                    {
+                        var origBackColor = Console.BackgroundColor;
+                        var origForeColor = Console.ForegroundColor;
+                        Console.Write(item.Value);
+                        Console.BackgroundColor = origBackColor;
+                        Console.ForegroundColor = origForeColor;
+                        continue;
+                    }
+                    default:
+                        throw new InvalidOperationException();
                 }
             }
         }
