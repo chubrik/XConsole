@@ -64,47 +64,6 @@ public sealed class ConsoleUtils
         });
     }
 
-    #region ReadLine
-
-    public string ReadLineHidden() => ReadLineBase(maskChar: null);
-
-    public string ReadLineMasked(char maskChar = '\u2022') => ReadLineBase(maskChar);
-
-    private string ReadLineBase(char? maskChar)
-    {
-        return XConsole.Sync(() =>
-        {
-            var text = string.Empty;
-            ConsoleKeyInfo keyInfo;
-
-            do
-            {
-                keyInfo = XConsole.ReadKey(intercept: true);
-
-                if (keyInfo.Key == ConsoleKey.Backspace && text.Length > 0)
-                {
-                    if (maskChar != null)
-                        XConsole.Write("\b \b");
-
-                    text = text.Substring(0, text.Length - 1);
-                }
-                else if (!char.IsControl(keyInfo.KeyChar))
-                {
-                    if (maskChar != null)
-                        XConsole.Write(maskChar.Value);
-
-                    text += keyInfo.KeyChar;
-                }
-            }
-            while (keyInfo.Key != ConsoleKey.Enter);
-
-            XConsole.WriteLine();
-            return text;
-        });
-    }
-
-    #endregion
-
     #region Window resize
 
 #if NET
