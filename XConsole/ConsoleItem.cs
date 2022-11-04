@@ -4,25 +4,21 @@ using System;
 
 internal readonly struct ConsoleItem
 {
-    public ConsoleItemType Type { get; }
     public string Value { get; }
-    public ConsoleColor BackColor { get; }
+    public ConsoleItemType Type { get; }
     public ConsoleColor ForeColor { get; }
+    public ConsoleColor BackColor { get; }
 
-    private ConsoleItem(ConsoleItemType type, string value, ConsoleColor backColor, ConsoleColor foreColor)
+    public ConsoleItem(
+        string value,
+        ConsoleItemType type = ConsoleItemType.Plain,
+        ConsoleColor foreColor = default,
+        ConsoleColor backColor = default)
     {
         Type = type;
         Value = value;
-        BackColor = backColor;
         ForeColor = foreColor;
-    }
-
-    public ConsoleItem(string value)
-    {
-        Type = ConsoleItemType.Plain;
-        Value = value;
-        BackColor = default;
-        ForeColor = default;
+        BackColor = backColor;
     }
 
     public static ConsoleItem Parse(string? value)
@@ -45,9 +41,7 @@ internal readonly struct ConsoleItem
                 var foreColor = _colorMap[char0];
 
                 if (foreColor != -1)
-                    return new(
-                        ConsoleItemType.ForeColor, value.Substring(2),
-                        backColor: default, (ConsoleColor)foreColor);
+                    return new(value.Substring(2), ConsoleItemType.ForeColor, foreColor: (ConsoleColor)foreColor);
             }
 
             return new(value);
@@ -55,25 +49,21 @@ internal readonly struct ConsoleItem
 
         if (value.Length > 2 && value[2] == '`' && char0 <= 'y')
         {
-            var backColor = _colorMap[char0];
+            var backColor = _colorMap[value[1]];
 
             if (backColor != -1)
             {
-                var char1 = value[1];
-
-                if (char1 <= 'y')
+                if (char0 <= 'y')
                 {
-                    var foreColor = _colorMap[char1];
+                    var foreColor = _colorMap[char0];
 
                     if (foreColor != -1)
                         return new(
-                            ConsoleItemType.BothColors, value.Substring(3),
-                            (ConsoleColor)backColor, (ConsoleColor)foreColor);
+                            value.Substring(3), ConsoleItemType.BothColors,
+                            foreColor: (ConsoleColor)foreColor, backColor: (ConsoleColor)backColor);
 
-                    if (char1 == ' ')
-                        return new(
-                            ConsoleItemType.BackColor, value.Substring(3),
-                            (ConsoleColor)backColor, foreColor: default);
+                    if (char0 == ' ')
+                        return new(value.Substring(3), ConsoleItemType.BackColor, backColor: (ConsoleColor)backColor);
                 }
             }
 
@@ -81,7 +71,7 @@ internal readonly struct ConsoleItem
         }
 
         if (char0 == '\x1b')
-            return new(ConsoleItemType.Ansi, value, backColor: default, foreColor: default);
+            return new(value, ConsoleItemType.Ansi);
 
         return new(value);
     }

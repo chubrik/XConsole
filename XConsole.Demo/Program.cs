@@ -14,7 +14,7 @@ public static class Program
 {
     public static async Task Main()
     {
-        Console.WriteLine("bC`Hello", "R`, ", "mY`World", "G`!");
+        Console.WriteLine("Cb`Hello", "R`, ", "Ym`World", "G`!");
 
         //
         Console.WriteLine();
@@ -70,7 +70,7 @@ public static class Program
         foreach (var animation in animationList)
         {
             await Task.Delay(300);
-            animation.Stop().TryWrite("bC`ok");
+            animation.Stop().TryWrite("Cb`ok");
         }
     }
 }

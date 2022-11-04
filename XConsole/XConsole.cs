@@ -1104,22 +1104,22 @@ public static class XConsole
                     }
                     case ConsoleItemType.BothColors:
                     {
-                        var origBackColor = Console.BackgroundColor;
                         var origForeColor = Console.ForegroundColor;
-                        Console.BackgroundColor = item.BackColor;
+                        var origBackColor = Console.BackgroundColor;
                         Console.ForegroundColor = item.ForeColor;
+                        Console.BackgroundColor = item.BackColor;
                         Console.Write(item.Value);
-                        Console.BackgroundColor = origBackColor;
                         Console.ForegroundColor = origForeColor;
+                        Console.BackgroundColor = origBackColor;
                         continue;
                     }
                     case ConsoleItemType.Ansi:
                     {
-                        var origBackColor = Console.BackgroundColor;
                         var origForeColor = Console.ForegroundColor;
+                        var origBackColor = Console.BackgroundColor;
                         Console.Write(item.Value);
-                        Console.BackgroundColor = origBackColor;
                         Console.ForegroundColor = origForeColor;
+                        Console.BackgroundColor = origBackColor;
                         continue;
                     }
                     default:

@@ -56,9 +56,9 @@ To colorize the text you need to add a prefix to a string.
 The prefix consists of one or two letters denoting colors,
 followed by a trailing `` ` `` character, after which the text immediately begins.
 
-Let’s denote the text color letter as `X` and the background color letter as `Z`.
-In this case, there are three prefix patterns: `` X` `` to change text color,
-`` Z ` `` to change background color, `` ZX` `` to change both colors.
+Let’s denote the text color letter as *T* and the background color letter as *B*.
+In this case, there are three prefix patterns: `` T` `` to change only text color,
+`` TB` `` to change both colors, ``  B` `` (space at the beginning) to change only background color.
 
 For example, to colorize text to green just add `` G` `` prefix (*G* means green):
 ```csharp
@@ -70,7 +70,7 @@ To make a multicolor message split it to parts with individual color prefixes
 and pass them to single `WriteLine` method.
 Be sure that your messages will not be broken by other threads.
 ```csharp
-Console.WriteLine("C`It is easy ", "bW`to use many", "R` colors in ", "Y`one message");
+Console.WriteLine("C`It is easy ", "Wb`to use many", "R` colors in ", "Y`one message");
 ```
 ![XConsole multicolor](https://raw.githubusercontent.com/chubrik/XConsole/main/img/colors-multi.png)
 
