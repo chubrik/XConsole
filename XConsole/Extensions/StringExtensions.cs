@@ -1,11 +1,17 @@
 ﻿#if NET
 
-namespace Chubrik.XConsole.Extensions;
+namespace Chubrik.XConsole;
 
 using System;
 using System.Drawing;
 using System.Globalization;
+using System.Runtime.Versioning;
 
+[SupportedOSPlatform("windows")]
+[UnsupportedOSPlatform("android")]
+[UnsupportedOSPlatform("browser")]
+[UnsupportedOSPlatform("ios")]
+[UnsupportedOSPlatform("tvos")]
 public static class StringExtensions
 {
     private const string _foregroundColorFormat = "\x1b[38;2;{0};{1};{2}m{3}\x1b[39m";
@@ -22,6 +28,7 @@ public static class StringExtensions
 
     #region Foreground color
 
+    /// <summary>XConsole extension for colorizing text in the console.</summary>
     public static string Color(this string value, Color color)
     {
         return XConsole.VirtualTerminalAndColoringEnabled
@@ -29,11 +36,13 @@ public static class StringExtensions
             : value;
     }
 
+    /// <summary>XConsole extension for colorizing text in the console.</summary>
     public static string Color(this string value, KnownColor color)
     {
         return value.Color(System.Drawing.Color.FromKnownColor(color: color));
     }
 
+    /// <summary>XConsole extension for colorizing text in the console.</summary>
     public static string Color(this string value, ConsoleColor color)
     {
         return XConsole.VirtualTerminalAndColoringEnabled
@@ -41,16 +50,19 @@ public static class StringExtensions
             : value;
     }
 
+    /// <summary>XConsole extension for colorizing text in the console.</summary>
     public static string Color(this string value, int rgb)
     {
         return value.Color(System.Drawing.Color.FromArgb(argb: rgb));
     }
 
+    /// <summary>XConsole extension for colorizing text in the console.</summary>
     public static string Color(this string value, int red, int green, int blue)
     {
         return value.Color(System.Drawing.Color.FromArgb(red: red, green: green, blue: blue));
     }
 
+    /// <summary>XConsole extension for colorizing text in the console.</summary>
     public static string Color(this string value, string hexColor)
     {
         var rgb = int.Parse(hexColor[0] == '#' ? hexColor.Substring(1) : hexColor, NumberStyles.HexNumber);
@@ -61,6 +73,7 @@ public static class StringExtensions
 
     #region Background color
 
+    /// <summary>XConsole extension for colorizing text in the console.</summary>
     public static string BgColor(this string value, Color color)
     {
         return XConsole.VirtualTerminalAndColoringEnabled
@@ -68,11 +81,13 @@ public static class StringExtensions
             : value;
     }
 
+    /// <summary>XConsole extension for colorizing text in the console.</summary>
     public static string BgColor(this string value, KnownColor color)
     {
         return value.BgColor(System.Drawing.Color.FromKnownColor(color: color));
     }
 
+    /// <summary>XConsole extension for colorizing text in the console.</summary>
     public static string BgColor(this string value, ConsoleColor color)
     {
         return XConsole.VirtualTerminalAndColoringEnabled
@@ -80,16 +95,19 @@ public static class StringExtensions
             : value;
     }
 
+    /// <summary>XConsole extension for colorizing text in the console.</summary>
     public static string BgColor(this string value, int rgb)
     {
         return value.BgColor(System.Drawing.Color.FromArgb(argb: rgb));
     }
 
+    /// <summary>XConsole extension for colorizing text in the console.</summary>
     public static string BgColor(this string value, int red, int green, int blue)
     {
         return value.BgColor(System.Drawing.Color.FromArgb(red: red, green: green, blue: blue));
     }
 
+    /// <summary>XConsole extension for colorizing text in the console.</summary>
     public static string BgColor(this string value, string hexColor)
     {
         var rgb = int.Parse(hexColor[0] == '#' ? hexColor.Substring(1) : hexColor, NumberStyles.HexNumber);
@@ -98,6 +116,7 @@ public static class StringExtensions
 
     #endregion
 
+    /// <summary>XConsole extension for underlining text in the console.</summary>
     public static string Underline(this string value)
     {
         return XConsole.VirtualTerminalEnabled ? string.Format(_underlineFormat, value) : value;

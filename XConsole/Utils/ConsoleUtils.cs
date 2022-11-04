@@ -18,22 +18,22 @@ public sealed class ConsoleUtils
 
     #region Animations
 
-    public ConsoleAnimation AnimateEllipsis()
+    public IConsoleAnimation AnimateEllipsis()
     {
         return new EllipsisAnimation(XConsole.CursorPosition);
     }
 
-    public ConsoleAnimation AnimateEllipsis(CancellationToken cancellationToken)
+    public IConsoleAnimation AnimateEllipsis(CancellationToken cancellationToken)
     {
         return new EllipsisAnimation(XConsole.CursorPosition, cancellationToken);
     }
 
-    public ConsoleAnimation AnimateSpinner()
+    public IConsoleAnimation AnimateSpinner()
     {
         return new SpinnerAnimation(XConsole.CursorPosition);
     }
 
-    public ConsoleAnimation AnimateSpinner(CancellationToken cancellationToken)
+    public IConsoleAnimation AnimateSpinner(CancellationToken cancellationToken)
     {
         return new SpinnerAnimation(XConsole.CursorPosition, cancellationToken);
     }

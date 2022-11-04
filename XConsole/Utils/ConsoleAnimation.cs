@@ -12,7 +12,7 @@ using System.Runtime.Versioning;
 [UnsupportedOSPlatform("ios")]
 [UnsupportedOSPlatform("tvos")]
 #endif
-public abstract class ConsoleAnimation : IDisposable
+internal abstract class ConsoleAnimation : IConsoleAnimation
 {
     protected static readonly Random _random = new();
 

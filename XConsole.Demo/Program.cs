@@ -1,5 +1,4 @@
-﻿using Chubrik.XConsole.Extensions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -46,7 +45,7 @@ public static class Program
         var fileIndex = 0;
         Console.Pin(() => new[] { "m`This is pin!\n", $"g`Number of files: ", $"W`{fileIndex}" });
         var endPosList = new List<ConsolePosition>();
-        var animationList = new List<ConsoleAnimation>();
+        var animationList = new List<IConsoleAnimation>();
         var random = new Random();
 
         for (; fileIndex < Math.Min(100, files.Length); fileIndex++)
