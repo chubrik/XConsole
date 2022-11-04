@@ -24,14 +24,15 @@ public static class XConsole
     private static readonly string _newLine = Environment.NewLine;
     private static readonly bool _positioningEnabled;
     private static readonly object _syncLock = new();
-#if NET
-    private static readonly bool _virtualTerminalEnabled;
-#endif
 
     private static bool _coloringEnabled = Environment.GetEnvironmentVariable("NO_COLOR") == null;
     private static bool _cursorVisible;
     private static int _maxTop;
     private static long _shiftTop = 0;
+
+#if NET
+    internal static readonly bool VirtualTerminalEnabled;
+#endif
 
     static XConsole()
     {
@@ -41,14 +42,23 @@ public static class XConsole
         {
             _cursorVisible = Console.CursorVisible;
             _maxTop = Console.BufferHeight - 1;
-            _positioningEnabled = true;
+            _positioningEnabled = _maxTop > 0;
         }
         catch { }
 
 #if NET
-        _virtualTerminalEnabled = EnableVirtualTerminal();
+        try
+        {
+            VirtualTerminalEnabled = EnableVirtualTerminal();
+        }
+        catch { }
 #endif
     }
+
+    internal static long ShiftTop => _shiftTop;
+#if NET
+    internal static bool VirtualTerminalAndColoringEnabled => VirtualTerminalEnabled && _coloringEnabled;
+#endif
 
     public static bool NO_COLOR
     {
@@ -60,8 +70,6 @@ public static class XConsole
     /// Special property for making XConsole extensions
     /// </summary>
     public static ConsoleUtils Utils { get; } = new();
-
-    internal static long ShiftTop => _shiftTop;
 
     public static void Sync(Action action)
     {
@@ -1158,7 +1166,7 @@ public static class XConsole
                         case '\x1b':
 
 #if NET
-                            if (_virtualTerminalEnabled)
+                            if (VirtualTerminalEnabled)
                             {
                                 for (charIndex++; charIndex < charCount; charIndex++)
                                 {

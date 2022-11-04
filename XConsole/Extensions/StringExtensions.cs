@@ -1,4 +1,4 @@
-﻿#if !NETSTANDARD1_3
+﻿#if NET
 
 namespace Chubrik.XConsole.Extensions;
 
@@ -24,19 +24,21 @@ public static class StringExtensions
 
     public static string Color(this string value, Color color)
     {
-        return string.Format(_foregroundColorFormat, color.R, color.G, color.B, value);
+        return XConsole.VirtualTerminalAndColoringEnabled
+            ? string.Format(_foregroundColorFormat, color.R, color.G, color.B, value)
+            : value;
     }
 
-#if !NETSTANDARD2_0
     public static string Color(this string value, KnownColor color)
     {
         return value.Color(System.Drawing.Color.FromKnownColor(color: color));
     }
-#endif
 
     public static string Color(this string value, ConsoleColor color)
     {
-        return string.Format(_foregroundConsoleColorFormat, _foregroundConsoleColorCodes[(int)color], value);
+        return XConsole.VirtualTerminalAndColoringEnabled
+            ? string.Format(_foregroundConsoleColorFormat, _foregroundConsoleColorCodes[(int)color], value)
+            : value;
     }
 
     public static string Color(this string value, int rgb)
@@ -61,19 +63,21 @@ public static class StringExtensions
 
     public static string BgColor(this string value, Color color)
     {
-        return string.Format(_backgroundColorFormat, color.R, color.G, color.B, value);
+        return XConsole.VirtualTerminalAndColoringEnabled
+            ? string.Format(_backgroundColorFormat, color.R, color.G, color.B, value)
+            : value;
     }
 
-#if !NETSTANDARD2_0
     public static string BgColor(this string value, KnownColor color)
     {
         return value.BgColor(System.Drawing.Color.FromKnownColor(color: color));
     }
-#endif
 
     public static string BgColor(this string value, ConsoleColor color)
     {
-        return string.Format(_backgroundConsoleColorFormat, _backgroundConsoleColorCodes[(int)color], value);
+        return XConsole.VirtualTerminalAndColoringEnabled
+            ? string.Format(_backgroundConsoleColorFormat, _backgroundConsoleColorCodes[(int)color], value)
+            : value;
     }
 
     public static string BgColor(this string value, int rgb)
@@ -96,7 +100,7 @@ public static class StringExtensions
 
     public static string Underline(this string value)
     {
-        return string.Format(_underlineFormat, value);
+        return XConsole.VirtualTerminalEnabled ? string.Format(_underlineFormat, value) : value;
     }
 }
 
