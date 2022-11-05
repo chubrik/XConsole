@@ -4,7 +4,6 @@
 
 Extended .NET console with coloring microsyntax, multiline pinning, write-to-position, etc.
 Safe for multitasking, safe for 9000+ lines, easy to use.
-
 The main features are shown in the following image:
 
 ![XConsole summary](https://raw.githubusercontent.com/chubrik/XConsole/main/img/summary.png)
@@ -16,7 +15,7 @@ The main features are shown in the following image:
 - [Pinning](#pinning)
 - [Positioning](#positioning)
 - [License](#license)
-<br>
+<br><br><br>
 
 ## <a name="install"></a>Install
 By Package Manager:
@@ -49,20 +48,20 @@ This trick is great for upgrading an existing regular console application
 because XConsole is backwards compatible with the standard Console.
 After the upgrade, the application will not change how it works
 unless you want to start using the XConsole features.
-<br><br><br>
+<br><br><br><br>
 
 ## <a name="coloring"></a>Coloring
-To colorize the text you need to add a prefix to a string.
+
+### Standard console colors
+To colorize the text with standard console colors you need to add a prefix to a string.
 The prefix consists of one or two letters denoting colors,
 followed by a trailing `` ` `` character, after which the text immediately begins.
-
 Let’s denote the text color letter as *T* and the background color letter as *B*.
 In this case, there are three prefix patterns: `` T` `` to change only text color,
 `` TB` `` to change both colors, ``  B` `` (space at the beginning) to change only background color.
-
 For example, to colorize text to green just add `` G` `` prefix (*G* means green):
 ```csharp
-Console.WriteLine("G`This log message is colorized using microsyntax");
+Console.WriteLine("G`This line is colorized using simple microsyntax");
 ```
 ![XConsole single color](https://raw.githubusercontent.com/chubrik/XConsole/main/img/colors-single.png)
 
@@ -74,14 +73,24 @@ Console.WriteLine("C`It is easy ", "Wb`to use many", "R` colors in ", "Y`one mes
 ```
 ![XConsole multicolor](https://raw.githubusercontent.com/chubrik/XConsole/main/img/colors-multi.png)
 
-The following table shows all possible colors and their letter designations:
+The following table shows all standard console colors and their letter designations:
 
 ![XConsole color table](https://raw.githubusercontent.com/chubrik/XConsole/main/img/colors-table.png)
 <br>
 
-### NO_COLOR
+### Extended colors
+If you’re running your application on Windows 10+ with .NET 5+, extended colors are available to you:
+```csharp
+// Different ways to colorize text orange
+Console.WriteLine("text".Color(Color.Orange));
+Console.WriteLine("text".Color(255, 160, 0));
+Console.WriteLine("text".Color(0xFFA000));
+Console.WriteLine("text".Color("#FFA000"));
+```
+
+#### NO_COLOR
 XConsole supports the [`NO_COLOR`](https://no-color.org/) standard with an appropriate environment variable and property.
-<br><br><br>
+<br><br><br><br>
 
 ## <a name="pinning"></a>Pinning
 You can pin some text below regular log messages with the `Pin` method.
@@ -117,14 +126,13 @@ To remove a pin, call the `Unpin` method:
 ```csharp
 Console.Unpin(); // Remove pin
 ```
-<br>
+<br><br>
 
 ## <a name="positioning"></a>Positioning
 XConsole provides a `ConsolePosition` structure, which is a position in the console area.
 This is an important feature if you have a lot of log messages.
 This structure is resistant to console buffer overflows (9000+ log lines)
 and always points to the correct position in the console area.
-
 Each `Write` and `WriteLine` method returns a start and end position.
 You can save them and use later to rewrite the text or add text to the end of the message.
 To do this, `ConsolePosition` has its own `Write` method, which returns a new end position.
@@ -145,7 +153,7 @@ You can also get or set the cursor position using the `ConsolePosition` structur
 ConsolePosition position = Console.CursorPosition;              // Get cursor position
 Console.CursorPosition = new ConsolePosition(left: 15, top: 5); // Set cursor position
 ```
-<br>
+<br><br>
 
 ## <a name="license"></a>License
 The XConsole is licensed under the [MIT license](https://github.com/chubrik/XConsole/blob/main/LICENSE).
