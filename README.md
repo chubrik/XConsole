@@ -24,7 +24,7 @@ PM> Install-Package XConsole
 ```
 Or by adding to \*.csproj file:
 ```
-<PackageReference Include="XConsole" Version="1.3.*" />
+<PackageReference Include="XConsole" Version="1.4.*" />
 ```
 More ways to install see on [NuGet Gallery](https://www.nuget.org/packages/XConsole/).
 <br><br><br>
