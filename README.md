@@ -75,18 +75,24 @@ Console.WriteLine("C`It is easy ", "Wb`to use many", "R` colors in ", "Y`one mes
 
 The following table shows all standard console colors and their letter designations:
 
-![XConsole color table](https://raw.githubusercontent.com/chubrik/XConsole/main/img/colors-table.png)
+![XConsole colors table](https://raw.githubusercontent.com/chubrik/XConsole/main/img/colors-table.png)
 <br>
 
 ### Extended colors
 If you’re running your application on Windows 10+ with .NET 5+, extended colors are available to you:
 ```csharp
-// Different ways to colorize text orange
-Console.WriteLine("text".Color(Color.Orange));
-Console.WriteLine("text".Color(255, 160, 0));
-Console.WriteLine("text".Color(0xFFA000));
-Console.WriteLine("text".Color("#FFA000"));
+// Different ways to colorize text the same orange color
+Console.WriteLine("This is orange text".Color(Color.Orange)); // Color structure
+Console.WriteLine("This is orange text".Color(255, 165, 0));  // Red, green & blue
+Console.WriteLine("This is orange text".Color(0xFFA500));     // Hexadecimal number
+Console.WriteLine("This is orange text".Color("#FFA500"));    // Hexadecimal string
+
+// Combinations of text and background colors
+Console.WriteLine("This is orange with an indigo background.".Color(Color.Orange).BgColor(Color.Indigo));
+Console.WriteLine(("This is lime " + "with a brown".BgColor(Color.Brown) + " background.").Color(Color.Lime));
+Console.WriteLine($"This is aqua {"with a navy".BgColor(Color.Navy)} background.".Color(Color.Aqua));
 ```
+![XConsole colors extended](https://raw.githubusercontent.com/chubrik/XConsole/main/img/colors-extended.png)
 
 #### NO_COLOR
 XConsole supports the [`NO_COLOR`](https://no-color.org/) standard with an appropriate environment variable and property.

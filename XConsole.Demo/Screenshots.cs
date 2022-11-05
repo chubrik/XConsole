@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 
 namespace Chubrik.XConsole.Demo;
 
@@ -77,6 +78,14 @@ public static class Screenshots
         Console.WriteLine("Console.Write(", "y`\"b`text\"", ");    ", "b`text    ", "dark ", "b`[b]", "lue");
         Console.WriteLine("Console.Write(", "y`\"d`text\"", ");    ", "d`text    [d]", "ark gray");
         Console.WriteLine("Console.Write(", "y`\"n`text\"", ");    ", "n`text    ", "d`[n]", "o color (black)");
+    }
+
+    public static void ColorsExtended()
+    {
+        Console.WriteLine("This is orange text".Color(Color.Orange));
+        Console.WriteLine("This is orange with an indigo background.".Color(Color.Orange).BgColor(Color.Indigo));
+        Console.WriteLine(("This is lime " + "with a brown".BgColor(Color.Brown) + " background.").Color(Color.Lime));
+        Console.WriteLine($"This is aqua {"with a navy".BgColor(Color.Navy)} background.".Color(Color.Aqua));
     }
 
     public static void StaticPin1()
