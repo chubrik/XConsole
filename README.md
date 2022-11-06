@@ -1,9 +1,13 @@
 # XConsole
 [![NuGet package](https://img.shields.io/nuget/v/XConsole)](https://www.nuget.org/packages/XConsole/)
 [![MIT license](https://img.shields.io/github/license/chubrik/XConsole)](https://github.com/chubrik/XConsole/blob/main/LICENSE)
+[![NuGet downloads](https://img.shields.io/nuget/dt/XConsole)](https://www.nuget.org/packages/XConsole/)
 
-Extended .NET console with coloring microsyntax, multiline pinning, write-to-position, etc.
-Safe for multitasking, safe for 9000+ lines, easy to use.
+Extended .NET console with coloring microsyntax, multiline pinning, write-to-position & most useful utils.
+It’s designed with a focus on performance for professional use in complex tasks:
+a huge number of asynchronous logs, with the need to highlight important and pin summary data.
+XConsole is safe for multitasking, safe for console buffer overflows (9000+ lines), very easy to use.
+
 The main features are shown in the following image:
 
 ![XConsole summary](https://raw.githubusercontent.com/chubrik/XConsole/main/img/summary.png)
@@ -14,15 +18,15 @@ The main features are shown in the following image:
 - [Coloring](#coloring)
 - [Pinning](#pinning)
 - [Positioning](#positioning)
+- [ReadLine](#readline)
 - [License](#license)
 <br><br><br>
 
 ## <a name="install"></a>Install
-By Package Manager:
+By Package Manager or by adding package reference to \*.csproj file:
 ```
 PM> Install-Package XConsole
 ```
-Or by adding to \*.csproj file:
 ```
 <PackageReference Include="XConsole" Version="1.4.*" />
 ```
@@ -31,13 +35,13 @@ More ways to install see on [NuGet Gallery](https://www.nuget.org/packages/XCons
 
 ## <a name="setup"></a>Setup
 Simple way to start using the XConsole is by adding `using` to your code.
-After that you can write `Console` as usual and get all the features of XConsole:
+After that you can write `Console` as usual and get all the features of XConsole.
+Alternatively, you can upgrade an entire project to XConsole at once
+by adding the following lines to the \*.csproj file.
 ```csharp
 // Safely upgrade a single code file to XConsole
 using Console = Chubrik.XConsole.XConsole;
 ```
-Alternatively, you can upgrade an entire project to XConsole at once
-by adding the following lines to the \*.csproj file:
 ```csproj
 <ItemGroup>
   <!-- Safely upgrade an entire project to XConsole -->
@@ -58,20 +62,15 @@ The prefix consists of one or two letters denoting colors,
 followed by a trailing `` ` `` character, after which the text immediately begins.
 Let’s denote the text color letter as *T* and the background color letter as *B*.
 In this case, there are three prefix patterns: `` T` `` to change only text color,
-`` TB` `` to change both colors, ``  B` `` (space at the beginning) to change only background color.
-For example, to colorize text to green just add `` G` `` prefix (*G* means green):
-```csharp
-Console.WriteLine("G`This line is colorized using simple microsyntax");
-```
-![XConsole single color](https://raw.githubusercontent.com/chubrik/XConsole/main/img/colors-single.png)
-
+`` TB` `` to change text and background colors, ``  B` `` (space at the beginning) to change only background color.
 To make a multicolor message split it to parts with individual color prefixes
 and pass them to single `WriteLine` method.
 Be sure that your messages will not be broken by other threads.
 ```csharp
-Console.WriteLine("C`It is easy ", "Wb`to use many", "R` colors in ", "Y`one message");
+Console.WriteLine("G`This line is colorized using simple microsyntax");                 // Single color
+Console.WriteLine("C`It is easy ", "Wb`to use many", "R` colors in ", "Y`one message"); // Multicolor
 ```
-![XConsole multicolor](https://raw.githubusercontent.com/chubrik/XConsole/main/img/colors-multi.png)
+![XConsole single color](https://raw.githubusercontent.com/chubrik/XConsole/main/img/colors-standard.png)
 
 The following table shows all standard console colors and their letter designations:
 
@@ -95,8 +94,11 @@ Console.WriteLine($"This is aqua {"with a navy".BgColor(Color.Navy)} background.
 ![XConsole colors extended](https://raw.githubusercontent.com/chubrik/XConsole/main/img/colors-extended.png)
 
 #### NO_COLOR
-XConsole supports the [`NO_COLOR`](https://no-color.org/) standard with an appropriate environment variable and property.
-<br><br><br><br>
+XConsole supports the [`NO_COLOR`](https://no-color.org/) standard with an environment variable and with a property.
+```csharp
+Console.NO_COLOR = true; // Disable all colors
+```
+<br><br>
 
 ## <a name="pinning"></a>Pinning
 You can pin some text below regular log messages with the `Pin` method.
@@ -124,13 +126,11 @@ Console.Pin(() => new[] { "Multiline pin,\nvalue=", "C`" + value });       // Mu
 ![XConsole pin 6](https://raw.githubusercontent.com/chubrik/XConsole/main/img/pin-6.png)
 
 The dynamic pin will be automatically updated every time the `Write` or `WriteLine` methods are called.
-You can also update a dynamic pin manually using the `UpdatePin` method:
+You can also update a dynamic pin manually using the `UpdatePin` method.
+To remove a pin, call the `Unpin` method.
 ```csharp
 Console.UpdatePin(); // Update dynamic pin manually
-```
-To remove a pin, call the `Unpin` method:
-```csharp
-Console.Unpin(); // Remove pin
+Console.Unpin();     // Remove pin
 ```
 <br><br>
 
@@ -154,12 +154,22 @@ end.Write("Y`!");
 ```
 ![XConsole positioning](https://raw.githubusercontent.com/chubrik/XConsole/main/img/positioning.png)
 <br><br>
-You can also get or set the cursor position using the `ConsolePosition` structure:
+You can also get or set the cursor position using the `CursorPosition` property:
 ```csharp
 ConsolePosition position = Console.CursorPosition;              // Get cursor position
 Console.CursorPosition = new ConsolePosition(left: 15, top: 5); // Set cursor position
 ```
 <br><br>
+
+## <a name="readline"></a>ReadLine
+ReadLine has two additional modes for secure input: masked and hidden. Mask symbol is customizable.
+```csharp
+Console.ReadLine(ConsoleReadLineMode.Masked);                // Masked ReadLine
+Console.ReadLine(ConsoleReadLineMode.Masked, maskChar: '#'); // Masked ReadLine with custom mask
+Console.ReadLine(ConsoleReadLineMode.Hidden);                // Hidden ReadLine
+```
+![XConsole positioning](https://raw.githubusercontent.com/chubrik/XConsole/main/img/readline.png)
+<br><br><br>
 
 ## <a name="license"></a>License
 The XConsole is licensed under the [MIT license](https://github.com/chubrik/XConsole/blob/main/LICENSE).

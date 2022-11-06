@@ -59,6 +59,12 @@ public static class Screenshots
                 return;
     }
 
+    public static void ColorsStandard()
+    {
+        Console.WriteLine("G`This line is colorized using simple microsyntax");
+        Console.WriteLine("C`It is easy ", "Wb`to use many", "R` colors in ", "Y`one message");
+    }
+
     public static void ColorsTable()
     {
         Console.WriteLine("d`code                        result  comment");
@@ -167,11 +173,23 @@ public static class Screenshots
                 return;
     }
 
-    public static void Hello()
+    public static void Positioning()
     {
         var (begin, end) = Console.WriteLine("Hello, World!");
         begin.Write("C`HELLO");
         end = end.Write(" I'm here");
         end.Write("Y`!");
+    }
+
+    public static void ReadLine()
+    {
+        var (_, end) = Console.WriteLine("Please type password in masked mode: ••••••••");
+        Console.WriteLine("Please type password with custom mask: ########");
+        Console.WriteLine("Please type password in hidden mode:");
+        Console.CursorPosition = end;
+
+        for (; ; )
+            if (Console.ReadKey(true).Key == ConsoleKey.Escape)
+                return;
     }
 }
