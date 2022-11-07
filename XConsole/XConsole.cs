@@ -245,6 +245,8 @@ public static class XConsole
 
     #region Positioning
 
+    private const long _intMinValue = int.MinValue;
+
     public static ConsolePosition CursorPosition
     {
         get
@@ -263,15 +265,8 @@ public static class XConsole
         {
             lock (_syncLock)
             {
-                var actualTop = value.InitialTop + value.ShiftTop - _shiftTop;
-
-                if (actualTop < int.MinValue)
-                    actualTop = int.MinValue;
-
-                if (actualTop > int.MaxValue)
-                    actualTop = int.MaxValue;
-
-                Console.SetCursorPosition(value.Left, (int)actualTop);
+                var actualTop = Math.Max(_intMinValue, value.InitialTop + value.ShiftTop - _shiftTop);
+                Console.SetCursorPosition(value.Left, unchecked((int)actualTop));
             }
         }
     }
@@ -288,13 +283,13 @@ public static class XConsole
         }
 
         var actualTop = position.InitialTop + position.ShiftTop - shiftTop;
-        return actualTop >= 0 && actualTop < bufferHeight ? (int)actualTop : null;
+        return actualTop >= 0 && actualTop < bufferHeight ? unchecked((int)actualTop) : null;
     }
 
     internal static ConsolePosition WriteToPosition(ConsolePosition position, ConsoleItem[] items)
     {
         if (!_positioningEnabled)
-            return new(0, 0, 0);
+            return default;
 
         int origLeft, origTop, endLeft, endTop;
         long shiftTop, positionActualTop;
@@ -302,14 +297,7 @@ public static class XConsole
         lock (_syncLock)
         {
             shiftTop = _shiftTop;
-            positionActualTop = position.InitialTop + position.ShiftTop - shiftTop;
-
-            if (positionActualTop < int.MinValue)
-                positionActualTop = int.MinValue;
-
-            if (positionActualTop > int.MaxValue)
-                positionActualTop = int.MaxValue;
-
+            positionActualTop = Math.Max(_intMinValue, position.InitialTop + position.ShiftTop - shiftTop);
 #if NET
             (origLeft, origTop) = Console.GetCursorPosition();
 #else
@@ -319,7 +307,7 @@ public static class XConsole
 
             try
             {
-                Console.SetCursorPosition(position.Left, (int)positionActualTop);
+                Console.SetCursorPosition(position.Left, unchecked((int)positionActualTop));
             }
             catch
             {
@@ -474,7 +462,7 @@ public static class XConsole
             lock (_syncLock)
                 Console.WriteLine();
 
-            return (new(0, 0, 0), new(0, 0, 0));
+            return (default, default);
         }
 
         var getPinValues = _getPinValues;
@@ -603,7 +591,7 @@ public static class XConsole
                     Console.WriteLine();
             }
 
-            return (new(0, 0, 0), new(0, 0, 0));
+            return (default, default);
         }
 
         var getPinValues = _getPinValues;

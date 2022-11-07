@@ -1,5 +1,6 @@
 ﻿namespace Chubrik.XConsole;
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,7 +14,7 @@ using System.Runtime.Versioning;
 #endif
 internal sealed class SpinnerAnimation : ConsoleAnimation
 {
-    private readonly int _delay = _random.Next(80, 125);
+    private readonly TimeSpan _delay = TimeSpan.FromMilliseconds(_random.Next(80, 125));
     protected override string Clear { get; } = " ";
 
     public SpinnerAnimation(ConsolePosition position)

@@ -1,4 +1,6 @@
-﻿namespace Chubrik.XConsole;
+﻿#pragma warning disable CA1822 // Mark members as static
+
+namespace Chubrik.XConsole;
 
 using System;
 using System.Runtime.InteropServices;
@@ -40,7 +42,7 @@ public sealed class ConsoleUtils
 
     #endregion
 
-    public bool Confirm(string message = "W`Continue? [Y/n]: ", string yes = "G`Yes", string no = "R`No")
+    public bool Confirm(string message = "Continue? [Y/n]: ", string yes = "Yes", string no = "No")
     {
         return XConsole.Sync(() =>
         {

@@ -15,6 +15,7 @@ using System.Runtime.Versioning;
 internal abstract class ConsoleAnimation : IConsoleAnimation
 {
     protected static readonly Random _random = new();
+    private static readonly TimeSpan _restartDelay = TimeSpan.FromSeconds(1);
 
     private readonly CancellationTokenSource _cts;
     private readonly Task _task;
@@ -46,7 +47,7 @@ internal abstract class ConsoleAnimation : IConsoleAnimation
                 }
                 catch (ArgumentOutOfRangeException)
                 {
-                    await Task.Delay(1000, cancellationToken).ConfigureAwait(false);
+                    await Task.Delay(_restartDelay, cancellationToken).ConfigureAwait(false);
                 }
         }
         catch (TaskCanceledException)

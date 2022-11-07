@@ -1,5 +1,6 @@
 ﻿namespace Chubrik.XConsole;
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,7 +14,7 @@ using System.Runtime.Versioning;
 #endif
 internal sealed class EllipsisAnimation : ConsoleAnimation
 {
-    private readonly int _delay = _random.Next(100, 150);
+    private readonly TimeSpan _delay = TimeSpan.FromMilliseconds(_random.Next(100, 150));
     protected override string Clear { get; } = "   ";
 
     public EllipsisAnimation(ConsolePosition position)
@@ -25,7 +26,7 @@ internal sealed class EllipsisAnimation : ConsoleAnimation
     protected override async Task LoopAsync(CancellationToken cancellationToken)
     {
         var delay = _delay;
-        var delayX2 = delay * 2;
+        var delayX2 = delay + delay;
         var position = Position;
 
         for (; ; )
