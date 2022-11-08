@@ -1232,6 +1232,62 @@ public static class XConsole
 
     #region Remaining API
 
+    public static TextReader In => Console.In;
+
+    public static Encoding InputEncoding
+    {
+        get => Console.InputEncoding;
+        set
+        {
+            lock (_syncLock)
+                Console.InputEncoding = value;
+        }
+    }
+
+    public static Encoding OutputEncoding
+    {
+        get => Console.OutputEncoding;
+        set
+        {
+            lock (_syncLock)
+                Console.OutputEncoding = value;
+        }
+    }
+
+    public static bool KeyAvailable => Console.KeyAvailable;
+
+    public static ConsoleKeyInfo ReadKey()
+    {
+        lock (_syncLock)
+            return Console.ReadKey();
+    }
+
+    public static ConsoleKeyInfo ReadKey(bool intercept)
+    {
+        lock (_syncLock)
+            return Console.ReadKey(intercept: intercept);
+    }
+
+    public static TextWriter Out => Console.Out;
+
+    public static TextWriter Error => Console.Error;
+
+    public static bool IsInputRedirected => Console.IsInputRedirected;
+
+    public static bool IsOutputRedirected => Console.IsOutputRedirected;
+
+    public static bool IsErrorRedirected => Console.IsErrorRedirected;
+
+    public static int CursorSize
+    {
+        get => Console.CursorSize;
+        set => Console.CursorSize = value;
+    }
+
+    public static bool NumberLock => Console.NumberLock;
+
+    public static bool CapsLock => Console.CapsLock;
+
     public static ConsoleColor BackgroundColor
     {
         get
@@ -1246,81 +1302,6 @@ public static class XConsole
                     Console.BackgroundColor = value;
         }
     }
-
-    public static int BufferHeight
-    {
-        get => Console.BufferHeight;
-        set
-        {
-            lock (_syncLock)
-            {
-                Console.BufferHeight = value;
-                _maxTop = value - 1;
-            }
-        }
-    }
-
-    public static int BufferWidth
-    {
-        get => Console.BufferWidth;
-        set
-        {
-            lock (_syncLock)
-                Console.BufferWidth = value;
-        }
-    }
-
-    public static bool CapsLock => Console.CapsLock;
-
-    public static int CursorLeft
-    {
-        get
-        {
-            lock (_syncLock)
-                return Console.CursorLeft;
-        }
-        set
-        {
-            lock (_syncLock)
-                Console.CursorLeft = value;
-        }
-    }
-
-    public static int CursorSize
-    {
-        get => Console.CursorSize;
-        set => Console.CursorSize = value;
-    }
-
-    public static int CursorTop
-    {
-        get
-        {
-            lock (_syncLock)
-                return Console.CursorTop;
-        }
-        set
-        {
-            lock (_syncLock)
-                Console.CursorTop = value;
-        }
-    }
-
-    public static bool CursorVisible
-    {
-        get
-        {
-            lock (_syncLock)
-                return Console.CursorVisible;
-        }
-        set
-        {
-            lock (_syncLock)
-                Console.CursorVisible = _cursorVisible = value;
-        }
-    }
-
-    public static TextWriter Error => Console.Error;
 
     public static ConsoleColor ForegroundColor
     {
@@ -1337,64 +1318,39 @@ public static class XConsole
         }
     }
 
-    public static TextReader In => Console.In;
-
-    public static Encoding InputEncoding
+    public static void ResetColor()
     {
-        get => Console.InputEncoding;
+        lock (_syncLock)
+            Console.ResetColor();
+    }
+
+    public static int BufferWidth
+    {
+        get => Console.BufferWidth;
         set
         {
             lock (_syncLock)
-                Console.InputEncoding = value;
+                Console.BufferWidth = value;
         }
     }
 
-    public static bool IsErrorRedirected => Console.IsErrorRedirected;
-
-    public static bool IsInputRedirected => Console.IsInputRedirected;
-
-    public static bool IsOutputRedirected => Console.IsOutputRedirected;
-
-    public static bool KeyAvailable => Console.KeyAvailable;
-
-    public static int LargestWindowHeight => Console.LargestWindowHeight;
-
-    public static int LargestWindowWidth => Console.LargestWindowWidth;
-
-    public static bool NumberLock => Console.NumberLock;
-
-    public static TextWriter Out => Console.Out;
-
-    public static Encoding OutputEncoding
+    public static int BufferHeight
     {
-        get => Console.OutputEncoding;
+        get => Console.BufferHeight;
         set
         {
             lock (_syncLock)
-                Console.OutputEncoding = value;
+            {
+                Console.BufferHeight = value;
+                _maxTop = value - 1;
+            }
         }
     }
 
-    public static string Title
+    public static void SetBufferSize(int width, int height)
     {
-        get => Console.Title;
-        set => Console.Title = value;
-    }
-
-    public static bool TreatControlCAsInput
-    {
-        get => Console.TreatControlCAsInput;
-        set => Console.TreatControlCAsInput = value;
-    }
-
-    public static int WindowHeight
-    {
-        get => Console.WindowHeight;
-        set
-        {
-            lock (_syncLock)
-                Console.WindowHeight = value;
-        }
+        lock (_syncLock)
+            Console.SetBufferSize(width: width, height: height);
     }
 
     public static int WindowLeft
@@ -1419,22 +1375,71 @@ public static class XConsole
         }
     }
 
-    public static event ConsoleCancelEventHandler? CancelKeyPress
+    public static int WindowHeight
     {
-        //[System.Runtime.CompilerServices.NullableContext(2)]
-        add => Console.CancelKeyPress += value;
-        //[System.Runtime.CompilerServices.NullableContext(2)]
-        remove => Console.CancelKeyPress -= value;
+        get => Console.WindowHeight;
+        set
+        {
+            lock (_syncLock)
+                Console.WindowHeight = value;
+        }
     }
 
-    public static void Beep() => Console.Beep();
+    public static void SetWindowPosition(int left, int top)
+    {
+        Console.SetWindowPosition(left: left, top: top);
+    }
 
-    public static void Beep(int frequency, int duration) => Console.Beep(frequency: frequency, duration: duration);
-
-    public static void Clear()
+    public static void SetWindowSize(int width, int height)
     {
         lock (_syncLock)
-            Console.Clear();
+            Console.SetWindowSize(width: width, height: height);
+    }
+
+    public static int LargestWindowWidth => Console.LargestWindowWidth;
+
+    public static int LargestWindowHeight => Console.LargestWindowHeight;
+
+    public static bool CursorVisible
+    {
+        get
+        {
+            lock (_syncLock)
+                return Console.CursorVisible;
+        }
+        set
+        {
+            lock (_syncLock)
+                Console.CursorVisible = _cursorVisible = value;
+        }
+    }
+
+    public static int CursorLeft
+    {
+        get
+        {
+            lock (_syncLock)
+                return Console.CursorLeft;
+        }
+        set
+        {
+            lock (_syncLock)
+                Console.CursorLeft = value;
+        }
+    }
+
+    public static int CursorTop
+    {
+        get
+        {
+            lock (_syncLock)
+                return Console.CursorTop;
+        }
+        set
+        {
+            lock (_syncLock)
+                Console.CursorTop = value;
+        }
     }
 
     public static (int Left, int Top) GetCursorPosition()
@@ -1446,6 +1451,16 @@ public static class XConsole
             return (Console.CursorLeft, Console.CursorTop);
 #endif
     }
+
+    public static string Title
+    {
+        get => Console.Title;
+        set => Console.Title = value;
+    }
+
+    public static void Beep() => Console.Beep();
+
+    public static void Beep(int frequency, int duration) => Console.Beep(frequency: frequency, duration: duration);
 
     public static void MoveBufferArea(
         int sourceLeft, int sourceTop, int sourceWidth, int sourceHeight, int targetLeft, int targetTop)
@@ -1469,17 +1484,31 @@ public static class XConsole
                 sourceChar: sourceChar, sourceForeColor: sourceForeColor, sourceBackColor: sourceBackColor);
     }
 
-    public static Stream OpenStandardError()
+    public static void Clear()
     {
-        return Console.OpenStandardError();
+        lock (_syncLock)
+            Console.Clear();
     }
 
-#if !NETSTANDARD1_3
-    public static Stream OpenStandardError(int bufferSize)
+    public static void SetCursorPosition(int left, int top)
     {
-        return Console.OpenStandardError(bufferSize: bufferSize);
+        lock (_syncLock)
+            Console.SetCursorPosition(left: left, top: top);
     }
-#endif
+
+    public static event ConsoleCancelEventHandler? CancelKeyPress
+    {
+        //[System.Runtime.CompilerServices.NullableContext(2)]
+        add => Console.CancelKeyPress += value;
+        //[System.Runtime.CompilerServices.NullableContext(2)]
+        remove => Console.CancelKeyPress -= value;
+    }
+
+    public static bool TreatControlCAsInput
+    {
+        get => Console.TreatControlCAsInput;
+        set => Console.TreatControlCAsInput = value;
+    }
 
     public static Stream OpenStandardInput()
     {
@@ -1509,46 +1538,17 @@ public static class XConsole
     }
 #endif
 
-    public static int Read()
+    public static Stream OpenStandardError()
     {
-        lock (_syncLock)
-            return Console.Read();
+        return Console.OpenStandardError();
     }
 
-    public static ConsoleKeyInfo ReadKey()
+#if !NETSTANDARD1_3
+    public static Stream OpenStandardError(int bufferSize)
     {
-        lock (_syncLock)
-            return Console.ReadKey();
+        return Console.OpenStandardError(bufferSize: bufferSize);
     }
-
-    public static ConsoleKeyInfo ReadKey(bool intercept)
-    {
-        lock (_syncLock)
-            return Console.ReadKey(intercept: intercept);
-    }
-
-    public static void ResetColor()
-    {
-        lock (_syncLock)
-            Console.ResetColor();
-    }
-
-    public static void SetBufferSize(int width, int height)
-    {
-        lock (_syncLock)
-            Console.SetBufferSize(width: width, height: height);
-    }
-
-    public static void SetCursorPosition(int left, int top)
-    {
-        lock (_syncLock)
-            Console.SetCursorPosition(left: left, top: top);
-    }
-
-    public static void SetError(TextWriter newError)
-    {
-        Console.SetError(newError: newError);
-    }
+#endif
 
     public static void SetIn(TextReader newIn)
     {
@@ -1562,15 +1562,15 @@ public static class XConsole
             Console.SetOut(newOut: newOut);
     }
 
-    public static void SetWindowPosition(int left, int top)
+    public static void SetError(TextWriter newError)
     {
-        Console.SetWindowPosition(left: left, top: top);
+        Console.SetError(newError: newError);
     }
 
-    public static void SetWindowSize(int width, int height)
+    public static int Read()
     {
         lock (_syncLock)
-            Console.SetWindowSize(width: width, height: height);
+            return Console.Read();
     }
 
     #endregion
