@@ -1249,11 +1249,7 @@ public static class XConsole
 
     public static int BufferHeight
     {
-        get
-        {
-            lock (_syncLock)
-                return Console.BufferHeight;
-        }
+        get => Console.BufferHeight;
         set
         {
             lock (_syncLock)
@@ -1266,11 +1262,7 @@ public static class XConsole
 
     public static int BufferWidth
     {
-        get
-        {
-            lock (_syncLock)
-                return Console.BufferWidth;
-        }
+        get => Console.BufferWidth;
         set
         {
             lock (_syncLock)
@@ -1349,11 +1341,7 @@ public static class XConsole
 
     public static Encoding InputEncoding
     {
-        get
-        {
-            lock (_syncLock)
-                return Console.InputEncoding;
-        }
+        get => Console.InputEncoding;
         set
         {
             lock (_syncLock)
@@ -1379,11 +1367,7 @@ public static class XConsole
 
     public static Encoding OutputEncoding
     {
-        get
-        {
-            lock (_syncLock)
-                return Console.OutputEncoding;
-        }
+        get => Console.OutputEncoding;
         set
         {
             lock (_syncLock)
@@ -1406,7 +1390,11 @@ public static class XConsole
     public static int WindowHeight
     {
         get => Console.WindowHeight;
-        set => Console.WindowHeight = value;
+        set
+        {
+            lock (_syncLock)
+                Console.WindowHeight = value;
+        }
     }
 
     public static int WindowLeft
@@ -1424,7 +1412,11 @@ public static class XConsole
     public static int WindowWidth
     {
         get => Console.WindowWidth;
-        set => Console.WindowWidth = value;
+        set
+        {
+            lock (_syncLock)
+                Console.WindowWidth = value;
+        }
     }
 
     public static event ConsoleCancelEventHandler? CancelKeyPress
@@ -1477,22 +1469,44 @@ public static class XConsole
                 sourceChar: sourceChar, sourceForeColor: sourceForeColor, sourceBackColor: sourceBackColor);
     }
 
-    public static Stream OpenStandardError() => Console.OpenStandardError();
+    public static Stream OpenStandardError()
+    {
+        return Console.OpenStandardError();
+    }
 
 #if !NETSTANDARD1_3
-    public static Stream OpenStandardError(int bufferSize) => Console.OpenStandardError(bufferSize: bufferSize);
+    public static Stream OpenStandardError(int bufferSize)
+    {
+        return Console.OpenStandardError(bufferSize: bufferSize);
+    }
 #endif
 
-    public static Stream OpenStandardInput() => Console.OpenStandardInput();
+    public static Stream OpenStandardInput()
+    {
+        lock (_syncLock)
+            return Console.OpenStandardInput();
+    }
 
 #if !NETSTANDARD1_3
-    public static Stream OpenStandardInput(int bufferSize) => Console.OpenStandardInput(bufferSize: bufferSize);
+    public static Stream OpenStandardInput(int bufferSize)
+    {
+        lock (_syncLock)
+            return Console.OpenStandardInput(bufferSize: bufferSize);
+    }
 #endif
 
-    public static Stream OpenStandardOutput() => Console.OpenStandardOutput();
+    public static Stream OpenStandardOutput()
+    {
+        lock (_syncLock)
+            return Console.OpenStandardOutput();
+    }
 
 #if !NETSTANDARD1_3
-    public static Stream OpenStandardOutput(int bufferSize) => Console.OpenStandardOutput(bufferSize: bufferSize);
+    public static Stream OpenStandardOutput(int bufferSize)
+    {
+        lock (_syncLock)
+            return Console.OpenStandardOutput(bufferSize: bufferSize);
+    }
 #endif
 
     public static int Read()
@@ -1531,13 +1545,27 @@ public static class XConsole
             Console.SetCursorPosition(left: left, top: top);
     }
 
-    public static void SetError(TextWriter newError) => Console.SetError(newError: newError);
+    public static void SetError(TextWriter newError)
+    {
+        Console.SetError(newError: newError);
+    }
 
-    public static void SetIn(TextReader newIn) => Console.SetIn(newIn: newIn);
+    public static void SetIn(TextReader newIn)
+    {
+        lock (_syncLock)
+            Console.SetIn(newIn: newIn);
+    }
 
-    public static void SetOut(TextWriter newOut) => Console.SetOut(newOut: newOut);
+    public static void SetOut(TextWriter newOut)
+    {
+        lock (_syncLock)
+            Console.SetOut(newOut: newOut);
+    }
 
-    public static void SetWindowPosition(int left, int top) => Console.SetWindowPosition(left: left, top: top);
+    public static void SetWindowPosition(int left, int top)
+    {
+        Console.SetWindowPosition(left: left, top: top);
+    }
 
     public static void SetWindowSize(int width, int height)
     {
