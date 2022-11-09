@@ -5,13 +5,7 @@ namespace Chubrik.XConsole;
 using System;
 using System.Drawing;
 using System.Globalization;
-using System.Runtime.Versioning;
 
-[SupportedOSPlatform("windows")]
-[UnsupportedOSPlatform("android")]
-[UnsupportedOSPlatform("browser")]
-[UnsupportedOSPlatform("ios")]
-[UnsupportedOSPlatform("tvos")]
 public static class StringExtensions
 {
     private const string _foregroundColorFormat = "\x1b[38;2;{0};{1};{2}m{3}\x1b[39m";

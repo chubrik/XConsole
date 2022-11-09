@@ -1,4 +1,8 @@
-﻿namespace Chubrik.XConsole;
+﻿#if !NET
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+#endif
+
+namespace Chubrik.XConsole;
 
 using System;
 

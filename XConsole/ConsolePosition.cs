@@ -1,4 +1,8 @@
-﻿namespace Chubrik.XConsole;
+﻿#if !NET
+#pragma warning disable CS8604 // Possible null reference argument.
+#endif
+
+namespace Chubrik.XConsole;
 
 using System;
 using System.Collections.Generic;
@@ -6,7 +10,6 @@ using System.Diagnostics;
 
 #if NET
 using System.Runtime.Versioning;
-[SupportedOSPlatform("windows")]
 [UnsupportedOSPlatform("android")]
 [UnsupportedOSPlatform("browser")]
 [UnsupportedOSPlatform("ios")]

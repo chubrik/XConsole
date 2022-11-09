@@ -1,4 +1,6 @@
-﻿#if !NET
+﻿#if NET
+#pragma warning disable CA1416 // Validate platform compatibility
+#else
 #pragma warning disable CS8604 // Possible null reference argument.
 #endif
 
@@ -9,16 +11,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-
 #if NET
 using System.Runtime.Versioning;
 using System.Runtime.InteropServices;
-[SupportedOSPlatform("windows")]
-[UnsupportedOSPlatform("android")]
-[UnsupportedOSPlatform("browser")]
-[UnsupportedOSPlatform("ios")]
-[UnsupportedOSPlatform("tvos")]
 #endif
+
 public static class XConsole
 {
     private static readonly string _newLine = Environment.NewLine;
@@ -47,11 +44,14 @@ public static class XConsole
         catch { }
 
 #if NET
-        try
+        if (OperatingSystem.IsWindows())
         {
-            VirtualTerminalEnabled = EnableVirtualTerminal();
+            try
+            {
+                VirtualTerminalEnabled = EnableVirtualTerminal();
+            }
+            catch { }
         }
-        catch { }
 #endif
     }
 
@@ -88,6 +88,12 @@ public static class XConsole
     [Obsolete("At least one argument should be specified.", error: true)]
     public static void Pin() => throw new InvalidOperationException();
 
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+#endif
     public static void Pin(params string?[] values)
     {
         Debug.Assert(values.Length > 0);
@@ -99,6 +105,12 @@ public static class XConsole
         UpdatePin();
     }
 
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+#endif
     public static void Pin(IReadOnlyList<string?> values)
     {
         if (!_positioningEnabled)
@@ -108,6 +120,12 @@ public static class XConsole
         UpdatePin();
     }
 
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+#endif
     public static void Pin(Func<string?> getValue)
     {
         if (!_positioningEnabled)
@@ -117,6 +135,12 @@ public static class XConsole
         UpdatePin();
     }
 
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+#endif
     public static void Pin(Func<IReadOnlyList<string?>> getValues)
     {
         if (!_positioningEnabled)
@@ -126,6 +150,12 @@ public static class XConsole
         UpdatePin();
     }
 
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+#endif
     public static void UpdatePin()
     {
         if (!_positioningEnabled)
@@ -200,6 +230,12 @@ public static class XConsole
         }
     }
 
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+#endif
     public static void Unpin()
     {
         if (!_positioningEnabled)
@@ -247,6 +283,12 @@ public static class XConsole
 
     private const long _intMinValue = int.MinValue;
 
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+#endif
     public static ConsolePosition CursorPosition
     {
         get
@@ -344,12 +386,20 @@ public static class XConsole
 
     #region ReadLine
 
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+#endif
     public static string ReadLine()
     {
         lock (_syncLock)
             return Console.ReadLine() ?? string.Empty;
     }
 
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+#endif
     public static string ReadLine(ConsoleReadLineMode mode, char maskChar = '\u2022')
     {
         switch (mode)
@@ -1232,8 +1282,20 @@ public static class XConsole
 
     #region Remaining API
 
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+#endif
     public static TextReader In => Console.In;
 
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+#endif
     public static Encoding InputEncoding
     {
         get => Console.InputEncoding;
@@ -1247,6 +1309,11 @@ public static class XConsole
     public static Encoding OutputEncoding
     {
         get => Console.OutputEncoding;
+#if NET
+        [UnsupportedOSPlatform("android")]
+        [UnsupportedOSPlatform("ios")]
+        [UnsupportedOSPlatform("tvos")]
+#endif
         set
         {
             lock (_syncLock)
@@ -1256,12 +1323,24 @@ public static class XConsole
 
     public static bool KeyAvailable => Console.KeyAvailable;
 
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+#endif
     public static ConsoleKeyInfo ReadKey()
     {
         lock (_syncLock)
             return Console.ReadKey();
     }
 
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+#endif
     public static ConsoleKeyInfo ReadKey(bool intercept)
     {
         lock (_syncLock)
@@ -1280,14 +1359,35 @@ public static class XConsole
 
     public static int CursorSize
     {
+#if NET
+        [UnsupportedOSPlatform("android")]
+        [UnsupportedOSPlatform("browser")]
+        [UnsupportedOSPlatform("ios")]
+        [UnsupportedOSPlatform("tvos")]
+#endif
         get => Console.CursorSize;
+#if NET
+        [SupportedOSPlatform("windows")]
+#endif
         set => Console.CursorSize = value;
     }
 
+#if NET
+    [SupportedOSPlatform("windows")]
+#endif
     public static bool NumberLock => Console.NumberLock;
 
+#if NET
+    [SupportedOSPlatform("windows")]
+#endif
     public static bool CapsLock => Console.CapsLock;
 
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+#endif
     public static ConsoleColor BackgroundColor
     {
         get
@@ -1303,6 +1403,12 @@ public static class XConsole
         }
     }
 
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+#endif
     public static ConsoleColor ForegroundColor
     {
         get
@@ -1318,6 +1424,12 @@ public static class XConsole
         }
     }
 
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+#endif
     public static void ResetColor()
     {
         lock (_syncLock)
@@ -1326,7 +1438,16 @@ public static class XConsole
 
     public static int BufferWidth
     {
+#if NET
+        [UnsupportedOSPlatform("android")]
+        [UnsupportedOSPlatform("browser")]
+        [UnsupportedOSPlatform("ios")]
+        [UnsupportedOSPlatform("tvos")]
+#endif
         get => Console.BufferWidth;
+#if NET
+        [SupportedOSPlatform("windows")]
+#endif
         set
         {
             lock (_syncLock)
@@ -1336,7 +1457,16 @@ public static class XConsole
 
     public static int BufferHeight
     {
+#if NET
+        [UnsupportedOSPlatform("android")]
+        [UnsupportedOSPlatform("browser")]
+        [UnsupportedOSPlatform("ios")]
+        [UnsupportedOSPlatform("tvos")]
+#endif
         get => Console.BufferHeight;
+#if NET
+        [SupportedOSPlatform("windows")]
+#endif
         set
         {
             lock (_syncLock)
@@ -1347,6 +1477,9 @@ public static class XConsole
         }
     }
 
+#if NET
+    [SupportedOSPlatform("windows")]
+#endif
     public static void SetBufferSize(int width, int height)
     {
         lock (_syncLock)
@@ -1356,18 +1489,33 @@ public static class XConsole
     public static int WindowLeft
     {
         get => Console.WindowLeft;
+#if NET
+        [SupportedOSPlatform("windows")]
+#endif
         set => Console.WindowLeft = value;
     }
 
     public static int WindowTop
     {
         get => Console.WindowTop;
+#if NET
+        [SupportedOSPlatform("windows")]
+#endif
         set => Console.WindowTop = value;
     }
 
     public static int WindowWidth
     {
+#if NET
+        [UnsupportedOSPlatform("android")]
+        [UnsupportedOSPlatform("browser")]
+        [UnsupportedOSPlatform("ios")]
+        [UnsupportedOSPlatform("tvos")]
+#endif
         get => Console.WindowWidth;
+#if NET
+        [SupportedOSPlatform("windows")]
+#endif
         set
         {
             lock (_syncLock)
@@ -1377,7 +1525,16 @@ public static class XConsole
 
     public static int WindowHeight
     {
+#if NET
+        [UnsupportedOSPlatform("android")]
+        [UnsupportedOSPlatform("browser")]
+        [UnsupportedOSPlatform("ios")]
+        [UnsupportedOSPlatform("tvos")]
+#endif
         get => Console.WindowHeight;
+#if NET
+        [SupportedOSPlatform("windows")]
+#endif
         set
         {
             lock (_syncLock)
@@ -1385,28 +1542,55 @@ public static class XConsole
         }
     }
 
+#if NET
+    [SupportedOSPlatform("windows")]
+#endif
     public static void SetWindowPosition(int left, int top)
     {
         Console.SetWindowPosition(left: left, top: top);
     }
 
+#if NET
+    [SupportedOSPlatform("windows")]
+#endif
     public static void SetWindowSize(int width, int height)
     {
         lock (_syncLock)
             Console.SetWindowSize(width: width, height: height);
     }
 
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+#endif
     public static int LargestWindowWidth => Console.LargestWindowWidth;
 
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+#endif
     public static int LargestWindowHeight => Console.LargestWindowHeight;
 
     public static bool CursorVisible
     {
+#if NET
+        [SupportedOSPlatform("windows")]
+#endif
         get
         {
             lock (_syncLock)
                 return Console.CursorVisible;
         }
+#if NET
+        [UnsupportedOSPlatform("android")]
+        [UnsupportedOSPlatform("browser")]
+        [UnsupportedOSPlatform("ios")]
+        [UnsupportedOSPlatform("tvos")]
+#endif
         set
         {
             lock (_syncLock)
@@ -1414,6 +1598,12 @@ public static class XConsole
         }
     }
 
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+#endif
     public static int CursorLeft
     {
         get
@@ -1428,6 +1618,12 @@ public static class XConsole
         }
     }
 
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+#endif
     public static int CursorTop
     {
         get
@@ -1442,6 +1638,12 @@ public static class XConsole
         }
     }
 
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+#endif
     public static (int Left, int Top) GetCursorPosition()
     {
         lock (_syncLock)
@@ -1454,14 +1656,35 @@ public static class XConsole
 
     public static string Title
     {
+#if NET
+        [SupportedOSPlatform("windows")]
+#endif
         get => Console.Title;
+#if NET
+        [UnsupportedOSPlatform("android")]
+        [UnsupportedOSPlatform("browser")]
+        [UnsupportedOSPlatform("ios")]
+        [UnsupportedOSPlatform("tvos")]
+#endif
         set => Console.Title = value;
     }
 
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+#endif
     public static void Beep() => Console.Beep();
 
+#if NET
+    [SupportedOSPlatform("windows")]
+#endif
     public static void Beep(int frequency, int duration) => Console.Beep(frequency: frequency, duration: duration);
 
+#if NET
+    [SupportedOSPlatform("windows")]
+#endif
     public static void MoveBufferArea(
         int sourceLeft, int sourceTop, int sourceWidth, int sourceHeight, int targetLeft, int targetTop)
     {
@@ -1472,6 +1695,9 @@ public static class XConsole
                 targetLeft: targetLeft, targetTop: targetTop);
     }
 
+#if NET
+    [SupportedOSPlatform("windows")]
+#endif
     public static void MoveBufferArea(
         int sourceLeft, int sourceTop, int sourceWidth, int sourceHeight, int targetLeft, int targetTop,
         char sourceChar, ConsoleColor sourceForeColor, ConsoleColor sourceBackColor)
@@ -1484,18 +1710,35 @@ public static class XConsole
                 sourceChar: sourceChar, sourceForeColor: sourceForeColor, sourceBackColor: sourceBackColor);
     }
 
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+#endif
     public static void Clear()
     {
         lock (_syncLock)
             Console.Clear();
     }
 
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+#endif
     public static void SetCursorPosition(int left, int top)
     {
         lock (_syncLock)
             Console.SetCursorPosition(left: left, top: top);
     }
 
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+#endif
     public static event ConsoleCancelEventHandler? CancelKeyPress
     {
         //[System.Runtime.CompilerServices.NullableContext(2)]
@@ -1504,12 +1747,24 @@ public static class XConsole
         remove => Console.CancelKeyPress -= value;
     }
 
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+#endif
     public static bool TreatControlCAsInput
     {
         get => Console.TreatControlCAsInput;
         set => Console.TreatControlCAsInput = value;
     }
 
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+#endif
     public static Stream OpenStandardInput()
     {
         lock (_syncLock)
@@ -1517,6 +1772,10 @@ public static class XConsole
     }
 
 #if !NETSTANDARD1_3
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+#endif
     public static Stream OpenStandardInput(int bufferSize)
     {
         lock (_syncLock)
@@ -1550,6 +1809,12 @@ public static class XConsole
     }
 #endif
 
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+#endif
     public static void SetIn(TextReader newIn)
     {
         lock (_syncLock)
@@ -1567,6 +1832,10 @@ public static class XConsole
         Console.SetError(newError: newError);
     }
 
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+#endif
     public static int Read()
     {
         lock (_syncLock)

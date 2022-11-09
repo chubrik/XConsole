@@ -4,14 +4,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-#if NET
-using System.Runtime.Versioning;
-[SupportedOSPlatform("windows")]
-[UnsupportedOSPlatform("android")]
-[UnsupportedOSPlatform("browser")]
-[UnsupportedOSPlatform("ios")]
-[UnsupportedOSPlatform("tvos")]
-#endif
 internal abstract class ConsoleAnimation : IConsoleAnimation
 {
     protected static readonly Random _random = new();

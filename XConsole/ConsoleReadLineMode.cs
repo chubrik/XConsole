@@ -2,7 +2,7 @@
 
 public enum ConsoleReadLineMode
 {
-    Default = 0,
+    Default,
     Masked,
     Hidden
 }

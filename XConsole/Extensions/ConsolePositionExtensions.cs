@@ -4,7 +4,6 @@ using System.Threading;
 
 #if NET
 using System.Runtime.Versioning;
-[SupportedOSPlatform("windows")]
 [UnsupportedOSPlatform("android")]
 [UnsupportedOSPlatform("browser")]
 [UnsupportedOSPlatform("ios")]

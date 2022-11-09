@@ -4,14 +4,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-#if NET
-using System.Runtime.Versioning;
-[SupportedOSPlatform("windows")]
-[UnsupportedOSPlatform("android")]
-[UnsupportedOSPlatform("browser")]
-[UnsupportedOSPlatform("ios")]
-[UnsupportedOSPlatform("tvos")]
-#endif
 internal sealed class SpinnerAnimation : ConsoleAnimation
 {
     private readonly TimeSpan _delay = TimeSpan.FromMilliseconds(_random.Next(80, 125));
