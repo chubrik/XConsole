@@ -15,6 +15,9 @@ using System.Text;
 using System.Runtime.Versioning;
 using System.Runtime.InteropServices;
 #endif
+#if NET7_0_OR_GREATER
+using System.Diagnostics.CodeAnalysis;
+#endif
 
 public static class XConsole
 {
@@ -920,6 +923,9 @@ public static class XConsole
     }
 
     public static (ConsolePosition Begin, ConsolePosition End) Write(
+#if NET7_0_OR_GREATER
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
+#endif
         string format, object? arg0)
     {
         if (string.IsNullOrEmpty(format))
@@ -932,6 +938,9 @@ public static class XConsole
     }
 
     public static (ConsolePosition Begin, ConsolePosition End) Write(
+#if NET7_0_OR_GREATER
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
+#endif
         string format, object? arg0, object? arg1)
     {
         if (string.IsNullOrEmpty(format))
@@ -944,6 +953,9 @@ public static class XConsole
     }
 
     public static (ConsolePosition Begin, ConsolePosition End) Write(
+#if NET7_0_OR_GREATER
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
+#endif
         string format, object? arg0, object? arg1, object? arg2)
     {
         if (string.IsNullOrEmpty(format))
@@ -956,6 +968,9 @@ public static class XConsole
     }
 
     public static (ConsolePosition Begin, ConsolePosition End) Write(
+#if NET7_0_OR_GREATER
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
+#endif
         string format, params object?[]? arg)
     {
         if (string.IsNullOrEmpty(format))
@@ -1049,6 +1064,9 @@ public static class XConsole
     }
 
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(
+#if NET7_0_OR_GREATER
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
+#endif
         string format, object? arg0)
     {
         if (string.IsNullOrEmpty(format))
@@ -1058,6 +1076,9 @@ public static class XConsole
     }
 
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(
+#if NET7_0_OR_GREATER
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
+#endif
         string format, object? arg0, object? arg1)
     {
         if (string.IsNullOrEmpty(format))
@@ -1067,6 +1088,9 @@ public static class XConsole
     }
 
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(
+#if NET7_0_OR_GREATER
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
+#endif
         string format, object? arg0, object? arg1, object? arg2)
     {
         if (string.IsNullOrEmpty(format))
@@ -1076,6 +1100,9 @@ public static class XConsole
     }
 
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(
+#if NET7_0_OR_GREATER
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
+#endif
         string format, params object?[]? arg)
     {
         if (string.IsNullOrEmpty(format))
@@ -1248,8 +1275,8 @@ public static class XConsole
     }
 
     #region Virtual terminal
-
 #if NET
+
     // https://learn.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences
 
     private const int STD_OUTPUT_HANDLE = -11;
@@ -1274,8 +1301,8 @@ public static class XConsole
 
     [DllImport("kernel32.dll")]
     private static extern bool SetConsoleMode(IntPtr hConsoleHandle, uint dwMode);
-#endif
 
+#endif
     #endregion
 
     #endregion

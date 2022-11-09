@@ -7,9 +7,14 @@ namespace Chubrik.XConsole;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-
 #if NET
 using System.Runtime.Versioning;
+#endif
+#if NET7_0_OR_GREATER
+using System.Diagnostics.CodeAnalysis;
+#endif
+
+#if NET
 [UnsupportedOSPlatform("android")]
 [UnsupportedOSPlatform("browser")]
 [UnsupportedOSPlatform("ios")]
@@ -133,28 +138,44 @@ public readonly struct ConsolePosition
         return XConsole.WriteToPosition(this, new[] { new ConsoleItem(value.ToString()) });
     }
 
-    public ConsolePosition Write(string format, object? arg0)
+    public ConsolePosition Write(
+#if NET7_0_OR_GREATER
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
+#endif
+        string format, object? arg0)
     {
         return string.IsNullOrEmpty(format)
             ? this
             : XConsole.WriteToPosition(this, new[] { ConsoleItem.Parse(string.Format(format, arg0)) });
     }
 
-    public ConsolePosition Write(string format, object? arg0, object? arg1)
+    public ConsolePosition Write(
+#if NET7_0_OR_GREATER
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
+#endif
+        string format, object? arg0, object? arg1)
     {
         return string.IsNullOrEmpty(format)
             ? this
             : XConsole.WriteToPosition(this, new[] { ConsoleItem.Parse(string.Format(format, arg0, arg1)) });
     }
 
-    public ConsolePosition Write(string format, object? arg0, object? arg1, object? arg2)
+    public ConsolePosition Write(
+#if NET7_0_OR_GREATER
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
+#endif
+        string format, object? arg0, object? arg1, object? arg2)
     {
         return string.IsNullOrEmpty(format)
             ? this
             : XConsole.WriteToPosition(this, new[] { ConsoleItem.Parse(string.Format(format, arg0, arg1, arg2)) });
     }
 
-    public ConsolePosition Write(string format, params object?[]? arg)
+    public ConsolePosition Write(
+#if NET7_0_OR_GREATER
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
+#endif
+        string format, params object?[]? arg)
     {
         return string.IsNullOrEmpty(format)
             ? this
@@ -267,28 +288,44 @@ public readonly struct ConsolePosition
         return TryWriteBase(new[] { new ConsoleItem(value.ToString()) });
     }
 
-    public ConsolePosition? TryWrite(string format, object? arg0)
+    public ConsolePosition? TryWrite(
+#if NET7_0_OR_GREATER
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
+#endif
+        string format, object? arg0)
     {
         return string.IsNullOrEmpty(format)
             ? this
             : TryWriteBase(new[] { ConsoleItem.Parse(string.Format(format, arg0)) });
     }
 
-    public ConsolePosition? TryWrite(string format, object? arg0, object? arg1)
+    public ConsolePosition? TryWrite(
+#if NET7_0_OR_GREATER
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
+#endif
+        string format, object? arg0, object? arg1)
     {
         return string.IsNullOrEmpty(format)
             ? this
             : TryWriteBase(new[] { ConsoleItem.Parse(string.Format(format, arg0, arg1)) });
     }
 
-    public ConsolePosition? TryWrite(string format, object? arg0, object? arg1, object? arg2)
+    public ConsolePosition? TryWrite(
+#if NET7_0_OR_GREATER
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
+#endif
+        string format, object? arg0, object? arg1, object? arg2)
     {
         return string.IsNullOrEmpty(format)
             ? this
             : TryWriteBase(new[] { ConsoleItem.Parse(string.Format(format, arg0, arg1, arg2)) });
     }
 
-    public ConsolePosition? TryWrite(string format, params object?[]? arg)
+    public ConsolePosition? TryWrite(
+#if NET7_0_OR_GREATER
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
+#endif
+        string format, params object?[]? arg)
     {
         return string.IsNullOrEmpty(format)
             ? this
