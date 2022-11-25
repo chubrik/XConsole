@@ -11,8 +11,9 @@ XConsole is safe for multitasking, safe for console buffer overflows (9000+ line
 The main features are shown in the following image:
 
 ![XConsole summary](https://raw.githubusercontent.com/chubrik/XConsole/main/img/summary.png)
-<br><br>
+<br>
 
+## Contents
 - [Install](#install)
 - [Setup](#setup)
 - [Coloring](#coloring)
@@ -23,15 +24,15 @@ The main features are shown in the following image:
 <br><br><br>
 
 ## <a name="install"></a>Install
-By Package Manager or by adding package reference to \*.csproj file:
+By Package Manager or by adding package reference to \*.csproj file.
+More ways see on [NuGet Gallery](https://www.nuget.org/packages/XConsole/).
 ```
 PM> Install-Package XConsole
 ```
-```
+```csproj
 <PackageReference Include="XConsole" Version="1.4.*" />
 ```
-More ways to install see on [NuGet Gallery](https://www.nuget.org/packages/XConsole/).
-<br><br><br>
+<br><br>
 
 ## <a name="setup"></a>Setup
 Simple way to start using the XConsole is by adding `using` to your code.
@@ -77,19 +78,19 @@ The following table shows all standard console colors and their letter designati
 ![XConsole colors table](https://raw.githubusercontent.com/chubrik/XConsole/main/img/colors-table.png)
 <br>
 
-### Extended colors
+### 24-bit colors
 If you’re running your application on Windows 10+ with .NET 5+, extended colors are available to you:
 ```csharp
-// Different ways to colorize text the same orange color
-Console.WriteLine("This is orange text".Color(Color.Orange)); // Color structure
-Console.WriteLine("This is orange text".Color(255, 165, 0));  // Red, green & blue
-Console.WriteLine("This is orange text".Color(0xFFA500));     // Hexadecimal number
-Console.WriteLine("This is orange text".Color("#FFA500"));    // Hexadecimal string
+// Different ways to the same 24-bit color
+Console.WriteLine("Orange text".Color(Color.Orange)); // Color structure
+Console.WriteLine("Orange text".Color(255, 165, 0));  // Red, green & blue
+Console.WriteLine("Orange text".Color(0xFFA500));     // Hexadecimal number
+Console.WriteLine("Orange text".Color("#FFA500"));    // Hexadecimal string
 
 // Combinations of text and background colors
-Console.WriteLine("This is orange with an indigo background.".Color(Color.Orange).BgColor(Color.Indigo));
-Console.WriteLine(("This is lime " + "with a brown".BgColor(Color.Brown) + " background.").Color(Color.Lime));
-Console.WriteLine($"This is aqua {"with a navy".BgColor(Color.Navy)} background.".Color(Color.Aqua));
+Console.WriteLine("Оrange with an indigo background".Color(Color.Orange).BgColor(Color.Indigo));
+Console.WriteLine(("Lime with " + "a brown".BgColor(Color.Brown) + " background").Color(Color.Lime));
+Console.WriteLine($"Aqua with {"a navy".BgColor(Color.Navy)} background".Color(Color.Aqua));
 ```
 ![XConsole colors extended](https://raw.githubusercontent.com/chubrik/XConsole/main/img/colors-extended.png)
 
@@ -103,29 +104,26 @@ Console.NO_COLOR = true; // Disable all colors
 ## <a name="pinning"></a>Pinning
 You can pin some text below regular log messages with the `Pin` method.
 Pinned text can be static or dynamic, contain one or more lines, and of course can be colorized.
+The dynamic pin will be automatically updated every time the `Write` or `WriteLine` methods are called.
 Pin is resistant to line wrapping and to console buffer overflows (9000+ log lines).
 
-### Static pin
 ```csharp
 Console.Pin("Simple static pin");           // Simple static pin
 Console.Pin("Y`Multicolor", " static pin"); // Multicolor static pin
 Console.Pin("Multiline\nstatic pin");       // Multiline static pin
-```
-![XConsole pin 1](https://raw.githubusercontent.com/chubrik/XConsole/main/img/pin-1.png)
-![XConsole pin 2](https://raw.githubusercontent.com/chubrik/XConsole/main/img/pin-2.png)
-![XConsole pin 3](https://raw.githubusercontent.com/chubrik/XConsole/main/img/pin-3.png)
 
-### Dynamic pin
-```csharp
 Console.Pin(() => "Simple pin, value=" + value);                           // Simple dynamic pin
 Console.Pin(() => new[] { "Y`Multicolor", " pin, value=", "C`" + value }); // Multicolor dynamic pin
 Console.Pin(() => new[] { "Multiline pin,\nvalue=", "C`" + value });       // Multiline dynamic pin
 ```
+![XConsole pin 1](https://raw.githubusercontent.com/chubrik/XConsole/main/img/pin-1.png)
+![XConsole pin 2](https://raw.githubusercontent.com/chubrik/XConsole/main/img/pin-2.png)
+![XConsole pin 3](https://raw.githubusercontent.com/chubrik/XConsole/main/img/pin-3.png)
+<br>
 ![XConsole pin 4](https://raw.githubusercontent.com/chubrik/XConsole/main/img/pin-4.png)
 ![XConsole pin 5](https://raw.githubusercontent.com/chubrik/XConsole/main/img/pin-5.png)
 ![XConsole pin 6](https://raw.githubusercontent.com/chubrik/XConsole/main/img/pin-6.png)
 
-The dynamic pin will be automatically updated every time the `Write` or `WriteLine` methods are called.
 You can also update a dynamic pin manually using the `UpdatePin` method.
 To remove a pin, call the `Unpin` method.
 ```csharp
