@@ -33,7 +33,7 @@ public static class Screenshots
                 var red = i <= part ? maxRed : i < part * 2 ? (int)(maxRed * (1 - (i - part) / (float)part)) : i >= part * 5 ? maxRed : i > part * 4 ? (int)(maxRed * (i - part * 4) / (float)part) : 0;
                 var green = i < part ? (int)(maxGreen * i / (float)part) : i <= part * 3 ? maxGreen : i < part * 4 ? (int)(maxGreen * (1 - (i - part * 3) / (float)part)) : 0;
                 var blue = i <= part * 2 ? 0 : i < part * 3 ? (int)(maxBlue * (i - part * 2) / (float)part) : i <= part * 5 ? maxBlue : i < part * 6 ? (int)(maxBlue * (1 - (i - part * 5) / (float)part)) : 0;
-                var letter = step == 1 ? ansiText[i].ToString().Color(red, green, blue) : ansiText[i].ToString().Color(ConsoleColor.White).BgColor(red, green, blue);
+                var letter = step == 1 ? ansiText[i].Color(red, green, blue) : ansiText[i].Color(ConsoleColor.White).BgColor(red, green, blue);
                 Console.Write(i >= 20 && i <= 30 ? letter.Underline() : letter);
             }
 
