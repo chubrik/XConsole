@@ -35,7 +35,8 @@ internal abstract class ConsoleAnimation : IConsoleAnimation
             for (; ; )
                 try
                 {
-                    await LoopAsync(cancellationToken).ConfigureAwait(false);
+                    for (; ; )
+                        await LoopAsync(cancellationToken).ConfigureAwait(false);
                 }
                 catch (ArgumentOutOfRangeException)
                 {

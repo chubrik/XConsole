@@ -19,7 +19,11 @@ using System.Runtime.InteropServices;
 using System.Diagnostics.CodeAnalysis;
 #endif
 
+#if NET7_0_OR_GREATER
+public static partial class XConsole
+#else
 public static class XConsole
+#endif
 {
     private static readonly string _newLine = Environment.NewLine;
     private static readonly bool _positioningEnabled;
@@ -1293,6 +1297,18 @@ public static class XConsole
                SetConsoleMode(hOut, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
     }
 
+#if NET7_0_OR_GREATER
+    [LibraryImport("kernel32.dll", SetLastError = true)]
+    private static partial IntPtr GetStdHandle(int nStdHandle);
+
+    [LibraryImport("kernel32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool GetConsoleMode(IntPtr hConsoleHandle, out uint lpMode);
+
+    [LibraryImport("kernel32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool SetConsoleMode(IntPtr hConsoleHandle, uint dwMode);
+#else
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern IntPtr GetStdHandle(int nStdHandle);
 
@@ -1301,6 +1317,7 @@ public static class XConsole
 
     [DllImport("kernel32.dll")]
     private static extern bool SetConsoleMode(IntPtr hConsoleHandle, uint dwMode);
+#endif
 
 #endif
     #endregion

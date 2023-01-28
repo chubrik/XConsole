@@ -9,7 +9,11 @@ using System.Threading;
 using System.Runtime.Versioning;
 #endif
 
+#if NET7_0_OR_GREATER
+public sealed partial class ConsoleUtils
+#else
 public sealed class ConsoleUtils
+#endif
 {
     internal ConsoleUtils() { }
 
@@ -115,11 +119,20 @@ public sealed class ConsoleUtils
     [SupportedOSPlatform("windows")]
     public void RestoreWindow() => ShowWindow(_consolePtr, SW_RESTORE);
 
+#if NET7_0_OR_GREATER
+    [LibraryImport("kernel32.dll")]
+    private static partial IntPtr GetConsoleWindow();
+
+    [LibraryImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool ShowWindow(IntPtr hWnd, int nCmdShow);
+#else
     [DllImport("kernel32.dll", ExactSpelling = true)]
     private static extern IntPtr GetConsoleWindow();
 
     [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
     private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+#endif
 
 #endif
     #endregion
