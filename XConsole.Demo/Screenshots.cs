@@ -94,44 +94,6 @@ public static class Screenshots
         Console.WriteLine($"Aqua with {"a navy".BgColor(Color.Navy)} background".Color(Color.Aqua));
     }
 
-    public static void StaticPin1()
-    {
-        Console.WriteLine("Regular log message");
-        Console.WriteLine("Regular log message");
-        Console.WriteLine("Regular log message");
-        Console.WriteLine("Regular log message");
-        Console.Pin("Simple static pin");
-
-        for (; ; )
-            if (Console.ReadKey(true).Key == ConsoleKey.Escape)
-                return;
-    }
-
-    public static void StaticPin2()
-    {
-        Console.WriteLine("Regular log message");
-        Console.WriteLine("Regular log message");
-        Console.WriteLine("Regular log message");
-        Console.WriteLine("Regular log message");
-        Console.Pin("Y`Multicolor", " static pin");
-
-        for (; ; )
-            if (Console.ReadKey(true).Key == ConsoleKey.Escape)
-                return;
-    }
-
-    public static void StaticPin3()
-    {
-        Console.WriteLine("Regular log message");
-        Console.WriteLine("Regular log message");
-        Console.WriteLine("Regular log message");
-        Console.Pin("Multiline\nstatic pin");
-
-        for (; ; )
-            if (Console.ReadKey(true).Key == ConsoleKey.Escape)
-                return;
-    }
-
     public static void DynamicPin1()
     {
         var value = 25;
