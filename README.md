@@ -116,9 +116,9 @@ Console.Pin(() => "Simple pin, value=" + value);                           // Si
 Console.Pin(() => new[] { "Y`Multicolor", " pin, value=", "C`" + value }); // Multicolor dynamic pin
 Console.Pin(() => new[] { "Multiline pin,\nvalue=", "C`" + value });       // Multiline dynamic pin
 ```
-![XConsole pin 4](https://raw.githubusercontent.com/chubrik/XConsole/main/img/pin-4.png)
-![XConsole pin 5](https://raw.githubusercontent.com/chubrik/XConsole/main/img/pin-5.png)
-![XConsole pin 6](https://raw.githubusercontent.com/chubrik/XConsole/main/img/pin-6.png)
+![XConsole pin 1](https://raw.githubusercontent.com/chubrik/XConsole/main/img/pin-1.png)
+![XConsole pin 2](https://raw.githubusercontent.com/chubrik/XConsole/main/img/pin-2.png)
+![XConsole pin 3](https://raw.githubusercontent.com/chubrik/XConsole/main/img/pin-3.png)
 
 You can also update a dynamic pin manually using the `UpdatePin` method.
 To remove a pin, call the `Unpin` method.
