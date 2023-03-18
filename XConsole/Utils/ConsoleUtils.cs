@@ -71,25 +71,61 @@ public sealed class ConsoleUtils
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
 #endif
-    public bool Confirm(string message = "Continue? [Y/n]: ", string yes = "Yes", string no = "No")
+    public bool Confirm(string message = "Continue? [y/n]: ", string yes = "Yes", string no = "No")
     {
         return XConsole.Sync(() =>
         {
-            XConsole.Write(message);
+            bool? answer = null;
+            var answerPosition = XConsole.Write(message).End;
 
             for (; ; )
             {
                 var key = Console.ReadKey(intercept: true).Key;
 
-                if (key == ConsoleKey.Y)
+                switch (key)
                 {
-                    XConsole.WriteLine(yes);
-                    return true;
-                }
-                else if (key == ConsoleKey.N || key == ConsoleKey.Escape)
-                {
-                    XConsole.WriteLine(no);
-                    return false;
+                    case ConsoleKey.Y:
+                        if (answer != true)
+                        {
+                            if (answer == false)
+                                answerPosition.Write(new string(' ', no.Length));
+
+                            answer = true;
+                            XConsole.CursorPosition = answerPosition.Write(yes);
+                        }
+                        continue;
+
+                    case ConsoleKey.N:
+                        if (answer != false)
+                        {
+                            if (answer == true)
+                                answerPosition.Write(new string(' ', yes.Length));
+
+                            answer = false;
+                            XConsole.CursorPosition = answerPosition.Write(no);
+                        }
+                        continue;
+
+                    case ConsoleKey.Enter:
+                        if (answer != null)
+                        {
+                            XConsole.WriteLine();
+                            return answer.Value;
+                        }
+                        continue;
+
+                    case ConsoleKey.Backspace:
+                    case ConsoleKey.Escape:
+                        if (answer != null)
+                        {
+                            answer = null;
+                            answerPosition.Write(new string(' ', Math.Max(yes.Length, no.Length)));
+                            XConsole.CursorPosition = answerPosition;
+                        }
+                        continue;
+
+                    default:
+                        continue;
                 }
             }
         });
