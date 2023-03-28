@@ -52,7 +52,7 @@ public static class Program
         {
             await Task.Delay(50);
             var color = Color.FromArgb(random.Next(255), random.Next(255), random.Next(255));
-            var bgColor = Color.FromArgb(random.Next(96), random.Next(96), random.Next(96));
+            var bgColor = Color.FromArgb(random.Next(64), random.Next(64), random.Next(64));
             var endPos = Console.WriteLine(files[fileIndex].Name.Color(color).BgColor(bgColor) + ' ').End;
             endPosList.Add(endPos);
 
