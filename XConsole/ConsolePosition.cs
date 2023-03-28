@@ -37,6 +37,12 @@ public readonly struct ConsolePosition
 
     public ConsolePosition(int left, int top)
     {
+        if (left < 0)
+            throw new ArgumentOutOfRangeException(nameof(left), "Non-negative number required.");
+
+        if (top < 0)
+            throw new ArgumentOutOfRangeException(nameof(top), "Non-negative number required.");
+
         Left = left;
         InitialTop = top;
         ShiftTop = XConsole.ShiftTop;
@@ -88,20 +94,18 @@ public readonly struct ConsolePosition
 
     public ConsolePosition Write(char[]? buffer)
     {
-        var value = buffer?.ToString();
+        if (buffer == null || buffer.Length == 0)
+            return this;
 
-        return string.IsNullOrEmpty(value)
-            ? this
-            : XConsole.WriteToPosition(this, new[] { new ConsoleItem(value) });
+        return XConsole.WriteToPosition(this, new[] { new ConsoleItem(new string(buffer)) });
     }
 
     public ConsolePosition Write(char[] buffer, int index, int count)
     {
-        var value = buffer.ToString()?.Substring(index, count);
+        if (count == 0)
+            return this;
 
-        return string.IsNullOrEmpty(value)
-            ? this
-            : XConsole.WriteToPosition(this, new[] { new ConsoleItem(value) });
+        return XConsole.WriteToPosition(this, new[] { new ConsoleItem(new string(buffer, index, count)) });
     }
 
     public ConsolePosition Write(decimal value)
@@ -128,9 +132,10 @@ public readonly struct ConsolePosition
     {
         var valueStr = value?.ToString();
 
-        return string.IsNullOrEmpty(valueStr)
-            ? this
-            : XConsole.WriteToPosition(this, new[] { new ConsoleItem(valueStr) });
+        if (string.IsNullOrEmpty(valueStr))
+            return this;
+
+        return XConsole.WriteToPosition(this, new[] { new ConsoleItem(valueStr) });
     }
 
     public ConsolePosition Write(float value)
@@ -144,9 +149,10 @@ public readonly struct ConsolePosition
 #endif
         string format, object? arg0)
     {
-        return string.IsNullOrEmpty(format)
-            ? this
-            : XConsole.WriteToPosition(this, new[] { ConsoleItem.Parse(string.Format(format, arg0)) });
+        if (format.Length == 0)
+            return this;
+
+        return XConsole.WriteToPosition(this, new[] { ConsoleItem.Parse(string.Format(format, arg0)) });
     }
 
     public ConsolePosition Write(
@@ -155,9 +161,10 @@ public readonly struct ConsolePosition
 #endif
         string format, object? arg0, object? arg1)
     {
-        return string.IsNullOrEmpty(format)
-            ? this
-            : XConsole.WriteToPosition(this, new[] { ConsoleItem.Parse(string.Format(format, arg0, arg1)) });
+        if (format.Length == 0)
+            return this;
+
+        return XConsole.WriteToPosition(this, new[] { ConsoleItem.Parse(string.Format(format, arg0, arg1)) });
     }
 
     public ConsolePosition Write(
@@ -166,9 +173,10 @@ public readonly struct ConsolePosition
 #endif
         string format, object? arg0, object? arg1, object? arg2)
     {
-        return string.IsNullOrEmpty(format)
-            ? this
-            : XConsole.WriteToPosition(this, new[] { ConsoleItem.Parse(string.Format(format, arg0, arg1, arg2)) });
+        if (format.Length == 0)
+            return this;
+
+        return XConsole.WriteToPosition(this, new[] { ConsoleItem.Parse(string.Format(format, arg0, arg1, arg2)) });
     }
 
     public ConsolePosition Write(
@@ -177,10 +185,11 @@ public readonly struct ConsolePosition
 #endif
         string format, params object?[]? arg)
     {
-        return string.IsNullOrEmpty(format)
-            ? this
-            : XConsole.WriteToPosition(
-                this, new[] { ConsoleItem.Parse(string.Format(format, arg ?? Array.Empty<object?>())) });
+        if (format.Length == 0)
+            return this;
+
+        return XConsole.WriteToPosition(
+            this, new[] { ConsoleItem.Parse(string.Format(format, arg ?? Array.Empty<object?>())) });
     }
 
     public ConsolePosition Write(uint value)
@@ -238,20 +247,18 @@ public readonly struct ConsolePosition
 
     public ConsolePosition? TryWrite(char[]? buffer)
     {
-        var value = buffer?.ToString();
+        if (buffer == null || buffer.Length == 0)
+            return this;
 
-        return string.IsNullOrEmpty(value)
-            ? this
-            : TryWriteBase(new[] { new ConsoleItem(value) });
+        return TryWriteBase(new[] { new ConsoleItem(new string(buffer)) });
     }
 
     public ConsolePosition? TryWrite(char[] buffer, int index, int count)
     {
-        var value = buffer.ToString()?.Substring(index, count);
+        if (count == 0)
+            return this;
 
-        return string.IsNullOrEmpty(value)
-            ? this
-            : TryWriteBase(new[] { new ConsoleItem(value) });
+        return TryWriteBase(new[] { new ConsoleItem(new string(buffer, index, count)) });
     }
 
     public ConsolePosition? TryWrite(decimal value)
@@ -278,9 +285,10 @@ public readonly struct ConsolePosition
     {
         var valueStr = value?.ToString();
 
-        return string.IsNullOrEmpty(valueStr)
-            ? this
-            : TryWriteBase(new[] { new ConsoleItem(valueStr) });
+        if (string.IsNullOrEmpty(valueStr))
+            return this;
+
+        return TryWriteBase(new[] { new ConsoleItem(valueStr) });
     }
 
     public ConsolePosition? TryWrite(float value)
@@ -294,9 +302,10 @@ public readonly struct ConsolePosition
 #endif
         string format, object? arg0)
     {
-        return string.IsNullOrEmpty(format)
-            ? this
-            : TryWriteBase(new[] { ConsoleItem.Parse(string.Format(format, arg0)) });
+        if (format.Length == 0)
+            return this;
+
+        return TryWriteBase(new[] { ConsoleItem.Parse(string.Format(format, arg0)) });
     }
 
     public ConsolePosition? TryWrite(
@@ -305,9 +314,10 @@ public readonly struct ConsolePosition
 #endif
         string format, object? arg0, object? arg1)
     {
-        return string.IsNullOrEmpty(format)
-            ? this
-            : TryWriteBase(new[] { ConsoleItem.Parse(string.Format(format, arg0, arg1)) });
+        if (format.Length == 0)
+            return this;
+
+        return TryWriteBase(new[] { ConsoleItem.Parse(string.Format(format, arg0, arg1)) });
     }
 
     public ConsolePosition? TryWrite(
@@ -316,9 +326,10 @@ public readonly struct ConsolePosition
 #endif
         string format, object? arg0, object? arg1, object? arg2)
     {
-        return string.IsNullOrEmpty(format)
-            ? this
-            : TryWriteBase(new[] { ConsoleItem.Parse(string.Format(format, arg0, arg1, arg2)) });
+        if (format.Length == 0)
+            return this;
+
+        return TryWriteBase(new[] { ConsoleItem.Parse(string.Format(format, arg0, arg1, arg2)) });
     }
 
     public ConsolePosition? TryWrite(
@@ -327,9 +338,10 @@ public readonly struct ConsolePosition
 #endif
         string format, params object?[]? arg)
     {
-        return string.IsNullOrEmpty(format)
-            ? this
-            : TryWriteBase(new[] { ConsoleItem.Parse(string.Format(format, arg ?? Array.Empty<object?>())) });
+        if (format.Length == 0)
+            return this;
+
+        return TryWriteBase(new[] { ConsoleItem.Parse(string.Format(format, arg ?? Array.Empty<object?>())) });
     }
 
     public ConsolePosition? TryWrite(uint value)

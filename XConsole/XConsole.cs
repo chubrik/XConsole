@@ -397,10 +397,10 @@ public static class XConsole
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
 #endif
-    public static string ReadLine()
+    public static string? ReadLine()
     {
         lock (_syncLock)
-            return Console.ReadLine() ?? string.Empty;
+            return Console.ReadLine();
     }
 
 #if NET
@@ -412,7 +412,7 @@ public static class XConsole
         switch (mode)
         {
             case ConsoleReadLineMode.Default:
-                return ReadLine();
+                return ReadLine() ?? string.Empty; ;
 
             case ConsoleReadLineMode.Masked:
             case ConsoleReadLineMode.Hidden:
@@ -864,28 +864,24 @@ public static class XConsole
 
     public static (ConsolePosition Begin, ConsolePosition End) Write(char[]? buffer)
     {
-        var value = buffer?.ToString();
-
-        if (string.IsNullOrEmpty(value))
+        if (buffer == null || buffer.Length == 0)
         {
             var position = CursorPosition;
             return (position, position);
         }
 
-        return WriteBase(new[] { new ConsoleItem(value) }, isWriteLine: false);
+        return WriteBase(new[] { new ConsoleItem(new string(buffer)) }, isWriteLine: false);
     }
 
     public static (ConsolePosition Begin, ConsolePosition End) Write(char[] buffer, int index, int count)
     {
-        var value = buffer.ToString()?.Substring(index, count);
-
-        if (string.IsNullOrEmpty(value))
+        if (count == 0)
         {
             var position = CursorPosition;
             return (position, position);
         }
 
-        return WriteBase(new[] { new ConsoleItem(value) }, isWriteLine: false);
+        return WriteBase(new[] { new ConsoleItem(new string(buffer, index, count)) }, isWriteLine: false);
     }
 
     public static (ConsolePosition Begin, ConsolePosition End) Write(decimal value)
@@ -932,7 +928,7 @@ public static class XConsole
 #endif
         string format, object? arg0)
     {
-        if (string.IsNullOrEmpty(format))
+        if (format.Length == 0)
         {
             var position = CursorPosition;
             return (position, position);
@@ -947,7 +943,7 @@ public static class XConsole
 #endif
         string format, object? arg0, object? arg1)
     {
-        if (string.IsNullOrEmpty(format))
+        if (format.Length == 0)
         {
             var position = CursorPosition;
             return (position, position);
@@ -962,7 +958,7 @@ public static class XConsole
 #endif
         string format, object? arg0, object? arg1, object? arg2)
     {
-        if (string.IsNullOrEmpty(format))
+        if (format.Length == 0)
         {
             var position = CursorPosition;
             return (position, position);
@@ -977,7 +973,7 @@ public static class XConsole
 #endif
         string format, params object?[]? arg)
     {
-        if (string.IsNullOrEmpty(format))
+        if (format.Length == 0)
         {
             var position = CursorPosition;
             return (position, position);
@@ -1014,22 +1010,18 @@ public static class XConsole
 
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(char[]? buffer)
     {
-        var value = buffer?.ToString();
-
-        if (string.IsNullOrEmpty(value))
+        if (buffer == null || buffer.Length == 0)
             return WriteLine();
 
-        return WriteBase(new[] { new ConsoleItem(value) }, isWriteLine: true);
+        return WriteBase(new[] { new ConsoleItem(new string(buffer)) }, isWriteLine: true);
     }
 
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(char[] buffer, int index, int count)
     {
-        var value = buffer.ToString()?.Substring(index, count);
-
-        if (string.IsNullOrEmpty(value))
+        if (count == 0)
             return WriteLine();
 
-        return WriteBase(new[] { new ConsoleItem(value) }, isWriteLine: true);
+        return WriteBase(new[] { new ConsoleItem(new string(buffer, index, count)) }, isWriteLine: true);
     }
 
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(decimal value)
@@ -1073,7 +1065,7 @@ public static class XConsole
 #endif
         string format, object? arg0)
     {
-        if (string.IsNullOrEmpty(format))
+        if (format.Length == 0)
             return WriteLine();
 
         return WriteBase(new[] { ConsoleItem.Parse(string.Format(format, arg0)) }, isWriteLine: true);
@@ -1085,7 +1077,7 @@ public static class XConsole
 #endif
         string format, object? arg0, object? arg1)
     {
-        if (string.IsNullOrEmpty(format))
+        if (format.Length == 0)
             return WriteLine();
 
         return WriteBase(new[] { ConsoleItem.Parse(string.Format(format, arg0, arg1)) }, isWriteLine: true);
@@ -1097,7 +1089,7 @@ public static class XConsole
 #endif
         string format, object? arg0, object? arg1, object? arg2)
     {
-        if (string.IsNullOrEmpty(format))
+        if (format.Length == 0)
             return WriteLine();
 
         return WriteBase(new[] { ConsoleItem.Parse(string.Format(format, arg0, arg1, arg2)) }, isWriteLine: true);
@@ -1109,7 +1101,7 @@ public static class XConsole
 #endif
         string format, params object?[]? arg)
     {
-        if (string.IsNullOrEmpty(format))
+        if (format.Length == 0)
             return WriteLine();
 
         return WriteBase(
@@ -1785,9 +1777,7 @@ public static class XConsole
 #endif
     public static event ConsoleCancelEventHandler? CancelKeyPress
     {
-        //[System.Runtime.CompilerServices.NullableContext(2)]
         add => Console.CancelKeyPress += value;
-        //[System.Runtime.CompilerServices.NullableContext(2)]
         remove => Console.CancelKeyPress -= value;
     }
 
