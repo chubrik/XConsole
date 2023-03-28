@@ -1190,12 +1190,18 @@ public static class XConsole
 
     private static int CalcLineWrapCount(ConsoleItem[] items, int beginLeft)
     {
+        const int space = ' ';
+        const int _n = '\n';
+        const int _r = '\r';
+        const int _t = '\t';
+        const int _b = '\b';
+        const int _x1b = '\x1b';
+
         var lineWrapCount = 0;
         var left = beginLeft;
         var bufferWidth = Console.BufferWidth;
         string chars;
-        int charCount, charIndex;
-        char chr;
+        int charCount, charIndex, @char;
 
         for (var itemIndex = 0; itemIndex < items.Length; itemIndex++)
         {
@@ -1204,43 +1210,48 @@ public static class XConsole
 
             for (charIndex = 0; charIndex < charCount; charIndex++)
             {
-                chr = chars[charIndex];
+                @char = chars[charIndex];
 
-                if (chr >= ' ')
+                if (@char >= space)
                     left++;
                 else
-                    switch (chr)
+                    switch (@char)
                     {
-                        case '\n':
+                        case _n:
                             left = 0;
                             lineWrapCount++;
                             continue;
 
-                        case '\r':
+                        case _r:
                             left = 0;
                             continue;
 
-                        case '\t':
+                        case _t:
                             left = (left + 8) / 8 * 8;
                             break;
 
-                        case '\b':
+                        case _b:
 
                             if (left > 0)
                                 left--;
 
                             continue;
 
-                        case '\x1b':
+                        case _x1b:
 
 #if NET
+                            const int A = 'A';
+                            const int Z = 'Z';
+                            const int a = 'a';
+                            const int z = 'z';
+
                             if (VirtualTerminalEnabled)
                             {
                                 for (charIndex++; charIndex < charCount; charIndex++)
                                 {
-                                    chr = chars[charIndex];
+                                    @char = chars[charIndex];
 
-                                    if ((chr >= 'A' && chr <= 'Z') || (chr >= 'a' && chr <= 'z'))
+                                    if ((@char >= A && @char <= Z) || (@char >= a && @char <= z))
                                         break;
                                 }
 
