@@ -1,4 +1,7 @@
-﻿#if !NET
+﻿#pragma warning disable CS1573 // Parameter has no matching param tag in the XML comment (but other parameters do)
+#pragma warning disable CS1584 // XML comment has syntactically incorrect cref attribute
+#pragma warning disable CS1658 // Warning is overriding an error
+#if !NET
 #pragma warning disable CS8604 // Possible null reference argument.
 #endif
 
@@ -65,7 +68,7 @@ public readonly struct ConsolePosition
     /// </summary>
     /// <param name="left">The column position. Columns are numbered from left to right starting at 0.</param>
     /// <param name="top">The row position. Rows are numbered from top to bottom starting at 0.</param>
-    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    /// <exception cref="ArgumentOutOfRangeException"/>
     public ConsolePosition(int left, int top)
     {
         if (left < 0)
@@ -79,6 +82,7 @@ public readonly struct ConsolePosition
         ShiftTop = XConsole.ShiftTop;
     }
 
+#pragma warning disable CS1734 // XML comment has a paramref tag, but there is no parameter by that name
     /// <summary>
     /// <paramref name="Left"/> and <paramref name="top"/> arguments should be specified.
     /// </summary>
@@ -86,7 +90,8 @@ public readonly struct ConsolePosition
     /// Please, use constructor overload:
     /// <br/>&#8226; <see cref="ConsolePosition(int, int)"/>
     /// </remarks>
-    /// <exception cref="InvalidOperationException"></exception>
+    /// <exception cref="InvalidOperationException"/>
+#pragma warning restore CS1734 // XML comment has a paramref tag, but there is no parameter by that name
     [Obsolete("Arguments should be specified.", error: true)]
     public ConsolePosition() => throw new InvalidOperationException();
 

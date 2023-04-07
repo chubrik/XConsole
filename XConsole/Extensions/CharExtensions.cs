@@ -15,7 +15,7 @@ public static class CharExtensions
     public static string Color(this char value, Color color)
     {
         return XConsole.VirtualTerminalAndColoringEnabled
-            ? string.Format(ForegroundColorFormat, color.R, color.G, color.B, value)
+            ? string.Format(_foregroundColorFormat, color.R, color.G, color.B, value)
             : value.ToString();
     }
 
@@ -29,7 +29,7 @@ public static class CharExtensions
     public static string Color(this char value, ConsoleColor color)
     {
         return XConsole.VirtualTerminalAndColoringEnabled
-            ? string.Format(ForegroundConsoleColorFormat, ForegroundConsoleColorCodes[(int)color], value)
+            ? string.Format(_foregroundConsoleColorFormat, _foregroundConsoleColorCodes[(int)color], value)
             : value.ToString();
     }
 
@@ -60,7 +60,7 @@ public static class CharExtensions
     public static string BgColor(this char value, Color color)
     {
         return XConsole.VirtualTerminalAndColoringEnabled
-            ? string.Format(BackgroundColorFormat, color.R, color.G, color.B, value)
+            ? string.Format(_backgroundColorFormat, color.R, color.G, color.B, value)
             : value.ToString();
     }
 
@@ -74,7 +74,7 @@ public static class CharExtensions
     public static string BgColor(this char value, ConsoleColor color)
     {
         return XConsole.VirtualTerminalAndColoringEnabled
-            ? string.Format(BackgroundConsoleColorFormat, BackgroundConsoleColorCodes[(int)color], value)
+            ? string.Format(_backgroundConsoleColorFormat, _backgroundConsoleColorCodes[(int)color], value)
             : value.ToString();
     }
 
@@ -102,7 +102,7 @@ public static class CharExtensions
     /// <summary>XConsole extension for underlining text in the console.</summary>
     public static string Underline(this char value)
     {
-        return XConsole.VirtualTerminalEnabled ? string.Format(UnderlineFormat, value) : value.ToString();
+        return XConsole._virtualTerminalEnabled ? string.Format(_underlineFormat, value) : value.ToString();
     }
 }
 

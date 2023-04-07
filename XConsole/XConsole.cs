@@ -1,4 +1,7 @@
-﻿#if NET
+﻿#pragma warning disable CS1573 // Parameter has no matching param tag in the XML comment (but other parameters do)
+#pragma warning disable CS1584 // XML comment has syntactically incorrect cref attribute
+#pragma warning disable CS1658 // Warning is overriding an error
+#if NET
 #pragma warning disable CA1416 // Validate platform compatibility
 #else
 #pragma warning disable CS8604 // Possible null reference argument.
@@ -63,7 +66,7 @@ public static class XConsole
     private static long _shiftTop = 0;
 
 #if NET
-    internal static readonly bool VirtualTerminalEnabled;
+    internal static readonly bool _virtualTerminalEnabled;
 #endif
 
     static XConsole()
@@ -83,7 +86,7 @@ public static class XConsole
         {
             try
             {
-                VirtualTerminalEnabled = EnableVirtualTerminal();
+                _virtualTerminalEnabled = EnableVirtualTerminal();
             }
             catch { }
         }
@@ -92,7 +95,7 @@ public static class XConsole
 
     internal static long ShiftTop => _shiftTop;
 #if NET
-    internal static bool VirtualTerminalAndColoringEnabled => VirtualTerminalEnabled && _coloringEnabled;
+    internal static bool VirtualTerminalAndColoringEnabled => _virtualTerminalEnabled && _coloringEnabled;
 #endif
 
     /// <summary>
@@ -141,7 +144,7 @@ public static class XConsole
     /// <br/>&#8226; <see cref="Pin(Func{string?})"/>
     /// <br/>&#8226; <see cref="Pin(Func{IReadOnlyList{string?}})"/>
     /// </remarks>
-    /// <exception cref="InvalidOperationException"></exception>
+    /// <exception cref="InvalidOperationException"/>
     [Obsolete("At least one argument should be specified.", error: true)]
     public static void Pin() => throw new InvalidOperationException();
 
@@ -605,7 +608,7 @@ public static class XConsole
     /// At least one argument should be specified.
     /// </summary>
     /// <remarks>Please, use overloads.</remarks>
-    /// <exception cref="InvalidOperationException"></exception>
+    /// <exception cref="InvalidOperationException"/>
     [Obsolete("At least one argument should be specified.", error: true)]
     public static void Write() => throw new InvalidOperationException();
 
@@ -1563,7 +1566,7 @@ public static class XConsole
                             const int a = 'a';
                             const int z = 'z';
 
-                            if (VirtualTerminalEnabled)
+                            if (_virtualTerminalEnabled)
                             {
                                 for (charIndex++; charIndex < charCount; charIndex++)
                                 {
@@ -1604,10 +1607,12 @@ public static class XConsole
 
     // https://learn.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences
 
+#pragma warning disable IDE1006 // Naming Styles
     private const int STD_OUTPUT_HANDLE = -11;
     private const uint ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004;
 
     private static readonly IntPtr INVALID_HANDLE_VALUE = new(-1);
+#pragma warning restore IDE1006 // Naming Styles
 
     private static bool EnableVirtualTerminal()
     {
@@ -2044,12 +2049,15 @@ public static class XConsole
         }
     }
 
-    /// <inheritdoc cref="Console.GetCursorPosition()"/>
+    /// <summary>
+    /// Gets the position of the cursor.
+    /// </summary>
     /// <remarks>
     /// See also:<br/>
     /// &#8226; <seealso cref="CursorPosition"/> &#8212; smart <seealso cref="ConsolePosition"/> structure,
     /// resistant to console buffer overflow and always points to the correct position within the console buffer area.
     /// </remarks>
+    /// <returns>The column and row position of the cursor.</returns>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
