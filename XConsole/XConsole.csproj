@@ -15,7 +15,8 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/chubrik/XConsole</RepositoryUrl>
-    <Version>1.4.5</Version>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Version>1.4.7</Version>
   </PropertyGroup>
 
   <ItemGroup>
