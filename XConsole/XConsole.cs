@@ -19,6 +19,34 @@ using System.Runtime.InteropServices;
 using System.Diagnostics.CodeAnalysis;
 #endif
 
+/// <summary>
+/// Extended .NET console with coloring microsyntax, multiline pinning, write-to-position and most useful utils.
+/// <para>
+/// The main features:
+/// <list type="bullet">
+/// <item>Backward compatibility with the standard <see cref="Console"/>.</item>
+/// <item>
+/// A simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see> to colorize any text,
+/// resistant to multithreading. Also supports the "NO_COLOR" convention to disable any colors.
+/// </item>
+/// <item>
+/// <see cref="Pin()"/> methods pin text below the regular log messages.
+/// Text can be dynamic, multiline and colored. It's resistant to console buffer overflow.
+/// </item>
+/// <item>
+/// <see cref="CursorPosition"/> provides smart <see cref="ConsolePosition"/> structure
+/// resistant to console buffer overflow and always points to the correct position within the console buffer area.
+/// </item>
+/// <item>
+/// <see cref="Write()"/> and <see cref="WriteLine()"/> overloads
+/// return begin and end <see cref="ConsolePosition"/> within the console buffer area.
+/// </item>
+/// <item><see cref="ReadLine()"/> has additional modes that mask or hides all characters on the screen.</item>
+/// <item><see cref="Utils"/> is the instance for built-in and custom extensions.</item>
+/// </list>
+/// </para>
+/// <see href="https://github.com/chubrik/XConsole#xconsole">More info</see>
+/// </summary>
 #if NET7_0_OR_GREATER
 public static partial class XConsole
 #else
@@ -67,20 +95,31 @@ public static class XConsole
     internal static bool VirtualTerminalAndColoringEnabled => VirtualTerminalEnabled && _coloringEnabled;
 #endif
 
+    /// <summary>
+    /// Disables all colors according to the "NO_COLOR" convention. See: <see href="https://no-color.org/"/>.
+    /// </summary>
     public static bool NO_COLOR
     {
         get => !_coloringEnabled;
         set => _coloringEnabled = !value;
     }
 
+    /// <summary>
+    /// Instance for built-in and custom extensions.
+    /// </summary>
     public static ConsoleUtils Utils { get; } = new();
 
+    /// <summary>
+    /// Executes the <paramref name="action"/> callback synchronously.
+    /// </summary>
+    /// <param name="action">The action callback to execute synchronously.</param>
     public static void Sync(Action action)
     {
         lock (_syncLock)
             action();
     }
 
+    /// <inheritdoc cref="Sync(Action)"/>
     public static T Sync<T>(Func<T> action)
     {
         lock (_syncLock)
@@ -92,9 +131,32 @@ public static class XConsole
     private static Func<IReadOnlyList<string?>>? _getPinValues = null;
     private static int _pinHeight = 0;
 
+    /// <summary>
+    /// At least one argument should be specified.
+    /// </summary>
+    /// <remarks>
+    /// Please, use overloads:
+    /// <br/>&#8226; <see cref="Pin(string?[])"/>
+    /// <br/>&#8226; <see cref="Pin(IReadOnlyList{string?})"/>
+    /// <br/>&#8226; <see cref="Pin(Func{string?})"/>
+    /// <br/>&#8226; <see cref="Pin(Func{IReadOnlyList{string?}})"/>
+    /// </remarks>
+    /// <exception cref="InvalidOperationException"></exception>
     [Obsolete("At least one argument should be specified.", error: true)]
     public static void Pin() => throw new InvalidOperationException();
 
+    /// <summary>
+    /// Pins the specified set of string values as a static text below the regular log messages.
+    /// Text can be multiline and <see href="https://github.com/chubrik/XConsole#coloring">colored</see>.
+    /// Pin is resistant to console buffer overflow.
+    /// </summary>
+    /// <param name="values">
+    /// The set of values for pin below the regular log messages.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </param>
+    /// <remarks>
+    /// See also:<br/>&#8226; <seealso cref="Unpin()"/>
+    /// </remarks>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -112,6 +174,7 @@ public static class XConsole
         UpdatePin();
     }
 
+    /// <inheritdoc cref="Pin(string?[])"/>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -127,6 +190,21 @@ public static class XConsole
         UpdatePin();
     }
 
+    /// <summary>
+    /// Pins the value from <paramref name="getValue"/> callback as a dynamic text below the regular log messages.
+    /// Text can be multiline and <see href="https://github.com/chubrik/XConsole#coloring">colored</see>,
+    /// it updates every time <see cref="Write()"/> or <see cref="WriteLine()"/> method are called.
+    /// Pin is resistant to console buffer overflow.
+    /// </summary>
+    /// <param name="getValue">
+    /// The value callback to pin as a dynamic text below the regular log messages.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </param>
+    /// <remarks>
+    /// See also:
+    /// <br/>&#8226; <seealso cref="UpdatePin()"/>
+    /// <br/>&#8226; <seealso cref="Unpin()"/>
+    /// </remarks>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -142,6 +220,17 @@ public static class XConsole
         UpdatePin();
     }
 
+    /// <summary>
+    /// Pins the values from <paramref name="getValues"/> callback as a dynamic text below the regular log messages.
+    /// Text can be multiline and <see href="https://github.com/chubrik/XConsole#coloring">colored</see>,
+    /// it updates every time <see cref="Write()"/> or <see cref="WriteLine()"/> method are called.
+    /// Pin is resistant to console buffer overflow.
+    /// </summary>
+    /// <param name="getValues">
+    /// The values callback to pin as a dynamic text below the regular log messages.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </param>
+    /// <inheritdoc cref="Pin(Func{string?})"/>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -157,6 +246,15 @@ public static class XConsole
         UpdatePin();
     }
 
+    /// <summary>
+    /// Updates the pinned dynamic text below the regular log messages.
+    /// </summary>
+    /// <remarks>
+    /// See also:
+    /// <br/>&#8226; <seealso cref="Pin(Func{string?})"/>
+    /// <br/>&#8226; <seealso cref="Pin(Func{IReadOnlyList{string?}})"/>
+    /// <br/>&#8226; <seealso cref="Unpin()"/>
+    /// </remarks>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -237,6 +335,17 @@ public static class XConsole
         }
     }
 
+    /// <summary>
+    /// Removes the pinned text below the regular log messages.
+    /// </summary>
+    /// <remarks>
+    /// See also:
+    /// <br/>&#8226; <seealso cref="Pin(string?[])"/>
+    /// <br/>&#8226; <seealso cref="Pin(IReadOnlyList{string?})"/>
+    /// <br/>&#8226; <seealso cref="Pin(Func{string?})"/>
+    /// <br/>&#8226; <seealso cref="Pin(Func{IReadOnlyList{string?}})"/>
+    /// <br/>&#8226; <seealso cref="UpdatePin()"/>
+    /// </remarks>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -290,6 +399,14 @@ public static class XConsole
 
     private const long _intMinValue = int.MinValue;
 
+    /// <summary>
+    /// Gets or sets the position of the cursor.
+    /// </summary>
+    /// <returns>
+    /// Smart <see cref="ConsolePosition"/> structure, resistant to console buffer overflow
+    /// and always points to the correct position within the console buffer area.
+    /// </returns>
+    /// <inheritdoc cref="Console.SetCursorPosition(int, int)"/>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -393,6 +510,11 @@ public static class XConsole
 
     #region ReadLine
 
+    /// <inheritdoc cref="Console.ReadLine()"/>
+    /// <remarks>
+    /// See also:<br/>
+    /// &#8226; <seealso cref="ReadLine(ConsoleReadLineMode, char)"/> &#8212; overload with masked and hidden modes.
+    /// </remarks>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -403,6 +525,28 @@ public static class XConsole
             return Console.ReadLine();
     }
 
+    /// <summary>
+    /// <inheritdoc cref="Console.ReadLine()"/>
+    /// <para>
+    /// There are three <paramref name="mode"/> variants:
+    /// <br/>&#8226; <see cref="ConsoleReadLineMode.Default"/> &#8212; default behavior.
+    /// <br/>&#8226; <see cref="ConsoleReadLineMode.Masked"/> &#8212;
+    /// all characters are shown as a specified <paramref name="maskChar"/>.
+    /// <br/>&#8226; <see cref="ConsoleReadLineMode.Hidden"/> &#8212; no characters are shown on the screen.
+    /// </para>
+    /// </summary>
+    /// <param name="mode">
+    /// There are three <paramref name="mode"/> variants:
+    /// <br/>&#8226; <see cref="ConsoleReadLineMode.Default"/> &#8212; default behavior.
+    /// <br/>&#8226; <see cref="ConsoleReadLineMode.Masked"/> &#8212;
+    /// all characters are shown as a specified <paramref name="maskChar"/>.
+    /// <br/>&#8226; <see cref="ConsoleReadLineMode.Hidden"/> &#8212; no characters are shown on the screen.
+    /// </param>
+    /// <param name="maskChar">Char used for mask all characters in masked <paramref name="mode"/>.</param>
+    /// <returns>
+    /// The next line of characters from the input stream, or <see cref="string.Empty"/> if no more lines are available.
+    /// </returns>
+    /// <inheritdoc cref="Console.ReadLine()"/>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -457,14 +601,41 @@ public static class XConsole
 
     #region Write, WriteLine
 
+    /// <summary>
+    /// At least one argument should be specified.
+    /// </summary>
+    /// <remarks>Please, use overloads.</remarks>
+    /// <exception cref="InvalidOperationException"></exception>
     [Obsolete("At least one argument should be specified.", error: true)]
     public static void Write() => throw new InvalidOperationException();
 
+    /// <summary>
+    /// <inheritdoc cref="Console.Write(string?)"/>
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </summary>
+    /// <param name="value">
+    /// The value to write.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </param>
+    /// <returns>
+    /// Begin and end <see cref="ConsolePosition"/> structures, resistant to console buffer overflow
+    /// and always point to the correct positions within the console buffer area.
+    /// </returns>
+    /// <inheritdoc cref="Console.Write(string?)"/>
     public static (ConsolePosition Begin, ConsolePosition End) Write(string? value)
     {
         return WriteBase(new[] { ConsoleItem.Parse(value) }, isWriteLine: false);
     }
 
+    /// <summary>
+    /// Writes the specified set of string values to the standard output stream.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </summary>
+    /// <param name="values">
+    /// The set of values to write.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </param>
+    /// <inheritdoc cref="Write(string?)"/>
     public static (ConsolePosition Begin, ConsolePosition End) Write(params string?[] values)
     {
         Debug.Assert(values.Length > 0);
@@ -476,6 +647,7 @@ public static class XConsole
         return WriteBase(items, isWriteLine: false);
     }
 
+    /// <inheritdoc cref="Write(string?[])"/>
     public static (ConsolePosition Begin, ConsolePosition End) Write(IReadOnlyList<string?> values)
     {
         var items = new ConsoleItem[values.Count];
@@ -486,11 +658,26 @@ public static class XConsole
         return WriteBase(items, isWriteLine: false);
     }
 
+    /// <summary>
+    /// <inheritdoc cref="Console.WriteLine(string?)"/>
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </summary>
+    /// <inheritdoc cref="Write(string?)"/>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(string? value)
     {
         return WriteBase(new[] { ConsoleItem.Parse(value) }, isWriteLine: true);
     }
 
+    /// <summary>
+    /// Writes the specified set of string values, followed by the current line terminator,
+    /// to the standard output stream.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </summary>
+    /// <param name="values">
+    /// The set of values to write.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </param>
+    /// <inheritdoc cref="WriteLine(string?)"/>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(params string?[] values)
     {
         Debug.Assert(values.Length > 0);
@@ -502,6 +689,7 @@ public static class XConsole
         return WriteBase(items, isWriteLine: true);
     }
 
+    /// <inheritdoc cref="WriteLine(string?[])"/>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(IReadOnlyList<string?> values)
     {
         var items = new ConsoleItem[values.Count];
@@ -512,6 +700,8 @@ public static class XConsole
         return WriteBase(items, isWriteLine: true);
     }
 
+    /// <inheritdoc cref="Console.WriteLine()"/>
+    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine()
     {
         if (!_positioningEnabled)
@@ -852,16 +1042,22 @@ public static class XConsole
 
     #region Write overloads
 
+    /// <inheritdoc cref="Console.Write(bool)"/>
+    /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(bool value)
     {
         return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
     }
 
+    /// <inheritdoc cref="Console.Write(char)"/>
+    /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(char value)
     {
         return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
     }
 
+    /// <inheritdoc cref="Console.Write(char[]?)"/>
+    /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(char[]? buffer)
     {
         if (buffer == null || buffer.Length == 0)
@@ -873,6 +1069,8 @@ public static class XConsole
         return WriteBase(new[] { new ConsoleItem(new string(buffer)) }, isWriteLine: false);
     }
 
+    /// <inheritdoc cref="Console.Write(char[], int, int)"/>
+    /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(char[] buffer, int index, int count)
     {
         if (count == 0)
@@ -884,26 +1082,36 @@ public static class XConsole
         return WriteBase(new[] { new ConsoleItem(new string(buffer, index, count)) }, isWriteLine: false);
     }
 
+    /// <inheritdoc cref="Console.Write(decimal)"/>
+    /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(decimal value)
     {
         return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
     }
 
+    /// <inheritdoc cref="Console.Write(double)"/>
+    /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(double value)
     {
         return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
     }
 
+    /// <inheritdoc cref="Console.Write(int)"/>
+    /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(int value)
     {
         return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
     }
 
+    /// <inheritdoc cref="Console.Write(long)"/>
+    /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(long value)
     {
         return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
     }
 
+    /// <inheritdoc cref="Console.Write(object?)"/>
+    /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(object? value)
     {
         var valueStr = value?.ToString();
@@ -917,11 +1125,23 @@ public static class XConsole
         return WriteBase(new[] { new ConsoleItem(valueStr) }, isWriteLine: false);
     }
 
+    /// <inheritdoc cref="Console.Write(float)"/>
+    /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(float value)
     {
         return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
     }
 
+    /// <summary>
+    /// <inheritdoc cref="Console.Write(string, object?)"/>
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </summary>
+    /// <param name="format">
+    /// A composite format string.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </param>
+    /// <returns><inheritdoc cref="Write(string?)"/></returns>
+    /// <inheritdoc cref="Console.Write(string, object?)"/>
     public static (ConsolePosition Begin, ConsolePosition End) Write(
 #if NET7_0_OR_GREATER
         [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
@@ -937,6 +1157,16 @@ public static class XConsole
         return WriteBase(new[] { ConsoleItem.Parse(string.Format(format, arg0)) }, isWriteLine: false);
     }
 
+    /// <summary>
+    /// <inheritdoc cref="Console.Write(string, object?, object?)"/>
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </summary>
+    /// <param name="format">
+    /// A composite format string.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </param>
+    /// <returns><inheritdoc cref="Write(string?)"/></returns>
+    /// <inheritdoc cref="Console.Write(string, object?, object?)"/>
     public static (ConsolePosition Begin, ConsolePosition End) Write(
 #if NET7_0_OR_GREATER
         [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
@@ -952,6 +1182,16 @@ public static class XConsole
         return WriteBase(new[] { ConsoleItem.Parse(string.Format(format, arg0, arg1)) }, isWriteLine: false);
     }
 
+    /// <summary>
+    /// <inheritdoc cref="Console.Write(string, object?, object?, object?)"/>
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </summary>
+    /// <param name="format">
+    /// A composite format string.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </param>
+    /// <returns><inheritdoc cref="Write(string?)"/></returns>
+    /// <inheritdoc cref="Console.Write(string, object?, object?, object?)"/>
     public static (ConsolePosition Begin, ConsolePosition End) Write(
 #if NET7_0_OR_GREATER
         [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
@@ -967,6 +1207,16 @@ public static class XConsole
         return WriteBase(new[] { ConsoleItem.Parse(string.Format(format, arg0, arg1, arg2)) }, isWriteLine: false);
     }
 
+    /// <summary>
+    /// <inheritdoc cref="Console.Write(string, object?[]?)"/>
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </summary>
+    /// <param name="format">
+    /// A composite format string.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </param>
+    /// <returns><inheritdoc cref="Write(string?)"/></returns>
+    /// <inheritdoc cref="Console.Write(string, object?[]?)"/>
     public static (ConsolePosition Begin, ConsolePosition End) Write(
 #if NET7_0_OR_GREATER
         [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
@@ -984,11 +1234,15 @@ public static class XConsole
             isWriteLine: false);
     }
 
+    /// <inheritdoc cref="Console.Write(uint)"/>
+    /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(uint value)
     {
         return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
     }
 
+    /// <inheritdoc cref="Console.Write(ulong)"/>
+    /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(ulong value)
     {
         return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: false);
@@ -998,16 +1252,22 @@ public static class XConsole
 
     #region WriteLine overloads
 
+    /// <inheritdoc cref="Console.WriteLine(bool)"/>
+    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(bool value)
     {
         return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
     }
 
+    /// <inheritdoc cref="Console.WriteLine(char)"/>
+    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(char value)
     {
         return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
     }
 
+    /// <inheritdoc cref="Console.WriteLine(char[]?)"/>
+    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(char[]? buffer)
     {
         if (buffer == null || buffer.Length == 0)
@@ -1016,6 +1276,8 @@ public static class XConsole
         return WriteBase(new[] { new ConsoleItem(new string(buffer)) }, isWriteLine: true);
     }
 
+    /// <inheritdoc cref="Console.WriteLine(char[], int, int)"/>
+    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(char[] buffer, int index, int count)
     {
         if (count == 0)
@@ -1024,26 +1286,36 @@ public static class XConsole
         return WriteBase(new[] { new ConsoleItem(new string(buffer, index, count)) }, isWriteLine: true);
     }
 
+    /// <inheritdoc cref="Console.WriteLine(decimal)"/>
+    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(decimal value)
     {
         return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
     }
 
+    /// <inheritdoc cref="Console.WriteLine(double)"/>
+    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(double value)
     {
         return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
     }
 
+    /// <inheritdoc cref="Console.WriteLine(int)"/>
+    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(int value)
     {
         return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
     }
 
+    /// <inheritdoc cref="Console.WriteLine(long)"/>
+    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(long value)
     {
         return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
     }
 
+    /// <inheritdoc cref="Console.WriteLine(object?)"/>
+    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(object? value)
     {
         var valueStr = value?.ToString();
@@ -1054,11 +1326,23 @@ public static class XConsole
         return WriteBase(new[] { new ConsoleItem(valueStr) }, isWriteLine: true);
     }
 
+    /// <inheritdoc cref="Console.WriteLine(float)"/>
+    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(float value)
     {
         return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
     }
 
+    /// <summary>
+    /// <inheritdoc cref="Console.WriteLine(string, object?)"/>
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </summary>
+    /// <param name="format">
+    /// A composite format string.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </param>
+    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
+    /// <inheritdoc cref="Console.WriteLine(string, object?)"/>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(
 #if NET7_0_OR_GREATER
         [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
@@ -1071,6 +1355,16 @@ public static class XConsole
         return WriteBase(new[] { ConsoleItem.Parse(string.Format(format, arg0)) }, isWriteLine: true);
     }
 
+    /// <summary>
+    /// <inheritdoc cref="Console.WriteLine(string, object?, object?)"/>
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </summary>
+    /// <param name="format">
+    /// A composite format string.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </param>
+    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
+    /// <inheritdoc cref="Console.WriteLine(string, object?, object?)"/>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(
 #if NET7_0_OR_GREATER
         [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
@@ -1083,6 +1377,16 @@ public static class XConsole
         return WriteBase(new[] { ConsoleItem.Parse(string.Format(format, arg0, arg1)) }, isWriteLine: true);
     }
 
+    /// <summary>
+    /// <inheritdoc cref="Console.WriteLine(string, object?, object?, object?)"/>
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </summary>
+    /// <param name="format">
+    /// A composite format string.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </param>
+    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
+    /// <inheritdoc cref="Console.WriteLine(string, object?, object?, object?)"/>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(
 #if NET7_0_OR_GREATER
         [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
@@ -1095,6 +1399,16 @@ public static class XConsole
         return WriteBase(new[] { ConsoleItem.Parse(string.Format(format, arg0, arg1, arg2)) }, isWriteLine: true);
     }
 
+    /// <summary>
+    /// <inheritdoc cref="Console.WriteLine(string, object?[]?)"/>
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </summary>
+    /// <param name="format">
+    /// A composite format string.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </param>
+    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
+    /// <inheritdoc cref="Console.WriteLine(string, object?[]?)"/>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(
 #if NET7_0_OR_GREATER
         [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
@@ -1109,11 +1423,15 @@ public static class XConsole
             isWriteLine: true);
     }
 
+    /// <inheritdoc cref="Console.WriteLine(uint)"/>
+    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(uint value)
     {
         return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
     }
 
+    /// <inheritdoc cref="Console.WriteLine(ulong)"/>
+    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(ulong value)
     {
         return WriteBase(new[] { new ConsoleItem(value.ToString()) }, isWriteLine: true);
@@ -1329,6 +1647,7 @@ public static class XConsole
 
     #region Remaining API
 
+    /// <inheritdoc cref="Console.In"/>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -1337,6 +1656,7 @@ public static class XConsole
 #endif
     public static TextReader In => Console.In;
 
+    /// <inheritdoc cref="Console.InputEncoding"/>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -1353,6 +1673,7 @@ public static class XConsole
         }
     }
 
+    /// <inheritdoc cref="Console.OutputEncoding"/>
     public static Encoding OutputEncoding
     {
         get => Console.OutputEncoding;
@@ -1368,8 +1689,10 @@ public static class XConsole
         }
     }
 
+    /// <inheritdoc cref="Console.KeyAvailable"/>
     public static bool KeyAvailable => Console.KeyAvailable;
 
+    /// <inheritdoc cref="Console.ReadKey()"/>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -1382,6 +1705,7 @@ public static class XConsole
             return Console.ReadKey();
     }
 
+    /// <inheritdoc cref="Console.ReadKey(bool)"/>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -1394,16 +1718,22 @@ public static class XConsole
             return Console.ReadKey(intercept: intercept);
     }
 
+    /// <inheritdoc cref="Console.Out"/>
     public static TextWriter Out => Console.Out;
 
+    /// <inheritdoc cref="Console.Error"/>
     public static TextWriter Error => Console.Error;
 
+    /// <inheritdoc cref="Console.IsInputRedirected"/>
     public static bool IsInputRedirected => Console.IsInputRedirected;
 
+    /// <inheritdoc cref="Console.IsOutputRedirected"/>
     public static bool IsOutputRedirected => Console.IsOutputRedirected;
 
+    /// <inheritdoc cref="Console.IsErrorRedirected"/>
     public static bool IsErrorRedirected => Console.IsErrorRedirected;
 
+    /// <inheritdoc cref="Console.CursorSize"/>
     public static int CursorSize
     {
 #if NET
@@ -1419,16 +1749,19 @@ public static class XConsole
         set => Console.CursorSize = value;
     }
 
+    /// <inheritdoc cref="Console.NumberLock"/>
 #if NET
     [SupportedOSPlatform("windows")]
 #endif
     public static bool NumberLock => Console.NumberLock;
 
+    /// <inheritdoc cref="Console.CapsLock"/>
 #if NET
     [SupportedOSPlatform("windows")]
 #endif
     public static bool CapsLock => Console.CapsLock;
 
+    /// <inheritdoc cref="Console.BackgroundColor"/>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -1450,6 +1783,7 @@ public static class XConsole
         }
     }
 
+    /// <inheritdoc cref="Console.ForegroundColor"/>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -1471,6 +1805,7 @@ public static class XConsole
         }
     }
 
+    /// <inheritdoc cref="Console.ResetColor()"/>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -1483,6 +1818,7 @@ public static class XConsole
             Console.ResetColor();
     }
 
+    /// <inheritdoc cref="Console.BufferWidth"/>
     public static int BufferWidth
     {
 #if NET
@@ -1502,6 +1838,7 @@ public static class XConsole
         }
     }
 
+    /// <inheritdoc cref="Console.BufferHeight"/>
     public static int BufferHeight
     {
 #if NET
@@ -1524,6 +1861,7 @@ public static class XConsole
         }
     }
 
+    /// <inheritdoc cref="Console.SetBufferSize(int, int)"/>
 #if NET
     [SupportedOSPlatform("windows")]
 #endif
@@ -1533,6 +1871,7 @@ public static class XConsole
             Console.SetBufferSize(width: width, height: height);
     }
 
+    /// <inheritdoc cref="Console.WindowLeft"/>
     public static int WindowLeft
     {
         get => Console.WindowLeft;
@@ -1542,6 +1881,7 @@ public static class XConsole
         set => Console.WindowLeft = value;
     }
 
+    /// <inheritdoc cref="Console.WindowTop"/>
     public static int WindowTop
     {
         get => Console.WindowTop;
@@ -1551,6 +1891,7 @@ public static class XConsole
         set => Console.WindowTop = value;
     }
 
+    /// <inheritdoc cref="Console.WindowWidth"/>
     public static int WindowWidth
     {
 #if NET
@@ -1570,6 +1911,7 @@ public static class XConsole
         }
     }
 
+    /// <inheritdoc cref="Console.WindowHeight"/>
     public static int WindowHeight
     {
 #if NET
@@ -1589,6 +1931,7 @@ public static class XConsole
         }
     }
 
+    /// <inheritdoc cref="Console.SetWindowPosition(int, int)"/>
 #if NET
     [SupportedOSPlatform("windows")]
 #endif
@@ -1597,6 +1940,7 @@ public static class XConsole
         Console.SetWindowPosition(left: left, top: top);
     }
 
+    /// <inheritdoc cref="Console.SetWindowSize(int, int)"/>
 #if NET
     [SupportedOSPlatform("windows")]
 #endif
@@ -1606,6 +1950,7 @@ public static class XConsole
             Console.SetWindowSize(width: width, height: height);
     }
 
+    /// <inheritdoc cref="Console.LargestWindowWidth"/>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -1614,6 +1959,7 @@ public static class XConsole
 #endif
     public static int LargestWindowWidth => Console.LargestWindowWidth;
 
+    /// <inheritdoc cref="Console.LargestWindowHeight"/>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -1622,6 +1968,7 @@ public static class XConsole
 #endif
     public static int LargestWindowHeight => Console.LargestWindowHeight;
 
+    /// <inheritdoc cref="Console.CursorVisible"/>
     public static bool CursorVisible
     {
 #if NET
@@ -1645,6 +1992,12 @@ public static class XConsole
         }
     }
 
+    /// <inheritdoc cref="Console.CursorLeft"/>
+    /// <remarks>
+    /// See also:<br/>
+    /// &#8226; <seealso cref="CursorPosition"/> &#8212; smart <seealso cref="ConsolePosition"/> structure,
+    /// resistant to console buffer overflow and always points to the correct position within the console buffer area.
+    /// </remarks>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -1665,6 +2018,12 @@ public static class XConsole
         }
     }
 
+    /// <inheritdoc cref="Console.CursorTop"/>
+    /// <remarks>
+    /// See also:<br/>
+    /// &#8226; <seealso cref="CursorPosition"/> &#8212; smart <seealso cref="ConsolePosition"/> structure,
+    /// resistant to console buffer overflow and always points to the correct position within the console buffer area.
+    /// </remarks>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -1685,6 +2044,12 @@ public static class XConsole
         }
     }
 
+    /// <inheritdoc cref="Console.GetCursorPosition()"/>
+    /// <remarks>
+    /// See also:<br/>
+    /// &#8226; <seealso cref="CursorPosition"/> &#8212; smart <seealso cref="ConsolePosition"/> structure,
+    /// resistant to console buffer overflow and always points to the correct position within the console buffer area.
+    /// </remarks>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -1701,6 +2066,7 @@ public static class XConsole
 #endif
     }
 
+    /// <inheritdoc cref="Console.Title"/>
     public static string Title
     {
 #if NET
@@ -1716,6 +2082,7 @@ public static class XConsole
         set => Console.Title = value;
     }
 
+    /// <inheritdoc cref="Console.Beep()"/>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -1724,11 +2091,13 @@ public static class XConsole
 #endif
     public static void Beep() => Console.Beep();
 
+    /// <inheritdoc cref="Console.Beep(int, int)"/>
 #if NET
     [SupportedOSPlatform("windows")]
 #endif
     public static void Beep(int frequency, int duration) => Console.Beep(frequency: frequency, duration: duration);
 
+    /// <inheritdoc cref="Console.MoveBufferArea(int, int, int, int, int, int)"/>
 #if NET
     [SupportedOSPlatform("windows")]
 #endif
@@ -1742,6 +2111,7 @@ public static class XConsole
                 targetLeft: targetLeft, targetTop: targetTop);
     }
 
+    /// <inheritdoc cref="Console.MoveBufferArea(int, int, int, int, int, int, char, ConsoleColor, ConsoleColor)"/>
 #if NET
     [SupportedOSPlatform("windows")]
 #endif
@@ -1757,6 +2127,7 @@ public static class XConsole
                 sourceChar: sourceChar, sourceForeColor: sourceForeColor, sourceBackColor: sourceBackColor);
     }
 
+    /// <inheritdoc cref="Console.Clear()"/>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("ios")]
@@ -1768,6 +2139,12 @@ public static class XConsole
             Console.Clear();
     }
 
+    /// <inheritdoc cref="Console.SetCursorPosition(int, int)"/>
+    /// <remarks>
+    /// See also:<br/>
+    /// &#8226; <seealso cref="CursorPosition"/> &#8212; smart <seealso cref="ConsolePosition"/> structure,
+    /// resistant to console buffer overflow and always points to the correct position within the console buffer area.
+    /// </remarks>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -1780,6 +2157,7 @@ public static class XConsole
             Console.SetCursorPosition(left: left, top: top);
     }
 
+    /// <inheritdoc cref="Console.CancelKeyPress"/>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -1792,6 +2170,7 @@ public static class XConsole
         remove => Console.CancelKeyPress -= value;
     }
 
+    /// <inheritdoc cref="Console.TreatControlCAsInput"/>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -1804,6 +2183,7 @@ public static class XConsole
         set => Console.TreatControlCAsInput = value;
     }
 
+    /// <inheritdoc cref="Console.OpenStandardInput()"/>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -1817,6 +2197,7 @@ public static class XConsole
     }
 
 #if !NETSTANDARD1_3
+    /// <inheritdoc cref="Console.OpenStandardInput(int)"/>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -1828,6 +2209,7 @@ public static class XConsole
     }
 #endif
 
+    /// <inheritdoc cref="Console.OpenStandardOutput()"/>
     public static Stream OpenStandardOutput()
     {
         lock (_syncLock)
@@ -1835,6 +2217,7 @@ public static class XConsole
     }
 
 #if !NETSTANDARD1_3
+    /// <inheritdoc cref="Console.OpenStandardOutput(int)"/>
     public static Stream OpenStandardOutput(int bufferSize)
     {
         lock (_syncLock)
@@ -1842,18 +2225,21 @@ public static class XConsole
     }
 #endif
 
+    /// <inheritdoc cref="Console.OpenStandardError()"/>
     public static Stream OpenStandardError()
     {
         return Console.OpenStandardError();
     }
 
 #if !NETSTANDARD1_3
+    /// <inheritdoc cref="Console.OpenStandardError(int)"/>
     public static Stream OpenStandardError(int bufferSize)
     {
         return Console.OpenStandardError(bufferSize: bufferSize);
     }
 #endif
 
+    /// <inheritdoc cref="Console.SetIn(TextReader)"/>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -1866,17 +2252,20 @@ public static class XConsole
             Console.SetIn(newIn: newIn);
     }
 
+    /// <inheritdoc cref="Console.SetOut(TextWriter)"/>
     public static void SetOut(TextWriter newOut)
     {
         lock (_syncLock)
             Console.SetOut(newOut: newOut);
     }
 
+    /// <inheritdoc cref="Console.SetError(TextWriter)"/>
     public static void SetError(TextWriter newError)
     {
         Console.SetError(newError: newError);
     }
 
+    /// <inheritdoc cref="Console.Read()"/>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
