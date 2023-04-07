@@ -3,10 +3,10 @@
 [![MIT license](https://img.shields.io/github/license/chubrik/XConsole)](https://github.com/chubrik/XConsole/blob/main/LICENSE)
 [![NuGet downloads](https://img.shields.io/nuget/dt/XConsole)](https://www.nuget.org/packages/XConsole/)
 
-Extended .NET console with coloring microsyntax, multiline pinning, write-to-position & most useful utils.
+Extended .NET console with coloring microsyntax, multiline pinning, write-to-position and most useful utils.
 It’s designed with a focus on performance for professional use in complex tasks:
 a huge number of asynchronous logs, with the need to highlight important and pin summary data.
-XConsole is safe for multitasking, safe for console buffer overflows (9000+ lines), very easy to use.
+XConsole is safe for multitasking, safe for console buffer overflow (9000+ lines), very easy to use.
 
 The main features are shown in the following image:
 
@@ -68,7 +68,7 @@ To make a multicolor message split it to parts with individual color prefixes
 and pass them to single `WriteLine` method.
 Be sure that your messages will not be broken by other threads.
 ```csharp
-Console.WriteLine("G`This line is colorized using simple microsyntax");                 // Single color
+Console.WriteLine("G`This line is colored using simple microsyntax");                   // Single color
 Console.WriteLine("C`It is easy ", "Wb`to use many", "R` colors in ", "Y`one message"); // Multicolor
 ```
 ![XConsole single color](https://raw.githubusercontent.com/chubrik/XConsole/main/img/colors-standard.png)
@@ -103,9 +103,9 @@ Console.NO_COLOR = true; // Disable all colors
 
 ## <a name="pinning"></a>Pinning
 You can pin some text below regular log messages with the `Pin` method.
-Pinned text can be static or dynamic, contain one or more lines, and of course can be colorized.
+Pinned text can be static or dynamic, contain one or more lines, and of course can be colored.
 The dynamic pin will be automatically updated every time the `Write` or `WriteLine` methods are called.
-Pin is resistant to line wrapping and to console buffer overflows (9000+ log lines).
+Pin is resistant to line wrapping and to console buffer overflow (9000+ log lines).
 
 ```csharp
 Console.Pin("Simple static pin");           // Simple static pin
@@ -129,11 +129,11 @@ Console.Unpin();     // Remove pin
 <br><br>
 
 ## <a name="positioning"></a>Positioning
-XConsole provides a `ConsolePosition` structure, which is a position in the console area.
+XConsole provides a `ConsolePosition` structure, which is a position within the console buffer area.
 This is an important feature if you have a lot of log messages.
-This structure is resistant to console buffer overflows (9000+ log lines)
-and always points to the correct position in the console area.
-Each `Write` and `WriteLine` method returns a start and end position.
+This structure is resistant to console buffer overflow (9000+ log lines)
+and always points to the correct position within the console buffer area.
+Each `Write` and `WriteLine` method returns a begin and end position.
 You can save them and use later to rewrite the text or add text to the end of the message.
 To do this, `ConsolePosition` has its own `Write` method, which returns a new end position.
 

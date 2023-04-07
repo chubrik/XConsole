@@ -10,7 +10,7 @@ public static class Screenshots
         Console.WriteLine("Regular log message: 12 apples");
         Console.WriteLine("Regular log message: 8 bananas");
         Console.WriteLine("Regular log message: 14 limes");
-        Console.WriteLine("G`This line is colorized using simple microsyntax");
+        Console.WriteLine("G`This line is colored using simple microsyntax");
         Console.WriteLine("Regular log message: 7 apples");
         Console.WriteLine("Regular log message: 21 bananas");
         Console.WriteLine("Regular log message: 3 limes");
@@ -61,7 +61,7 @@ public static class Screenshots
 
     public static void ColorsStandard()
     {
-        Console.WriteLine("G`This line is colorized using simple microsyntax");
+        Console.WriteLine("G`This line is colored using simple microsyntax");
         Console.WriteLine("C`It is easy ", "Wb`to use many", "R` colors in ", "Y`one message");
     }
 
