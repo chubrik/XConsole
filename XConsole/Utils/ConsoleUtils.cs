@@ -27,7 +27,7 @@ public sealed class ConsoleUtils
 #endif
     public IConsoleAnimation AnimateEllipsis()
     {
-        return new EllipsisAnimation(XConsole.CursorPosition);
+        return new EllipsisAnimation(XConsole.CursorPosition, cancellationToken: null);
     }
 
 #if NET
@@ -49,7 +49,7 @@ public sealed class ConsoleUtils
 #endif
     public IConsoleAnimation AnimateSpinner()
     {
-        return new SpinnerAnimation(XConsole.CursorPosition);
+        return new SpinnerAnimation(XConsole.CursorPosition, cancellationToken: null);
     }
 
 #if NET

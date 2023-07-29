@@ -6,13 +6,10 @@ using System.Threading.Tasks;
 
 internal sealed class SpinnerAnimation : ConsoleAnimation
 {
-    private readonly TimeSpan _delay = TimeSpan.FromMilliseconds(_random.Next(80, 125));
+    private readonly TimeSpan _delay = TimeSpan.FromMilliseconds(_random.Next(80, 120));
     protected override string Clear { get; } = " ";
 
-    public SpinnerAnimation(ConsolePosition position)
-        : base(position) { }
-
-    public SpinnerAnimation(ConsolePosition position, CancellationToken cancellationToken)
+    public SpinnerAnimation(ConsolePosition position, CancellationToken? cancellationToken)
         : base(position, cancellationToken) { }
 
     protected override async Task LoopAsync(CancellationToken cancellationToken)

@@ -1,13 +1,12 @@
 ﻿namespace Chubrik.XConsole;
 
 /// <summary>
-/// The mode of <see cref="XConsole.ReadLine(ConsoleReadLineMode, char)"/> method.
+/// The mode of <see cref="XConsole.ReadLine(ConsoleReadLineMode)"/> method.
 /// <para>
 /// There are three mode variants:
-/// <br/>&#8226; <see cref="ConsoleReadLineMode.Default"/> &#8212; default behavior.
-/// <br/>&#8226; <see cref="ConsoleReadLineMode.Masked"/> &#8212;
-/// all characters are shown as a specified mask character.
-/// <br/>&#8226; <see cref="ConsoleReadLineMode.Hidden"/> &#8212; no characters are shown on the screen.
+/// <br/>&#8226; <see cref="ConsoleReadLineMode.Default"/> &#8211; default behavior.
+/// <br/>&#8226; <see cref="ConsoleReadLineMode.Masked"/> &#8211; typed characters are displayed as a mask.
+/// <br/>&#8226; <see cref="ConsoleReadLineMode.Hidden"/> &#8211; typed characters are not displayed.
 /// </para>
 /// </summary>
 public enum ConsoleReadLineMode
@@ -18,12 +17,12 @@ public enum ConsoleReadLineMode
     Default,
 
     /// <summary>
-    /// All characters are shown as a specified character.
+    /// Typed characters are displayed as a mask.
     /// </summary>
     Masked,
 
     /// <summary>
-    /// No characters are shown on the screen.
+    /// Typed characters are not displayed.
     /// </summary>
     Hidden
 }

@@ -9,10 +9,7 @@ internal sealed class EllipsisAnimation : ConsoleAnimation
     private readonly TimeSpan _delay = TimeSpan.FromMilliseconds(_random.Next(100, 150));
     protected override string Clear { get; } = "   ";
 
-    public EllipsisAnimation(ConsolePosition position)
-        : base(position) { }
-
-    public EllipsisAnimation(ConsolePosition position, CancellationToken cancellationToken)
+    public EllipsisAnimation(ConsolePosition position, CancellationToken? cancellationToken)
         : base(position, cancellationToken) { }
 
     protected override async Task LoopAsync(CancellationToken cancellationToken)

@@ -25,9 +25,9 @@ using System.Diagnostics.CodeAnalysis;
 /// that write text directly to a position and return the new <see cref="ConsolePosition"/> structure.
 /// <para>
 /// Provides three properties:
-/// <br/>&#8226; <see cref="Left"/> &#8212; the column position within the console buffer area.
-/// <br/>&#8226; <see cref="InitialTop"/> &#8212; the row position within the console buffer area at the initial moment.
-/// <br/>&#8226; <see cref="ActualTop"/> &#8212; the current row position within the console buffer area,
+/// <br/>&#8226; <see cref="Left"/> &#8211; the column position within the console buffer area.
+/// <br/>&#8226; <see cref="InitialTop"/> &#8211; the row position within the console buffer area at the initial moment.
+/// <br/>&#8226; <see cref="ActualTop"/> &#8211; the current row position within the console buffer area,
 /// considering the buffer overflow.
 /// </para>
 /// </summary>

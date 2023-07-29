@@ -15,16 +15,14 @@ internal abstract class ConsoleAnimation : IConsoleAnimation
     public ConsolePosition Position { get; }
     protected abstract string Clear { get; }
 
-    public ConsoleAnimation(ConsolePosition position)
-        : this(position, new CancellationTokenSource()) { }
-
-    public ConsoleAnimation(ConsolePosition position, CancellationToken cancellationToken)
-        : this(position, CancellationTokenSource.CreateLinkedTokenSource(cancellationToken)) { }
-
-    private ConsoleAnimation(ConsolePosition position, CancellationTokenSource cts)
+    public ConsoleAnimation(ConsolePosition position, CancellationToken? cancellationToken)
     {
         Position = position;
-        _cts = cts;
+
+        _cts = cancellationToken != null
+            ? CancellationTokenSource.CreateLinkedTokenSource(cancellationToken.Value)
+            : new CancellationTokenSource();
+        
         _task = StartAsync(_cts.Token);
     }
 
