@@ -455,7 +455,7 @@ public static class XConsole
         return actualTop >= 0 && actualTop < bufferHeight ? unchecked((int)actualTop) : null;
     }
 
-    internal static ConsolePosition WriteToPosition(ConsolePosition position, ConsoleItem[] items)
+    internal static ConsolePosition WriteToPosition(ConsolePosition position, ConsoleItem[] items, bool viewportOnly = false)
     {
         if (!_positioningEnabled)
             return default;
@@ -472,6 +472,10 @@ public static class XConsole
 #else
             (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
+
+            if (viewportOnly && origTop + _pinHeight - positionActualTop >= Console.WindowHeight)
+                throw new ArgumentOutOfRangeException(nameof(position));
+
             Console.CursorVisible = false;
 
             try

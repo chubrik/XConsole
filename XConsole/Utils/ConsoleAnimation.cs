@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 internal abstract class ConsoleAnimation : IConsoleAnimation
 {
     protected static readonly Random _random = new();
-    private static readonly TimeSpan _restartDelay = TimeSpan.FromSeconds(1);
 
     private readonly CancellationTokenSource _cts;
     private readonly Task _task;
@@ -22,7 +21,7 @@ internal abstract class ConsoleAnimation : IConsoleAnimation
         _cts = cancellationToken != null
             ? CancellationTokenSource.CreateLinkedTokenSource(cancellationToken.Value)
             : new CancellationTokenSource();
-        
+
         _task = StartAsync(_cts.Token);
     }
 
@@ -30,19 +29,14 @@ internal abstract class ConsoleAnimation : IConsoleAnimation
     {
         try
         {
-            for (; ; )
-                try
-                {
-                    await LoopAsync(cancellationToken).ConfigureAwait(false);
-                }
-                catch (ArgumentOutOfRangeException)
-                {
-                    await Task.Delay(_restartDelay, cancellationToken).ConfigureAwait(false);
-                }
+            await LoopAsync(cancellationToken).ConfigureAwait(false);
         }
-        catch (TaskCanceledException)
+        catch (Exception exception)
         {
-            Position.TryWrite(Clear);
+            if (exception is ArgumentOutOfRangeException || exception is TaskCanceledException)
+                Position.TryWrite(Clear);
+            else
+                throw;
         }
     }
 
