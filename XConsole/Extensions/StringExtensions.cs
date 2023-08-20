@@ -113,7 +113,7 @@ public static class StringExtensions
     /// <summary>XConsole extension for underlining text in the console.</summary>
     public static string Underline(this string value)
     {
-        return XConsole._virtualTerminalEnabled ? string.Format(_underlineFormat, value) : value;
+        return XConsole.VirtualTerminalEnabled ? string.Format(_underlineFormat, value) : value;
     }
 }
 

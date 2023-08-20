@@ -102,7 +102,7 @@ public static class CharExtensions
     /// <summary>XConsole extension for underlining text in the console.</summary>
     public static string Underline(this char value)
     {
-        return XConsole._virtualTerminalEnabled ? string.Format(_underlineFormat, value) : value.ToString();
+        return XConsole.VirtualTerminalEnabled ? string.Format(_underlineFormat, value) : value.ToString();
     }
 }
 

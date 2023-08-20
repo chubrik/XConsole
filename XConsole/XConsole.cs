@@ -66,7 +66,7 @@ public static class XConsole
     private static long _shiftTop = 0;
 
 #if NET
-    internal static readonly bool _virtualTerminalEnabled;
+    internal static readonly bool VirtualTerminalEnabled;
 #endif
 
     static XConsole()
@@ -83,19 +83,13 @@ public static class XConsole
 
 #if NET
         if (OperatingSystem.IsWindows())
-        {
-            try
-            {
-                _virtualTerminalEnabled = EnableVirtualTerminal();
-            }
-            catch { }
-        }
+            VirtualTerminalEnabled = TryEnableVirtualTerminal();
 #endif
     }
 
     internal static long ShiftTop => _shiftTop;
 #if NET
-    internal static bool VirtualTerminalAndColoringEnabled => _virtualTerminalEnabled && _coloringEnabled;
+    internal static bool VirtualTerminalAndColoringEnabled => VirtualTerminalEnabled && _coloringEnabled;
 #endif
 
     /// <summary>
@@ -400,8 +394,6 @@ public static class XConsole
 
     #region Positioning
 
-    private const long _intMinValue = int.MinValue;
-
     /// <summary>
     /// Gets or sets the position of the cursor.
     /// </summary>
@@ -434,7 +426,7 @@ public static class XConsole
         {
             lock (_syncLock)
             {
-                var actualTop = Math.Max(_intMinValue, value.InitialTop + value.ShiftTop - _shiftTop);
+                var actualTop = Math.Max(int.MinValue, value.InitialTop + value.ShiftTop - _shiftTop);
                 Console.SetCursorPosition(value.Left, unchecked((int)actualTop));
             }
         }
@@ -466,7 +458,7 @@ public static class XConsole
         lock (_syncLock)
         {
             shiftTop = _shiftTop;
-            positionActualTop = Math.Max(_intMinValue, position.InitialTop + position.ShiftTop - shiftTop);
+            positionActualTop = Math.Max(int.MinValue, position.InitialTop + position.ShiftTop - shiftTop);
 #if NET
             (origLeft, origTop) = Console.GetCursorPosition();
 #else
@@ -1604,7 +1596,7 @@ public static class XConsole
                             const int a = 'a';
                             const int z = 'z';
 
-                            if (_virtualTerminalEnabled)
+                            if (VirtualTerminalEnabled)
                             {
                                 for (charIndex++; charIndex < charCount; charIndex++)
                                 {
@@ -1652,13 +1644,20 @@ public static class XConsole
     private static readonly IntPtr INVALID_HANDLE_VALUE = new(-1);
 #pragma warning restore IDE1006 // Naming Styles
 
-    private static bool EnableVirtualTerminal()
+    private static bool TryEnableVirtualTerminal()
     {
-        var hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+        try
+        {
+            var hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 
-        return hOut != INVALID_HANDLE_VALUE &&
-               GetConsoleMode(hOut, out var dwMode) &&
-               SetConsoleMode(hOut, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+            return hOut != INVALID_HANDLE_VALUE &&
+                GetConsoleMode(hOut, out var dwMode) &&
+                SetConsoleMode(hOut, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+        }
+        catch
+        {
+            return false;
+        }
     }
 
 #if NET7_0_OR_GREATER
