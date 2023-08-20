@@ -16,7 +16,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/chubrik/XConsole</RepositoryUrl>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <Version>1.4.8</Version>
+    <Version>1.4.9</Version>
   </PropertyGroup>
 
   <ItemGroup>

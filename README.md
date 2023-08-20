@@ -6,7 +6,7 @@
 Extended .NET console with coloring microsyntax, multiline pinning, write-to-position and most useful utils.
 It’s designed with a focus on performance for professional use in complex tasks:
 a huge number of asynchronous logs, with the need to highlight important and pin summary data.
-XConsole is safe for multitasking, safe for console buffer overflow (9000+ lines), very easy to use.
+XConsole is safe for multitasking, safe for console buffer overflow (9000+ lines), easy to use.
 
 The main features are shown in the following image:
 
