@@ -88,7 +88,7 @@ Console.WriteLine("Orange text".Color(0xFFA500));     // Hexadecimal number
 Console.WriteLine("Orange text".Color("#FFA500"));    // Hexadecimal string
 
 // Combinations of text and background colors
-Console.WriteLine("Оrange with an indigo background".Color(Color.Orange).BgColor(Color.Indigo));
+Console.WriteLine("Orange with an indigo background".Color(Color.Orange).BgColor(Color.Indigo));
 Console.WriteLine(("Lime with " + "a brown".BgColor(Color.Brown) + " background").Color(Color.Lime));
 Console.WriteLine($"Aqua with {"a navy".BgColor(Color.Navy)} background".Color(Color.Aqua));
 ```

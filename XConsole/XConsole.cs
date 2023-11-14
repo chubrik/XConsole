@@ -30,11 +30,11 @@ using System.Diagnostics.CodeAnalysis;
 /// <item>Backward compatibility with the standard <see cref="Console"/>.</item>
 /// <item>
 /// A simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see> to colorize any text,
-/// resistant to multithreading. Also supports the "NO_COLOR" convention to disable any colors.
+/// resistant to multithreading. Also supports the “NO_COLOR” convention to disable any colors.
 /// </item>
 /// <item>
 /// <see cref="Pin()"/> methods pin text below the regular log messages.
-/// Text can be dynamic, multiline and colored. It's resistant to console buffer overflow.
+/// Text can be dynamic, multiline and colored. It’s resistant to console buffer overflow.
 /// </item>
 /// <item>
 /// <see cref="CursorPosition"/> provides smart <see cref="ConsolePosition"/> structure
@@ -133,10 +133,10 @@ public static class XConsole
     /// </summary>
     /// <remarks>
     /// Please, use overloads:
-    /// <br/>&#8226; <see cref="Pin(string?[])"/>
-    /// <br/>&#8226; <see cref="Pin(IReadOnlyList{string?})"/>
-    /// <br/>&#8226; <see cref="Pin(Func{string?})"/>
-    /// <br/>&#8226; <see cref="Pin(Func{IReadOnlyList{string?}})"/>
+    /// <br/>• <see cref="Pin(string?[])"/>
+    /// <br/>• <see cref="Pin(IReadOnlyList{string?})"/>
+    /// <br/>• <see cref="Pin(Func{string?})"/>
+    /// <br/>• <see cref="Pin(Func{IReadOnlyList{string?}})"/>
     /// </remarks>
     /// <exception cref="InvalidOperationException"/>
     [Obsolete("At least one argument should be specified.", error: true)]
@@ -152,7 +152,7 @@ public static class XConsole
     /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
     /// </param>
     /// <remarks>
-    /// See also:<br/>&#8226; <seealso cref="Unpin()"/>
+    /// See also:<br/>• <seealso cref="Unpin()"/>
     /// </remarks>
 #if NET
     [UnsupportedOSPlatform("android")]
@@ -199,8 +199,8 @@ public static class XConsole
     /// </param>
     /// <remarks>
     /// See also:
-    /// <br/>&#8226; <seealso cref="UpdatePin()"/>
-    /// <br/>&#8226; <seealso cref="Unpin()"/>
+    /// <br/>• <seealso cref="UpdatePin()"/>
+    /// <br/>• <seealso cref="Unpin()"/>
     /// </remarks>
 #if NET
     [UnsupportedOSPlatform("android")]
@@ -248,9 +248,9 @@ public static class XConsole
     /// </summary>
     /// <remarks>
     /// See also:
-    /// <br/>&#8226; <seealso cref="Pin(Func{string?})"/>
-    /// <br/>&#8226; <seealso cref="Pin(Func{IReadOnlyList{string?}})"/>
-    /// <br/>&#8226; <seealso cref="Unpin()"/>
+    /// <br/>• <seealso cref="Pin(Func{string?})"/>
+    /// <br/>• <seealso cref="Pin(Func{IReadOnlyList{string?}})"/>
+    /// <br/>• <seealso cref="Unpin()"/>
     /// </remarks>
 #if NET
     [UnsupportedOSPlatform("android")]
@@ -337,11 +337,11 @@ public static class XConsole
     /// </summary>
     /// <remarks>
     /// See also:
-    /// <br/>&#8226; <seealso cref="Pin(string?[])"/>
-    /// <br/>&#8226; <seealso cref="Pin(IReadOnlyList{string?})"/>
-    /// <br/>&#8226; <seealso cref="Pin(Func{string?})"/>
-    /// <br/>&#8226; <seealso cref="Pin(Func{IReadOnlyList{string?}})"/>
-    /// <br/>&#8226; <seealso cref="UpdatePin()"/>
+    /// <br/>• <seealso cref="Pin(string?[])"/>
+    /// <br/>• <seealso cref="Pin(IReadOnlyList{string?})"/>
+    /// <br/>• <seealso cref="Pin(Func{string?})"/>
+    /// <br/>• <seealso cref="Pin(Func{IReadOnlyList{string?}})"/>
+    /// <br/>• <seealso cref="UpdatePin()"/>
     /// </remarks>
 #if NET
     [UnsupportedOSPlatform("android")]
@@ -512,8 +512,8 @@ public static class XConsole
     /// <inheritdoc cref="Console.ReadLine()"/>
     /// <remarks>
     /// See also:
-    /// <br/>&#8226; <seealso cref="ReadLine(ConsoleReadLineMode)"/> &#8211; overload with masked and hidden modes.
-    /// <br/>&#8226; <seealso cref="ReadLine(ConsoleReadLineMode, char)"/> &#8211; masked mode with specified mask character.
+    /// <br/>• <seealso cref="ReadLine(ConsoleReadLineMode)"/> – overload with masked and hidden modes.
+    /// <br/>• <seealso cref="ReadLine(ConsoleReadLineMode, char)"/> – masked mode with specified mask character.
     /// </remarks>
 #if NET
     [UnsupportedOSPlatform("android")]
@@ -529,20 +529,20 @@ public static class XConsole
     /// <inheritdoc cref="Console.ReadLine()"/>
     /// <para>
     /// There are three <paramref name="mode"/> variants:
-    /// <br/>&#8226; <see cref="ConsoleReadLineMode.Default"/> &#8211; default behavior.
-    /// <br/>&#8226; <see cref="ConsoleReadLineMode.Masked"/> &#8211; typed characters are displayed as a mask.
-    /// <br/>&#8226; <see cref="ConsoleReadLineMode.Hidden"/> &#8211; typed characters are not displayed.
+    /// <br/>• <see cref="ConsoleReadLineMode.Default"/> – default behavior.
+    /// <br/>• <see cref="ConsoleReadLineMode.Masked"/> – typed characters are displayed as a mask.
+    /// <br/>• <see cref="ConsoleReadLineMode.Hidden"/> – typed characters are not displayed.
     /// </para>
     /// </summary>
     /// <param name="mode">
     /// There are three <paramref name="mode"/> variants:
-    /// <br/>&#8226; <see cref="ConsoleReadLineMode.Default"/> &#8211; default behavior.
-    /// <br/>&#8226; <see cref="ConsoleReadLineMode.Masked"/> &#8211; typed characters are displayed as a mask.
-    /// <br/>&#8226; <see cref="ConsoleReadLineMode.Hidden"/> &#8211; typed characters are not displayed.
+    /// <br/>• <see cref="ConsoleReadLineMode.Default"/> – default behavior.
+    /// <br/>• <see cref="ConsoleReadLineMode.Masked"/> – typed characters are displayed as a mask.
+    /// <br/>• <see cref="ConsoleReadLineMode.Hidden"/> – typed characters are not displayed.
     /// </param>
     /// <remarks>
     /// See also:<br/>
-    /// &#8226; <seealso cref="ReadLine(ConsoleReadLineMode, char)"/> &#8211; masked mode with specified mask character.
+    /// • <seealso cref="ReadLine(ConsoleReadLineMode, char)"/> – masked mode with specified mask character.
     /// </remarks>
     /// <returns>
     /// The next line of characters from the input stream, or <see cref="string.Empty"/> if no more lines are available.
@@ -561,23 +561,22 @@ public static class XConsole
     /// <inheritdoc cref="Console.ReadLine()"/>
     /// <para>
     /// There are three <paramref name="mode"/> variants:
-    /// <br/>&#8226; <see cref="ConsoleReadLineMode.Default"/> &#8211; default behavior.
-    /// <br/>&#8226; <see cref="ConsoleReadLineMode.Masked"/> &#8211;
+    /// <br/>• <see cref="ConsoleReadLineMode.Default"/> – default behavior.
+    /// <br/>• <see cref="ConsoleReadLineMode.Masked"/> –
     /// each typed character is displayed as the specified <paramref name="maskChar"/>.
-    /// <br/>&#8226; <see cref="ConsoleReadLineMode.Hidden"/> &#8211; typed characters are not displayed.
+    /// <br/>• <see cref="ConsoleReadLineMode.Hidden"/> – typed characters are not displayed.
     /// </para>
     /// </summary>
     /// <param name="mode">
     /// There are three <paramref name="mode"/> variants:
-    /// <br/>&#8226; <see cref="ConsoleReadLineMode.Default"/> &#8211; default behavior.
-    /// <br/>&#8226; <see cref="ConsoleReadLineMode.Masked"/> &#8211;
+    /// <br/>• <see cref="ConsoleReadLineMode.Default"/> – default behavior.
+    /// <br/>• <see cref="ConsoleReadLineMode.Masked"/> –
     /// each typed character is displayed as the specified <paramref name="maskChar"/>.
-    /// <br/>&#8226; <see cref="ConsoleReadLineMode.Hidden"/> &#8211; typed characters are not displayed.
+    /// <br/>• <see cref="ConsoleReadLineMode.Hidden"/> – typed characters are not displayed.
     /// </param>
     /// <param name="maskChar">Char used for mask each character in masked <paramref name="mode"/>.</param>
     /// <remarks>
-    /// See also:<br/>
-    /// &#8226; <seealso cref="ReadLine(ConsoleReadLineMode)"/> &#8211; masked mode with default mask character.
+    /// See also:<br/>• <seealso cref="ReadLine(ConsoleReadLineMode)"/> – masked mode with default mask character.
     /// </remarks>
     /// <inheritdoc cref="ReadLine(ConsoleReadLineMode)"/>
 #if NET
@@ -2037,7 +2036,7 @@ public static class XConsole
     /// <inheritdoc cref="Console.CursorLeft"/>
     /// <remarks>
     /// See also:<br/>
-    /// &#8226; <seealso cref="CursorPosition"/> &#8211; smart <seealso cref="ConsolePosition"/> structure,
+    /// • <seealso cref="CursorPosition"/> – smart <seealso cref="ConsolePosition"/> structure,
     /// resistant to console buffer overflow and always points to the correct position within the console buffer area.
     /// </remarks>
 #if NET
@@ -2063,7 +2062,7 @@ public static class XConsole
     /// <inheritdoc cref="Console.CursorTop"/>
     /// <remarks>
     /// See also:<br/>
-    /// &#8226; <seealso cref="CursorPosition"/> &#8211; smart <seealso cref="ConsolePosition"/> structure,
+    /// • <seealso cref="CursorPosition"/> – smart <seealso cref="ConsolePosition"/> structure,
     /// resistant to console buffer overflow and always points to the correct position within the console buffer area.
     /// </remarks>
 #if NET
@@ -2091,7 +2090,7 @@ public static class XConsole
     /// </summary>
     /// <remarks>
     /// See also:<br/>
-    /// &#8226; <seealso cref="CursorPosition"/> &#8211; smart <seealso cref="ConsolePosition"/> structure,
+    /// • <seealso cref="CursorPosition"/> – smart <seealso cref="ConsolePosition"/> structure,
     /// resistant to console buffer overflow and always points to the correct position within the console buffer area.
     /// </remarks>
     /// <returns>The column and row position of the cursor.</returns>
@@ -2187,7 +2186,7 @@ public static class XConsole
     /// <inheritdoc cref="Console.SetCursorPosition(int, int)"/>
     /// <remarks>
     /// See also:<br/>
-    /// &#8226; <seealso cref="CursorPosition"/> &#8211; smart <seealso cref="ConsolePosition"/> structure,
+    /// • <seealso cref="CursorPosition"/> – smart <seealso cref="ConsolePosition"/> structure,
     /// resistant to console buffer overflow and always points to the correct position within the console buffer area.
     /// </remarks>
 #if NET

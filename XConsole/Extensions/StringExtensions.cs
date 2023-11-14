@@ -5,14 +5,15 @@ namespace Chubrik.XConsole;
 using System;
 using System.Drawing;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 
 public static class StringExtensions
 {
-    internal const string _foregroundColorFormat = "\x1b[38;2;{0};{1};{2}m{3}\x1b[39m";
-    internal const string _backgroundColorFormat = "\x1b[48;2;{0};{1};{2}m{3}\x1b[49m";
-    internal const string _foregroundConsoleColorFormat = "\x1b[{0}m{1}\x1b[39m";
-    internal const string _backgroundConsoleColorFormat = "\x1b[{0}m{1}\x1b[49m";
-    internal const string _underlineFormat = "\x1b[4m{0}\x1b[24m";
+    private const string _foregroundConsoleColorFormat = "\x1b[{0}m{1}\x1b[39m";
+    private const string _backgroundConsoleColorFormat = "\x1b[{0}m{1}\x1b[49m";
+    private const string _foregroundRgbColorFormat = "\x1b[38;2;{0};{1};{2}m{3}\x1b[39m";
+    private const string _backgroundRgbColorFormat = "\x1b[48;2;{0};{1};{2}m{3}\x1b[49m";
+    private const string _underlineFormat = "\x1b[4m{0}\x1b[24m";
 
     internal static readonly int[] _foregroundConsoleColorCodes =
         new[] { 30, 34, 32, 36, 31, 35, 33, 37, 90, 94, 92, 96, 91, 95, 93, 97 };
@@ -23,20 +24,6 @@ public static class StringExtensions
     #region Foreground color
 
     /// <summary>XConsole extension for colorizing text in the console.</summary>
-    public static string Color(this string value, Color color)
-    {
-        return XConsole.VirtualTerminalAndColoringEnabled
-            ? string.Format(_foregroundColorFormat, color.R, color.G, color.B, value)
-            : value;
-    }
-
-    /// <summary>XConsole extension for colorizing text in the console.</summary>
-    public static string Color(this string value, KnownColor color)
-    {
-        return value.Color(System.Drawing.Color.FromKnownColor(color: color));
-    }
-
-    /// <summary>XConsole extension for colorizing text in the console.</summary>
     public static string Color(this string value, ConsoleColor color)
     {
         return XConsole.VirtualTerminalAndColoringEnabled
@@ -45,41 +32,66 @@ public static class StringExtensions
     }
 
     /// <summary>XConsole extension for colorizing text in the console.</summary>
-    public static string Color(this string value, int rgb)
+    public static string Color(this string value, KnownColor color)
     {
-        return value.Color(System.Drawing.Color.FromArgb(argb: rgb));
+        return value.Color(color: System.Drawing.Color.FromKnownColor(color: color));
     }
 
     /// <summary>XConsole extension for colorizing text in the console.</summary>
-    public static string Color(this string value, int red, int green, int blue)
+    public static string Color(this string value, Color color)
     {
-        return value.Color(System.Drawing.Color.FromArgb(red: red, green: green, blue: blue));
+        return ColorBase(value: value, red: color.R, green: color.G, blue: color.B);
+    }
+
+    /// <summary>XConsole extension for colorizing text in the console.</summary>
+    public static string Color(this string value, int rgb)
+    {
+        if (rgb < 0 || rgb > 16777215)
+            throw new ArgumentOutOfRangeException(nameof(rgb));
+
+        return ColorBase(value: value, red: rgb >> 16, green: (rgb >> 8) & 255, blue: rgb & 255);
     }
 
     /// <summary>XConsole extension for colorizing text in the console.</summary>
     public static string Color(this string value, string hexColor)
     {
-        var rgb = int.Parse(hexColor[0] == '#' ? hexColor.Substring(1) : hexColor, NumberStyles.HexNumber);
-        return value.Color(System.Drawing.Color.FromArgb(argb: rgb));
+        var hex = hexColor[0] == '#' ? hexColor[1..] : hexColor;
+
+        if (!int.TryParse(hex, NumberStyles.HexNumber, provider: null, out var rgb))
+            throw new FormatException();
+
+        if (rgb > 16777215)
+            throw new ArgumentOutOfRangeException(nameof(hexColor));
+
+        return ColorBase(value: value, red: rgb >> 16, green: (rgb >> 8) & 255, blue: rgb & 255);
+    }
+
+    /// <summary>XConsole extension for colorizing text in the console.</summary>
+    public static string Color(this string value, int red, int green, int blue)
+    {
+        if (red < 0 || red > 255)
+            throw new ArgumentOutOfRangeException(nameof(red));
+
+        if (green < 0 || green > 255)
+            throw new ArgumentOutOfRangeException(nameof(green));
+
+        if (blue < 0 || blue > 255)
+            throw new ArgumentOutOfRangeException(nameof(blue));
+
+        return ColorBase(value: value, red: red, green: green, blue: blue);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static string ColorBase(string value, int red, int green, int blue)
+    {
+        return XConsole.VirtualTerminalAndColoringEnabled
+            ? string.Format(_foregroundRgbColorFormat, red, green, blue, value)
+            : value;
     }
 
     #endregion
 
     #region Background color
-
-    /// <summary>XConsole extension for colorizing text in the console.</summary>
-    public static string BgColor(this string value, Color color)
-    {
-        return XConsole.VirtualTerminalAndColoringEnabled
-            ? string.Format(_backgroundColorFormat, color.R, color.G, color.B, value)
-            : value;
-    }
-
-    /// <summary>XConsole extension for colorizing text in the console.</summary>
-    public static string BgColor(this string value, KnownColor color)
-    {
-        return value.BgColor(System.Drawing.Color.FromKnownColor(color: color));
-    }
 
     /// <summary>XConsole extension for colorizing text in the console.</summary>
     public static string BgColor(this string value, ConsoleColor color)
@@ -90,22 +102,61 @@ public static class StringExtensions
     }
 
     /// <summary>XConsole extension for colorizing text in the console.</summary>
-    public static string BgColor(this string value, int rgb)
+    public static string BgColor(this string value, KnownColor color)
     {
-        return value.BgColor(System.Drawing.Color.FromArgb(argb: rgb));
+        return value.BgColor(System.Drawing.Color.FromKnownColor(color: color));
     }
 
     /// <summary>XConsole extension for colorizing text in the console.</summary>
-    public static string BgColor(this string value, int red, int green, int blue)
+    public static string BgColor(this string value, Color color)
     {
-        return value.BgColor(System.Drawing.Color.FromArgb(red: red, green: green, blue: blue));
+        return BgColorBase(value: value, red: color.R, green: color.G, blue: color.B);
+    }
+
+    /// <summary>XConsole extension for colorizing text in the console.</summary>
+    public static string BgColor(this string value, int rgb)
+    {
+        if (rgb < 0 || rgb > 16777215)
+            throw new ArgumentOutOfRangeException(nameof(rgb));
+
+        return BgColorBase(value: value, red: rgb >> 16, green: (rgb >> 8) & 255, blue: rgb & 255);
     }
 
     /// <summary>XConsole extension for colorizing text in the console.</summary>
     public static string BgColor(this string value, string hexColor)
     {
-        var rgb = int.Parse(hexColor[0] == '#' ? hexColor.Substring(1) : hexColor, NumberStyles.HexNumber);
-        return value.BgColor(System.Drawing.Color.FromArgb(argb: rgb));
+        var hex = hexColor[0] == '#' ? hexColor[1..] : hexColor;
+
+        if (!int.TryParse(hex, NumberStyles.HexNumber, provider: null, out var rgb))
+            throw new FormatException();
+
+        if (rgb > 16777215)
+            throw new ArgumentOutOfRangeException(nameof(hexColor));
+
+        return BgColorBase(value: value, red: rgb >> 16, green: (rgb >> 8) & 255, blue: rgb & 255);
+    }
+
+    /// <summary>XConsole extension for colorizing text in the console.</summary>
+    public static string BgColor(this string value, int red, int green, int blue)
+    {
+        if (red < 0 || red > 255)
+            throw new ArgumentOutOfRangeException(nameof(red));
+
+        if (green < 0 || green > 255)
+            throw new ArgumentOutOfRangeException(nameof(green));
+
+        if (blue < 0 || blue > 255)
+            throw new ArgumentOutOfRangeException(nameof(blue));
+
+        return BgColorBase(value: value, red: red, green: green, blue: blue);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static string BgColorBase(string value, int red, int green, int blue)
+    {
+        return XConsole.VirtualTerminalAndColoringEnabled
+            ? string.Format(_backgroundRgbColorFormat, red, green, blue, value)
+            : value;
     }
 
     #endregion

@@ -4,9 +4,9 @@
 /// The mode of <see cref="XConsole.ReadLine(ConsoleReadLineMode)"/> method.
 /// <para>
 /// There are three mode variants:
-/// <br/>&#8226; <see cref="ConsoleReadLineMode.Default"/> &#8211; default behavior.
-/// <br/>&#8226; <see cref="ConsoleReadLineMode.Masked"/> &#8211; typed characters are displayed as a mask.
-/// <br/>&#8226; <see cref="ConsoleReadLineMode.Hidden"/> &#8211; typed characters are not displayed.
+/// <br/>• <see cref="ConsoleReadLineMode.Default"/> – default behavior.
+/// <br/>• <see cref="ConsoleReadLineMode.Masked"/> – typed characters are displayed as a mask.
+/// <br/>• <see cref="ConsoleReadLineMode.Hidden"/> – typed characters are not displayed.
 /// </para>
 /// </summary>
 public enum ConsoleReadLineMode
