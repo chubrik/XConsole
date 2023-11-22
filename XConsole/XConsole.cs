@@ -1933,18 +1933,15 @@ public static class XConsole
     }
 
     /// <inheritdoc cref="Console.WindowWidth"/>
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+#endif
     public static int WindowWidth
     {
-#if NET
-        [UnsupportedOSPlatform("android")]
-        [UnsupportedOSPlatform("browser")]
-        [UnsupportedOSPlatform("ios")]
-        [UnsupportedOSPlatform("tvos")]
-#endif
         get => Console.WindowWidth;
-#if NET
-        [SupportedOSPlatform("windows")]
-#endif
         set
         {
             lock (_syncLock)
@@ -1953,18 +1950,15 @@ public static class XConsole
     }
 
     /// <inheritdoc cref="Console.WindowHeight"/>
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+#endif
     public static int WindowHeight
     {
-#if NET
-        [UnsupportedOSPlatform("android")]
-        [UnsupportedOSPlatform("browser")]
-        [UnsupportedOSPlatform("ios")]
-        [UnsupportedOSPlatform("tvos")]
-#endif
         get => Console.WindowHeight;
-#if NET
-        [SupportedOSPlatform("windows")]
-#endif
         set
         {
             lock (_syncLock)
@@ -1983,7 +1977,10 @@ public static class XConsole
 
     /// <inheritdoc cref="Console.SetWindowSize(int, int)"/>
 #if NET
-    [SupportedOSPlatform("windows")]
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
 #endif
     public static void SetWindowSize(int width, int height)
     {
