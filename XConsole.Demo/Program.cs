@@ -43,7 +43,7 @@ public static class Program
         var sysFolder = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.System));
         var files = sysFolder.GetFiles("*.exe");
         var fileIndex = 0;
-        Console.Pin(() => new[] { "m`This is pin!\n", $"g`Number of files: ", $"W`{fileIndex}" });
+        Console.Pin(() => ["m`This is pin!\n", $"g`Number of files: ", $"W`{fileIndex}"]);
         var endPosList = new List<ConsolePosition>();
         var animationList = new List<IConsoleAnimation>();
         var random = new Random();

@@ -1,6 +1,4 @@
-﻿#pragma warning disable CA1822 // Mark members as static
-
-namespace Chubrik.XConsole;
+﻿namespace Chubrik.XConsole;
 
 using System;
 using System.Runtime.InteropServices;

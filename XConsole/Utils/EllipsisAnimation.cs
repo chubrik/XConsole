@@ -4,13 +4,11 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-internal sealed class EllipsisAnimation : ConsoleAnimation
+internal sealed class EllipsisAnimation(ConsolePosition position, CancellationToken? cancellationToken)
+    : ConsoleAnimation(position, cancellationToken)
 {
     private readonly TimeSpan _delay = TimeSpan.FromMilliseconds(_random.Next(100, 151));
     protected override string Clear { get; } = "   ";
-
-    public EllipsisAnimation(ConsolePosition position, CancellationToken? cancellationToken)
-        : base(position, cancellationToken) { }
 
     protected override async Task LoopAsync(CancellationToken cancellationToken)
     {

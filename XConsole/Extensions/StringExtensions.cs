@@ -16,10 +16,10 @@ public static class StringExtensions
     private const string _underlineFormat = "\x1b[4m{0}\x1b[24m";
 
     internal static readonly int[] _foregroundConsoleColorCodes =
-        new[] { 30, 34, 32, 36, 31, 35, 33, 37, 90, 94, 92, 96, 91, 95, 93, 97 };
+        [30, 34, 32, 36, 31, 35, 33, 37, 90, 94, 92, 96, 91, 95, 93, 97];
 
     internal static readonly int[] _backgroundConsoleColorCodes =
-        new[] { 40, 44, 42, 46, 41, 45, 43, 47, 100, 104, 102, 106, 101, 105, 103, 107 };
+        [40, 44, 42, 46, 41, 45, 43, 47, 100, 104, 102, 106, 101, 105, 103, 107];
 
     #region Foreground color
 

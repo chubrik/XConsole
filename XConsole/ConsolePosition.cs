@@ -1,6 +1,7 @@
 ﻿#pragma warning disable CS1573 // Parameter has no matching param tag in the XML comment (but other parameters do)
 #pragma warning disable CS1584 // XML comment has syntactically incorrect cref attribute
 #pragma warning disable CS1658 // Warning is overriding an error
+#pragma warning disable CS1734 // XML comment has a paramref tag, but there is no parameter by that name
 #if !NET
 #pragma warning disable CS8604 // Possible null reference argument.
 #endif
@@ -82,7 +83,6 @@ public readonly struct ConsolePosition
         ShiftTop = XConsole.ShiftTop;
     }
 
-#pragma warning disable CS1734 // XML comment has a paramref tag, but there is no parameter by that name
     /// <summary>
     /// <paramref name="Left"/> and <paramref name="top"/> arguments should be specified.
     /// </summary>
@@ -91,7 +91,6 @@ public readonly struct ConsolePosition
     /// <br/>• <see cref="ConsolePosition(int, int)"/>
     /// </remarks>
     /// <exception cref="InvalidOperationException"/>
-#pragma warning restore CS1734 // XML comment has a paramref tag, but there is no parameter by that name
     [Obsolete("Arguments should be specified.", error: true)]
     public ConsolePosition() => throw new InvalidOperationException();
 
@@ -106,7 +105,7 @@ public readonly struct ConsolePosition
     /// <inheritdoc cref="TryWrite(string?)"/>
     public ConsolePosition Write(string? value)
     {
-        return XConsole.WriteToPosition(this, new[] { ConsoleItem.Parse(value) });
+        return XConsole.WriteToPosition(this, [ConsoleItem.Parse(value)]);
     }
 
     /// <returns>The new end <see cref="ConsolePosition"/> structure.</returns>
@@ -139,7 +138,7 @@ public readonly struct ConsolePosition
     /// <inheritdoc cref="TryWrite(bool)"/>
     public ConsolePosition Write(bool value)
     {
-        return XConsole.WriteToPosition(this, new[] { new ConsoleItem(value.ToString()) });
+        return XConsole.WriteToPosition(this, [new ConsoleItem(value.ToString())]);
     }
 
     /// <returns>The new end <see cref="ConsolePosition"/> structure.</returns>
@@ -147,18 +146,18 @@ public readonly struct ConsolePosition
     /// <inheritdoc cref="TryWrite(char)"/>
     public ConsolePosition Write(char value)
     {
-        return XConsole.WriteToPosition(this, new[] { new ConsoleItem(value.ToString()) });
+        return XConsole.WriteToPosition(this, [new ConsoleItem(value.ToString())]);
     }
 
     /// <returns>The new end <see cref="ConsolePosition"/> structure.</returns>
     /// <exception cref="ArgumentOutOfRangeException"/>
-    /// <inheritdoc cref="TryWrite(char[]?)"/>
+    /// <inheritdoc cref="TryWrite(char[])"/>
     public ConsolePosition Write(char[]? buffer)
     {
         if (buffer == null || buffer.Length == 0)
             return this;
 
-        return XConsole.WriteToPosition(this, new[] { new ConsoleItem(new string(buffer)) });
+        return XConsole.WriteToPosition(this, [new ConsoleItem(new string(buffer))]);
     }
 
     /// <returns>The new end <see cref="ConsolePosition"/> structure.</returns>
@@ -169,7 +168,7 @@ public readonly struct ConsolePosition
         if (count == 0)
             return this;
 
-        return XConsole.WriteToPosition(this, new[] { new ConsoleItem(new string(buffer, index, count)) });
+        return XConsole.WriteToPosition(this, [new ConsoleItem(new string(buffer, index, count))]);
     }
 
     /// <returns>The new end <see cref="ConsolePosition"/> structure.</returns>
@@ -177,7 +176,7 @@ public readonly struct ConsolePosition
     /// <inheritdoc cref="TryWrite(decimal)"/>
     public ConsolePosition Write(decimal value)
     {
-        return XConsole.WriteToPosition(this, new[] { new ConsoleItem(value.ToString()) });
+        return XConsole.WriteToPosition(this, [new ConsoleItem(value.ToString())]);
     }
 
     /// <returns>The new end <see cref="ConsolePosition"/> structure.</returns>
@@ -185,7 +184,7 @@ public readonly struct ConsolePosition
     /// <inheritdoc cref="TryWrite(double)"/>
     public ConsolePosition Write(double value)
     {
-        return XConsole.WriteToPosition(this, new[] { new ConsoleItem(value.ToString()) });
+        return XConsole.WriteToPosition(this, [new ConsoleItem(value.ToString())]);
     }
 
     /// <returns>The new end <see cref="ConsolePosition"/> structure.</returns>
@@ -193,7 +192,7 @@ public readonly struct ConsolePosition
     /// <inheritdoc cref="TryWrite(int)"/>
     public ConsolePosition Write(int value)
     {
-        return XConsole.WriteToPosition(this, new[] { new ConsoleItem(value.ToString()) });
+        return XConsole.WriteToPosition(this, [new ConsoleItem(value.ToString())]);
     }
 
     /// <returns>The new end <see cref="ConsolePosition"/> structure.</returns>
@@ -201,7 +200,7 @@ public readonly struct ConsolePosition
     /// <inheritdoc cref="TryWrite(long)"/>
     public ConsolePosition Write(long value)
     {
-        return XConsole.WriteToPosition(this, new[] { new ConsoleItem(value.ToString()) });
+        return XConsole.WriteToPosition(this, [new ConsoleItem(value.ToString())]);
     }
 
     /// <returns>The new end <see cref="ConsolePosition"/> structure.</returns>
@@ -214,7 +213,7 @@ public readonly struct ConsolePosition
         if (string.IsNullOrEmpty(valueStr))
             return this;
 
-        return XConsole.WriteToPosition(this, new[] { new ConsoleItem(valueStr) });
+        return XConsole.WriteToPosition(this, [new ConsoleItem(valueStr)]);
     }
 
     /// <returns>The new end <see cref="ConsolePosition"/> structure.</returns>
@@ -222,7 +221,7 @@ public readonly struct ConsolePosition
     /// <inheritdoc cref="TryWrite(float)"/>
     public ConsolePosition Write(float value)
     {
-        return XConsole.WriteToPosition(this, new[] { new ConsoleItem(value.ToString()) });
+        return XConsole.WriteToPosition(this, [new ConsoleItem(value.ToString())]);
     }
 
     /// <returns>The new end <see cref="ConsolePosition"/> structure.</returns>
@@ -237,7 +236,7 @@ public readonly struct ConsolePosition
         if (format.Length == 0)
             return this;
 
-        return XConsole.WriteToPosition(this, new[] { ConsoleItem.Parse(string.Format(format, arg0)) });
+        return XConsole.WriteToPosition(this, [ConsoleItem.Parse(string.Format(format, arg0))]);
     }
 
     /// <returns>The new end <see cref="ConsolePosition"/> structure.</returns>
@@ -252,7 +251,7 @@ public readonly struct ConsolePosition
         if (format.Length == 0)
             return this;
 
-        return XConsole.WriteToPosition(this, new[] { ConsoleItem.Parse(string.Format(format, arg0, arg1)) });
+        return XConsole.WriteToPosition(this, [ConsoleItem.Parse(string.Format(format, arg0, arg1))]);
     }
 
     /// <returns>The new end <see cref="ConsolePosition"/> structure.</returns>
@@ -267,12 +266,12 @@ public readonly struct ConsolePosition
         if (format.Length == 0)
             return this;
 
-        return XConsole.WriteToPosition(this, new[] { ConsoleItem.Parse(string.Format(format, arg0, arg1, arg2)) });
+        return XConsole.WriteToPosition(this, [ConsoleItem.Parse(string.Format(format, arg0, arg1, arg2))]);
     }
 
     /// <returns>The new end <see cref="ConsolePosition"/> structure.</returns>
     /// <exception cref="ArgumentOutOfRangeException"/>
-    /// <inheritdoc cref="TryWrite(string, object?[]?)"/>
+    /// <inheritdoc cref="TryWrite(string, object?[])"/>
     public ConsolePosition Write(
 #if NET7_0_OR_GREATER
         [StringSyntax(StringSyntaxAttribute.CompositeFormat)]
@@ -282,8 +281,7 @@ public readonly struct ConsolePosition
         if (format.Length == 0)
             return this;
 
-        return XConsole.WriteToPosition(
-            this, new[] { ConsoleItem.Parse(string.Format(format, arg ?? Array.Empty<object?>())) });
+        return XConsole.WriteToPosition(this, [ConsoleItem.Parse(string.Format(format, arg ?? []))]);
     }
 
     /// <returns>The new end <see cref="ConsolePosition"/> structure.</returns>
@@ -291,7 +289,7 @@ public readonly struct ConsolePosition
     /// <inheritdoc cref="TryWrite(uint)"/>
     public ConsolePosition Write(uint value)
     {
-        return XConsole.WriteToPosition(this, new[] { new ConsoleItem(value.ToString()) });
+        return XConsole.WriteToPosition(this, [new ConsoleItem(value.ToString())]);
     }
 
     /// <returns>The new end <see cref="ConsolePosition"/> structure.</returns>
@@ -299,7 +297,7 @@ public readonly struct ConsolePosition
     /// <inheritdoc cref="TryWrite(ulong)"/>
     public ConsolePosition Write(ulong value)
     {
-        return XConsole.WriteToPosition(this, new[] { new ConsoleItem(value.ToString()) });
+        return XConsole.WriteToPosition(this, [new ConsoleItem(value.ToString())]);
     }
 
     #endregion
@@ -326,7 +324,7 @@ public readonly struct ConsolePosition
     /// <exception cref="System.IO.IOException"/>
     public ConsolePosition? TryWrite(string? value)
     {
-        return TryWriteBase(new[] { ConsoleItem.Parse(value) });
+        return TryWriteBase([ConsoleItem.Parse(value)]);
     }
 
     /// <summary>
@@ -367,7 +365,7 @@ public readonly struct ConsolePosition
     /// <inheritdoc cref="TryWrite(string?)"/>
     public ConsolePosition? TryWrite(bool value)
     {
-        return TryWriteBase(new[] { new ConsoleItem(value.ToString()) });
+        return TryWriteBase([new ConsoleItem(value.ToString())]);
     }
 
     /// <summary>
@@ -377,20 +375,20 @@ public readonly struct ConsolePosition
     /// <inheritdoc cref="TryWrite(string?)"/>
     public ConsolePosition? TryWrite(char value)
     {
-        return TryWriteBase(new[] { new ConsoleItem(value.ToString()) });
+        return TryWriteBase([new ConsoleItem(value.ToString())]);
     }
 
     /// <summary>
     /// Writes the specified array of Unicode characters directly to a position.
     /// </summary>
-    /// <inheritdoc cref="Console.Write(char[]?)"/>
+    /// <inheritdoc cref="Console.Write(char[])"/>
     /// <inheritdoc cref="TryWrite(string?)"/>
     public ConsolePosition? TryWrite(char[]? buffer)
     {
         if (buffer == null || buffer.Length == 0)
             return this;
 
-        return TryWriteBase(new[] { new ConsoleItem(new string(buffer)) });
+        return TryWriteBase([new ConsoleItem(new string(buffer))]);
     }
 
     /// <summary>
@@ -403,7 +401,7 @@ public readonly struct ConsolePosition
         if (count == 0)
             return this;
 
-        return TryWriteBase(new[] { new ConsoleItem(new string(buffer, index, count)) });
+        return TryWriteBase([new ConsoleItem(new string(buffer, index, count))]);
     }
 
     /// <summary>
@@ -413,7 +411,7 @@ public readonly struct ConsolePosition
     /// <inheritdoc cref="TryWrite(string?)"/>
     public ConsolePosition? TryWrite(decimal value)
     {
-        return TryWriteBase(new[] { new ConsoleItem(value.ToString()) });
+        return TryWriteBase([new ConsoleItem(value.ToString())]);
     }
 
     /// <summary>
@@ -423,7 +421,7 @@ public readonly struct ConsolePosition
     /// <inheritdoc cref="TryWrite(string?)"/>
     public ConsolePosition? TryWrite(double value)
     {
-        return TryWriteBase(new[] { new ConsoleItem(value.ToString()) });
+        return TryWriteBase([new ConsoleItem(value.ToString())]);
     }
 
     /// <summary>
@@ -433,7 +431,7 @@ public readonly struct ConsolePosition
     /// <inheritdoc cref="TryWrite(string?)"/>
     public ConsolePosition? TryWrite(int value)
     {
-        return TryWriteBase(new[] { new ConsoleItem(value.ToString()) });
+        return TryWriteBase([new ConsoleItem(value.ToString())]);
     }
 
     /// <summary>
@@ -443,7 +441,7 @@ public readonly struct ConsolePosition
     /// <inheritdoc cref="TryWrite(string?)"/>
     public ConsolePosition? TryWrite(long value)
     {
-        return TryWriteBase(new[] { new ConsoleItem(value.ToString()) });
+        return TryWriteBase([new ConsoleItem(value.ToString())]);
     }
 
     /// <summary>
@@ -458,7 +456,7 @@ public readonly struct ConsolePosition
         if (string.IsNullOrEmpty(valueStr))
             return this;
 
-        return TryWriteBase(new[] { new ConsoleItem(valueStr) });
+        return TryWriteBase([new ConsoleItem(valueStr)]);
     }
 
     /// <summary>
@@ -468,7 +466,7 @@ public readonly struct ConsolePosition
     /// <inheritdoc cref="TryWrite(string?)"/>
     public ConsolePosition? TryWrite(float value)
     {
-        return TryWriteBase(new[] { new ConsoleItem(value.ToString()) });
+        return TryWriteBase([new ConsoleItem(value.ToString())]);
     }
 
     /// <summary>
@@ -491,7 +489,7 @@ public readonly struct ConsolePosition
         if (format.Length == 0)
             return this;
 
-        return TryWriteBase(new[] { ConsoleItem.Parse(string.Format(format, arg0)) });
+        return TryWriteBase([ConsoleItem.Parse(string.Format(format, arg0))]);
     }
 
     /// <summary>
@@ -514,7 +512,7 @@ public readonly struct ConsolePosition
         if (format.Length == 0)
             return this;
 
-        return TryWriteBase(new[] { ConsoleItem.Parse(string.Format(format, arg0, arg1)) });
+        return TryWriteBase([ConsoleItem.Parse(string.Format(format, arg0, arg1))]);
     }
 
     /// <summary>
@@ -537,7 +535,7 @@ public readonly struct ConsolePosition
         if (format.Length == 0)
             return this;
 
-        return TryWriteBase(new[] { ConsoleItem.Parse(string.Format(format, arg0, arg1, arg2)) });
+        return TryWriteBase([ConsoleItem.Parse(string.Format(format, arg0, arg1, arg2))]);
     }
 
     /// <summary>
@@ -549,7 +547,7 @@ public readonly struct ConsolePosition
     /// A composite format string.
     /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
     /// </param>
-    /// <inheritdoc cref="Console.Write(string, object?[]?)"/>
+    /// <inheritdoc cref="Console.Write(string, object?[])"/>
     /// <inheritdoc cref="TryWrite(string?)"/>
     public ConsolePosition? TryWrite(
 #if NET7_0_OR_GREATER
@@ -560,7 +558,7 @@ public readonly struct ConsolePosition
         if (format.Length == 0)
             return this;
 
-        return TryWriteBase(new[] { ConsoleItem.Parse(string.Format(format, arg ?? Array.Empty<object?>())) });
+        return TryWriteBase([ConsoleItem.Parse(string.Format(format, arg ?? []))]);
     }
 
     /// <summary>
@@ -570,7 +568,7 @@ public readonly struct ConsolePosition
     /// <inheritdoc cref="TryWrite(string?)"/>
     public ConsolePosition? TryWrite(uint value)
     {
-        return TryWriteBase(new[] { new ConsoleItem(value.ToString()) });
+        return TryWriteBase([new ConsoleItem(value.ToString())]);
     }
 
     /// <summary>
@@ -580,7 +578,7 @@ public readonly struct ConsolePosition
     /// <inheritdoc cref="TryWrite(string?)"/>
     public ConsolePosition? TryWrite(ulong value)
     {
-        return TryWriteBase(new[] { new ConsoleItem(value.ToString()) });
+        return TryWriteBase([new ConsoleItem(value.ToString())]);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

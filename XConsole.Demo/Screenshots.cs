@@ -47,12 +47,12 @@ public static class Screenshots
         Console.WriteLine("Regular log message: 6 bananas");
         Console.WriteLine("Regular log message: 10 limes");
 
-        Console.Pin(() => new[]
-        {
+        Console.Pin(() =>
+        [
             "W`Pinned multiline results:\n",
             "Apples=", "R`154", ", bananas=", "Y`241", ", limes=", "G`87", ", tital=", "nc`482", ", time=", "g`12:48\n",
             "d`(Pin will not be broken after 9000 log lines)"
-        });
+        ]);
 
         for (; ; )
             if (Console.ReadKey(true).Key == ConsoleKey.Escape)
@@ -115,7 +115,7 @@ public static class Screenshots
         Console.WriteLine("Regular log message");
         Console.WriteLine("Regular log message");
         Console.WriteLine("Regular log message");
-        Console.Pin(() => new[] { "Y`Multicolor", " pin, value=", "C`" + value });
+        Console.Pin(() => ["Y`Multicolor", " pin, value=", "C`" + value]);
 
         for (; ; )
             if (Console.ReadKey(true).Key == ConsoleKey.Escape)
@@ -128,7 +128,7 @@ public static class Screenshots
         Console.WriteLine("Regular log message");
         Console.WriteLine("Regular log message");
         Console.WriteLine("Regular log message");
-        Console.Pin(() => new[] { "Multiline pin,\nvalue=", "C`" + value });
+        Console.Pin(() => ["Multiline pin,\nvalue=", "C`" + value]);
 
         for (; ; )
             if (Console.ReadKey(true).Key == ConsoleKey.Escape)

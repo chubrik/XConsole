@@ -6,24 +6,16 @@ namespace Chubrik.XConsole;
 
 using System;
 
-internal readonly struct ConsoleItem
+internal readonly struct ConsoleItem(
+    string value,
+    ConsoleItemType type = ConsoleItemType.Plain,
+    ConsoleColor foreColor = default,
+    ConsoleColor backColor = default)
 {
-    public string Value { get; }
-    public ConsoleItemType Type { get; }
-    public ConsoleColor ForeColor { get; }
-    public ConsoleColor BackColor { get; }
-
-    public ConsoleItem(
-        string value,
-        ConsoleItemType type = ConsoleItemType.Plain,
-        ConsoleColor foreColor = default,
-        ConsoleColor backColor = default)
-    {
-        Type = type;
-        Value = value;
-        ForeColor = foreColor;
-        BackColor = backColor;
-    }
+    public string Value { get; } = value;
+    public ConsoleItemType Type { get; } = type;
+    public ConsoleColor ForeColor { get; } = foreColor;
+    public ConsoleColor BackColor { get; } = backColor;
 
     public static ConsoleItem Parse(string? value)
     {
@@ -85,8 +77,8 @@ internal readonly struct ConsoleItem
         return new(value);
     }
 
-    private static readonly int[] _colorMap = new[]
-    {
+    private static readonly int[] _colorMap =
+    [
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -95,5 +87,5 @@ internal readonly struct ConsoleItem
         -1, -1, 12, -1, -1, -1, -1, 15, -1, 14, -1, -1, -1, -1, -1, -1,
         -1, -1,  1,  3,  8, -1, -1,  2, -1, -1, -1, -1, -1,  5,  0, -1,
         -1, -1,  4, -1, -1, -1, -1,  7, -1,  6
-    };
+    ];
 }

@@ -112,9 +112,9 @@ Console.Pin("Simple static pin");           // Simple static pin
 Console.Pin("Y`Multicolor", " static pin"); // Multicolor static pin
 Console.Pin("Multiline\nstatic pin");       // Multiline static pin
 
-Console.Pin(() => "Simple pin, value=" + value);                           // Simple dynamic pin
-Console.Pin(() => new[] { "Y`Multicolor", " pin, value=", "C`" + value }); // Multicolor dynamic pin
-Console.Pin(() => new[] { "Multiline pin,\nvalue=", "C`" + value });       // Multiline dynamic pin
+Console.Pin(() => "Simple pin, value=" + value);                   // Simple dynamic pin
+Console.Pin(() => ["Y`Multicolor", " pin, value=", "C`" + value]); // Multicolor dynamic pin
+Console.Pin(() => ["Multiline pin,\nvalue=", "C`" + value]);       // Multiline dynamic pin
 ```
 ![XConsole pin 1](https://raw.githubusercontent.com/chubrik/XConsole/main/img/pin-1.png)
 ![XConsole pin 2](https://raw.githubusercontent.com/chubrik/XConsole/main/img/pin-2.png)
