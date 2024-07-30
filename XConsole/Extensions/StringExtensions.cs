@@ -7,6 +7,9 @@ using System.Drawing;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 
+/// <summary>
+/// String extensions for coloring and underlining text in the console.
+/// </summary>
 public static class StringExtensions
 {
     private const int _rgbMaxValue = 16777215;
@@ -24,7 +27,9 @@ public static class StringExtensions
 
     #region Foreground color
 
-    /// <summary>XConsole extension for colorizing text in the console.</summary>
+    /// <summary>
+    /// Modifies the string for coloring text in the console.
+    /// </summary>
     public static string Color(this string value, ConsoleColor color)
     {
         return XConsole.VirtualTerminalAndColoringEnabled
@@ -32,19 +37,19 @@ public static class StringExtensions
             : value;
     }
 
-    /// <summary>XConsole extension for colorizing text in the console.</summary>
+    /// <inheritdoc cref="Color(string, ConsoleColor)"/>
     public static string Color(this string value, KnownColor color)
     {
         return value.Color(color: System.Drawing.Color.FromKnownColor(color: color));
     }
 
-    /// <summary>XConsole extension for colorizing text in the console.</summary>
+    /// <inheritdoc cref="Color(string, ConsoleColor)"/>
     public static string Color(this string value, Color color)
     {
         return ColorBase(value: value, red: color.R, green: color.G, blue: color.B);
     }
 
-    /// <summary>XConsole extension for colorizing text in the console.</summary>
+    /// <inheritdoc cref="Color(string, ConsoleColor)"/>
     public static string Color(this string value, int rgb)
     {
         if (unchecked((uint)rgb) > _rgbMaxValue)
@@ -53,7 +58,7 @@ public static class StringExtensions
         return ColorBase(value: value, red: rgb >> 16, green: (rgb >> 8) & 0xFF, blue: rgb & 0xFF);
     }
 
-    /// <summary>XConsole extension for colorizing text in the console.</summary>
+    /// <inheritdoc cref="Color(string, ConsoleColor)"/>
     public static string Color(this string value, string hexColor)
     {
         var hex = hexColor[0] == '#' ? hexColor[1..] : hexColor;
@@ -67,7 +72,7 @@ public static class StringExtensions
         return ColorBase(value: value, red: rgb >> 16, green: (rgb >> 8) & 0xFF, blue: rgb & 0xFF);
     }
 
-    /// <summary>XConsole extension for colorizing text in the console.</summary>
+    /// <inheritdoc cref="Color(string, ConsoleColor)"/>
     public static string Color(this string value, int red, int green, int blue)
     {
         if (unchecked((uint)red) > byte.MaxValue)
@@ -94,7 +99,9 @@ public static class StringExtensions
 
     #region Background color
 
-    /// <summary>XConsole extension for colorizing text in the console.</summary>
+    /// <summary>
+    /// Modifies the string for coloring background in the console.
+    /// </summary>
     public static string BgColor(this string value, ConsoleColor color)
     {
         return XConsole.VirtualTerminalAndColoringEnabled
@@ -102,19 +109,19 @@ public static class StringExtensions
             : value;
     }
 
-    /// <summary>XConsole extension for colorizing text in the console.</summary>
+    /// <inheritdoc cref="BgColor(string, ConsoleColor)"/>
     public static string BgColor(this string value, KnownColor color)
     {
         return value.BgColor(System.Drawing.Color.FromKnownColor(color: color));
     }
 
-    /// <summary>XConsole extension for colorizing text in the console.</summary>
+    /// <inheritdoc cref="BgColor(string, ConsoleColor)"/>
     public static string BgColor(this string value, Color color)
     {
         return BgColorBase(value: value, red: color.R, green: color.G, blue: color.B);
     }
 
-    /// <summary>XConsole extension for colorizing text in the console.</summary>
+    /// <inheritdoc cref="BgColor(string, ConsoleColor)"/>
     public static string BgColor(this string value, int rgb)
     {
         if (unchecked((uint)rgb) > _rgbMaxValue)
@@ -123,7 +130,7 @@ public static class StringExtensions
         return BgColorBase(value: value, red: rgb >> 16, green: (rgb >> 8) & 0xFF, blue: rgb & 0xFF);
     }
 
-    /// <summary>XConsole extension for colorizing text in the console.</summary>
+    /// <inheritdoc cref="BgColor(string, ConsoleColor)"/>
     public static string BgColor(this string value, string hexColor)
     {
         var hex = hexColor[0] == '#' ? hexColor[1..] : hexColor;
@@ -137,7 +144,7 @@ public static class StringExtensions
         return BgColorBase(value: value, red: rgb >> 16, green: (rgb >> 8) & 0xFF, blue: rgb & 0xFF);
     }
 
-    /// <summary>XConsole extension for colorizing text in the console.</summary>
+    /// <inheritdoc cref="BgColor(string, ConsoleColor)"/>
     public static string BgColor(this string value, int red, int green, int blue)
     {
         if (unchecked((uint)red) > byte.MaxValue)
@@ -162,7 +169,9 @@ public static class StringExtensions
 
     #endregion
 
-    /// <summary>XConsole extension for underlining text in the console.</summary>
+    /// <summary>
+    /// Modifies the string for underlining text in the console.
+    /// </summary>
     public static string Underline(this string value)
     {
         return XConsole.VirtualTerminalEnabled ? string.Format(_underlineFormat, value) : value;

@@ -1,4 +1,6 @@
-﻿namespace Chubrik.XConsole;
+﻿#pragma warning disable CA1822 // Mark members as static
+
+namespace Chubrik.XConsole;
 
 using System;
 using System.Runtime.InteropServices;
@@ -7,6 +9,9 @@ using System.Threading;
 using System.Runtime.Versioning;
 #endif
 
+/// <summary>
+/// Instance for built-in and custom extensions.
+/// </summary>
 #if NET7_0_OR_GREATER
 public sealed partial class ConsoleUtils
 #else
@@ -17,6 +22,9 @@ public sealed class ConsoleUtils
 
     #region Animations
 
+    /// <summary>
+    /// Starts an ellipsis animation at the current position.
+    /// </summary>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -28,6 +36,7 @@ public sealed class ConsoleUtils
         return new EllipsisAnimation(XConsole.CursorPosition, cancellationToken: null);
     }
 
+    /// <inheritdoc cref="AnimateEllipsis()"/>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -39,6 +48,9 @@ public sealed class ConsoleUtils
         return new EllipsisAnimation(XConsole.CursorPosition, cancellationToken);
     }
 
+    /// <summary>
+    /// Starts a spinner animation at the current position.
+    /// </summary>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -50,6 +62,7 @@ public sealed class ConsoleUtils
         return new SpinnerAnimation(XConsole.CursorPosition, cancellationToken: null);
     }
 
+    /// <inheritdoc cref="AnimateSpinner()"/>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -63,6 +76,10 @@ public sealed class ConsoleUtils
 
     #endregion
 
+    /// <summary>
+    /// Displays the <paramref name="message"/> and waits until the user presses Y or N and then Enter.
+    /// </summary>
+    /// <returns>True or False according to the user’s decision.</returns>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
@@ -146,15 +163,27 @@ public sealed class ConsoleUtils
 
     private static readonly IntPtr _consolePtr = GetConsoleWindow();
 
+    /// <summary>
+    /// Hides the console window.
+    /// </summary>
     [SupportedOSPlatform("windows")]
     public void HideWindow() => ShowWindow(_consolePtr, SW_HIDE);
 
+    /// <summary>
+    /// Maximizes the console window.
+    /// </summary>
     [SupportedOSPlatform("windows")]
     public void MaximizeWindow() => ShowWindow(_consolePtr, SW_MAXIMIZE);
 
+    /// <summary>
+    /// Minimizes the console window.
+    /// </summary>
     [SupportedOSPlatform("windows")]
     public void MinimizeWindow() => ShowWindow(_consolePtr, SW_MINIMIZE);
 
+    /// <summary>
+    /// Restores the console window after minimization.
+    /// </summary>
     [SupportedOSPlatform("windows")]
     public void RestoreWindow() => ShowWindow(_consolePtr, SW_RESTORE);
 
