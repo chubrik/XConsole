@@ -1534,13 +1534,6 @@ public static class XConsole
 
     private static int CalcLineWrapCount(ConsoleItem[] items, int beginLeft)
     {
-        const int space = ' ';
-        const int _n = '\n';
-        const int _r = '\r';
-        const int _t = '\t';
-        const int _b = '\b';
-        const int _x1b = '\x1b';
-
         var lineWrapCount = 0;
         var left = beginLeft;
         var bufferWidth = Console.BufferWidth;
@@ -1556,46 +1549,41 @@ public static class XConsole
             {
                 @char = chars[charIndex];
 
-                if (@char >= space)
+                if (@char >= ' ')
                     left++;
                 else
                     switch (@char)
                     {
-                        case _n:
+                        case '\n':
                             left = 0;
                             lineWrapCount++;
                             continue;
 
-                        case _r:
+                        case '\r':
                             left = 0;
                             continue;
 
-                        case _t:
+                        case '\t':
                             left = (left + 8) / 8 * 8;
                             break;
 
-                        case _b:
+                        case '\b':
 
                             if (left > 0)
                                 left--;
 
                             continue;
 
-                        case _x1b:
+                        case '\x1b':
 
 #if NET
-                            const int A = 'A';
-                            const int Z = 'Z';
-                            const int a = 'a';
-                            const int z = 'z';
-
                             if (VirtualTerminalEnabled)
                             {
                                 for (charIndex++; charIndex < charCount; charIndex++)
                                 {
                                     @char = chars[charIndex];
 
-                                    if ((@char >= A && @char <= Z) || (@char >= a && @char <= z))
+                                    if ((@char >= 'A' && @char <= 'Z') || (@char >= 'a' && @char <= 'z'))
                                         break;
                                 }
 

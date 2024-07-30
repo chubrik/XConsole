@@ -19,25 +19,20 @@ internal readonly struct ConsoleItem(
 
     public static ConsoleItem Parse(string? value)
     {
-        const int tick = '`';
-        const int y = 'y';
-        const int space = ' ';
-        const int _x1b = '\x1b';
-
         if (string.IsNullOrEmpty(value))
             return new(string.Empty);
 
         var char0 = (int)value[0];
 
-        if (char0 == tick)
+        if (char0 == '`')
             return new(value.Substring(1));
 
         if (value.Length == 1)
             return new(value);
 
-        if (value[1] == tick)
+        if (value[1] == '`')
         {
-            if (char0 <= y)
+            if (char0 <= 'y')
             {
                 var foreColor = _colorMap[char0];
 
@@ -48,13 +43,13 @@ internal readonly struct ConsoleItem(
             return new(value);
         }
 
-        if (value.Length > 2 && value[2] == tick && char0 <= y)
+        if (value.Length > 2 && value[2] == '`' && char0 <= 'y')
         {
             var backColor = _colorMap[value[1]];
 
             if (backColor != -1)
             {
-                if (char0 <= y)
+                if (char0 <= 'y')
                 {
                     var foreColor = _colorMap[char0];
 
@@ -63,7 +58,7 @@ internal readonly struct ConsoleItem(
                             value.Substring(3), ConsoleItemType.BothColors,
                             foreColor: (ConsoleColor)foreColor, backColor: (ConsoleColor)backColor);
 
-                    if (char0 == space)
+                    if (char0 == ' ')
                         return new(value.Substring(3), ConsoleItemType.BackColor, backColor: (ConsoleColor)backColor);
                 }
             }
@@ -71,7 +66,7 @@ internal readonly struct ConsoleItem(
             return new(value);
         }
 
-        if (char0 == _x1b)
+        if (char0 == '\x1b')
             return new(value, ConsoleItemType.Ansi);
 
         return new(value);

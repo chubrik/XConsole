@@ -71,6 +71,11 @@ public sealed class ConsoleUtils
 #endif
     public bool Confirm(string message = "Continue? [y/n]: ", string yes = "Yes", string no = "No")
     {
+        var yesItem = ConsoleItem.Parse(yes);
+        var noItem = ConsoleItem.Parse(no);
+        var yesLength = yesItem.Value.Length;
+        var noLength = noItem.Value.Length;
+
         return XConsole.Sync(() =>
         {
             bool? answer = null;
@@ -86,10 +91,10 @@ public sealed class ConsoleUtils
                         if (answer != true)
                         {
                             if (answer == false)
-                                answerPosition.Write(new string(' ', no.Length));
+                                answerPosition.Write(new string(' ', noLength));
 
                             answer = true;
-                            XConsole.CursorPosition = answerPosition.Write(yes);
+                            XConsole.CursorPosition = XConsole.WriteToPosition(answerPosition, [yesItem]);
                         }
                         continue;
 
@@ -97,10 +102,10 @@ public sealed class ConsoleUtils
                         if (answer != false)
                         {
                             if (answer == true)
-                                answerPosition.Write(new string(' ', yes.Length));
+                                answerPosition.Write(new string(' ', yesLength));
 
                             answer = false;
-                            XConsole.CursorPosition = answerPosition.Write(no);
+                            XConsole.CursorPosition = XConsole.WriteToPosition(answerPosition, [noItem]);
                         }
                         continue;
 
@@ -117,7 +122,7 @@ public sealed class ConsoleUtils
                         if (answer != null)
                         {
                             answer = null;
-                            answerPosition.Write(new string(' ', Math.Max(yes.Length, no.Length)));
+                            answerPosition.Write(new string(' ', Math.Max(yesLength, noLength)));
                             XConsole.CursorPosition = answerPosition;
                         }
                         continue;

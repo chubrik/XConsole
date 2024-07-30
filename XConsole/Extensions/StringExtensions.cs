@@ -9,6 +9,7 @@ using System.Runtime.CompilerServices;
 
 public static class StringExtensions
 {
+    private const int _rgbMaxValue = 16777215;
     private const string _foregroundConsoleColorFormat = "\x1b[{0}m{1}\x1b[39m";
     private const string _backgroundConsoleColorFormat = "\x1b[{0}m{1}\x1b[49m";
     private const string _foregroundRgbColorFormat = "\x1b[38;2;{0};{1};{2}m{3}\x1b[39m";
@@ -46,10 +47,10 @@ public static class StringExtensions
     /// <summary>XConsole extension for colorizing text in the console.</summary>
     public static string Color(this string value, int rgb)
     {
-        if (rgb < 0 || rgb > 16777215)
+        if (unchecked((uint)rgb) > _rgbMaxValue)
             throw new ArgumentOutOfRangeException(nameof(rgb));
 
-        return ColorBase(value: value, red: rgb >> 16, green: (rgb >> 8) & 255, blue: rgb & 255);
+        return ColorBase(value: value, red: rgb >> 16, green: (rgb >> 8) & 0xFF, blue: rgb & 0xFF);
     }
 
     /// <summary>XConsole extension for colorizing text in the console.</summary>
@@ -60,22 +61,22 @@ public static class StringExtensions
         if (!int.TryParse(hex, NumberStyles.HexNumber, provider: null, out var rgb))
             throw new FormatException();
 
-        if (rgb > 16777215)
+        if (rgb > _rgbMaxValue)
             throw new ArgumentOutOfRangeException(nameof(hexColor));
 
-        return ColorBase(value: value, red: rgb >> 16, green: (rgb >> 8) & 255, blue: rgb & 255);
+        return ColorBase(value: value, red: rgb >> 16, green: (rgb >> 8) & 0xFF, blue: rgb & 0xFF);
     }
 
     /// <summary>XConsole extension for colorizing text in the console.</summary>
     public static string Color(this string value, int red, int green, int blue)
     {
-        if (red < 0 || red > 255)
+        if (unchecked((uint)red) > byte.MaxValue)
             throw new ArgumentOutOfRangeException(nameof(red));
 
-        if (green < 0 || green > 255)
+        if (unchecked((uint)green) > byte.MaxValue)
             throw new ArgumentOutOfRangeException(nameof(green));
 
-        if (blue < 0 || blue > 255)
+        if (unchecked((uint)blue) > byte.MaxValue)
             throw new ArgumentOutOfRangeException(nameof(blue));
 
         return ColorBase(value: value, red: red, green: green, blue: blue);
@@ -116,10 +117,10 @@ public static class StringExtensions
     /// <summary>XConsole extension for colorizing text in the console.</summary>
     public static string BgColor(this string value, int rgb)
     {
-        if (rgb < 0 || rgb > 16777215)
+        if (unchecked((uint)rgb) > _rgbMaxValue)
             throw new ArgumentOutOfRangeException(nameof(rgb));
 
-        return BgColorBase(value: value, red: rgb >> 16, green: (rgb >> 8) & 255, blue: rgb & 255);
+        return BgColorBase(value: value, red: rgb >> 16, green: (rgb >> 8) & 0xFF, blue: rgb & 0xFF);
     }
 
     /// <summary>XConsole extension for colorizing text in the console.</summary>
@@ -130,22 +131,22 @@ public static class StringExtensions
         if (!int.TryParse(hex, NumberStyles.HexNumber, provider: null, out var rgb))
             throw new FormatException();
 
-        if (rgb > 16777215)
+        if (rgb > _rgbMaxValue)
             throw new ArgumentOutOfRangeException(nameof(hexColor));
 
-        return BgColorBase(value: value, red: rgb >> 16, green: (rgb >> 8) & 255, blue: rgb & 255);
+        return BgColorBase(value: value, red: rgb >> 16, green: (rgb >> 8) & 0xFF, blue: rgb & 0xFF);
     }
 
     /// <summary>XConsole extension for colorizing text in the console.</summary>
     public static string BgColor(this string value, int red, int green, int blue)
     {
-        if (red < 0 || red > 255)
+        if (unchecked((uint)red) > byte.MaxValue)
             throw new ArgumentOutOfRangeException(nameof(red));
 
-        if (green < 0 || green > 255)
+        if (unchecked((uint)green) > byte.MaxValue)
             throw new ArgumentOutOfRangeException(nameof(green));
 
-        if (blue < 0 || blue > 255)
+        if (unchecked((uint)blue) > byte.MaxValue)
             throw new ArgumentOutOfRangeException(nameof(blue));
 
         return BgColorBase(value: value, red: red, green: green, blue: blue);
