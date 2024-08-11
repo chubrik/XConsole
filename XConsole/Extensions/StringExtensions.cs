@@ -6,10 +6,12 @@ using System;
 using System.Drawing;
 using System.Globalization;
 using System.Runtime.CompilerServices;
+using System.Runtime.Versioning;
 
 /// <summary>
 /// String extensions for coloring and underlining text in the console.
 /// </summary>
+[SupportedOSPlatform("windows")]
 public static class StringExtensions
 {
     private const int _rgbMaxValue = 16777215;
@@ -32,7 +34,7 @@ public static class StringExtensions
     /// </summary>
     public static string Color(this string value, ConsoleColor color)
     {
-        return XConsole.VirtualTerminalAndColoringEnabled
+        return VirtualTerminal.IsEnabled && XConsole.IsColoringEnabled
             ? string.Format(_foregroundConsoleColorFormat, _foregroundConsoleColorCodes[(int)color], value)
             : value;
     }
@@ -90,7 +92,7 @@ public static class StringExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static string ColorBase(string value, int red, int green, int blue)
     {
-        return XConsole.VirtualTerminalAndColoringEnabled
+        return VirtualTerminal.IsEnabled && XConsole.IsColoringEnabled
             ? string.Format(_foregroundRgbColorFormat, red, green, blue, value)
             : value;
     }
@@ -104,7 +106,7 @@ public static class StringExtensions
     /// </summary>
     public static string BgColor(this string value, ConsoleColor color)
     {
-        return XConsole.VirtualTerminalAndColoringEnabled
+        return VirtualTerminal.IsEnabled && XConsole.IsColoringEnabled
             ? string.Format(_backgroundConsoleColorFormat, _backgroundConsoleColorCodes[(int)color], value)
             : value;
     }
@@ -162,7 +164,7 @@ public static class StringExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static string BgColorBase(string value, int red, int green, int blue)
     {
-        return XConsole.VirtualTerminalAndColoringEnabled
+        return VirtualTerminal.IsEnabled && XConsole.IsColoringEnabled
             ? string.Format(_backgroundRgbColorFormat, red, green, blue, value)
             : value;
     }
@@ -174,7 +176,7 @@ public static class StringExtensions
     /// </summary>
     public static string Underline(this string value)
     {
-        return XConsole.VirtualTerminalEnabled ? string.Format(_underlineFormat, value) : value;
+        return VirtualTerminal.IsEnabled ? string.Format(_underlineFormat, value) : value;
     }
 }
 

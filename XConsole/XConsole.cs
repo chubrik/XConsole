@@ -14,7 +14,6 @@ using System.IO;
 using System.Text;
 #if NET
 using System.Runtime.Versioning;
-using System.Runtime.InteropServices;
 #endif
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
@@ -43,17 +42,15 @@ using System.Diagnostics.CodeAnalysis;
 /// return begin and end <see cref="ConsolePosition"/> within the console buffer area.
 /// </item>
 /// <item><see cref="ReadLine()"/> has additional modes that mask or hides the typed characters on the screen.</item>
-/// <item><see cref="Utils"/> is the instance for built-in and custom extensions.</item>
+/// <item><see cref="Utils"/> is singleton instance for pre-built and custom extensions.</item>
 /// </list>
 /// </para>
 /// <see href="https://github.com/chubrik/XConsole#xconsole">More info</see>
 /// </summary>
-#if NET7_0_OR_GREATER
-public static partial class XConsole
-#else
 public static class XConsole
-#endif
 {
+    #region Common
+
     private static readonly string _newLine = Environment.NewLine;
     private static readonly bool _positioningEnabled;
     private static readonly object _syncLock = new();
@@ -62,10 +59,6 @@ public static class XConsole
     private static bool _cursorVisible;
     private static int _maxTop;
     private static long _shiftTop = 0;
-
-#if NET
-    internal static readonly bool VirtualTerminalEnabled;
-#endif
 
     static XConsole()
     {
@@ -78,16 +71,11 @@ public static class XConsole
             _positioningEnabled = _maxTop > 0;
         }
         catch { }
-
-#if NET
-        if (OperatingSystem.IsWindows())
-            VirtualTerminalEnabled = TryEnableVirtualTerminal();
-#endif
     }
 
     internal static long ShiftTop => _shiftTop;
 #if NET
-    internal static bool VirtualTerminalAndColoringEnabled => VirtualTerminalEnabled && _coloringEnabled;
+    internal static bool IsColoringEnabled => _coloringEnabled;
 #endif
 
     /// <summary>
@@ -120,6 +108,8 @@ public static class XConsole
         lock (_syncLock)
             return action();
     }
+
+    #endregion
 
     #region Pinning
 
@@ -631,6 +621,8 @@ public static class XConsole
 
     #region Write, WriteLine
 
+    #region Write common
+
     /// <summary>
     /// At least one argument should be specified.
     /// </summary>
@@ -1069,6 +1061,8 @@ public static class XConsole
             new(left: endLeft, top: endTop, shiftTop: shiftTop)
         );
     }
+
+    #endregion
 
     #region Write overloads
 
@@ -1577,7 +1571,7 @@ public static class XConsole
                         case '\x1b':
 
 #if NET
-                            if (VirtualTerminalEnabled)
+                            if (VirtualTerminal.IsEnabled)
                             {
                                 for (charIndex++; charIndex < charCount; charIndex++)
                                 {
@@ -1612,57 +1606,6 @@ public static class XConsole
 
         return lineWrapCount;
     }
-
-    #region Virtual terminal
-#if NET
-
-    // https://learn.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences
-
-    private const int STD_OUTPUT_HANDLE = -11;
-    private const uint ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004;
-
-    private static readonly IntPtr INVALID_HANDLE_VALUE = new(-1);
-
-    private static bool TryEnableVirtualTerminal()
-    {
-        try
-        {
-            var hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-
-            return hOut != INVALID_HANDLE_VALUE &&
-                GetConsoleMode(hOut, out var dwMode) &&
-                SetConsoleMode(hOut, dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-#if NET7_0_OR_GREATER
-    [LibraryImport("kernel32.dll", SetLastError = true)]
-    private static partial IntPtr GetStdHandle(int nStdHandle);
-
-    [LibraryImport("kernel32.dll")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static partial bool GetConsoleMode(IntPtr hConsoleHandle, out uint lpMode);
-
-    [LibraryImport("kernel32.dll")]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static partial bool SetConsoleMode(IntPtr hConsoleHandle, uint dwMode);
-#else
-    [DllImport("kernel32.dll", SetLastError = true)]
-    private static extern IntPtr GetStdHandle(int nStdHandle);
-
-    [DllImport("kernel32.dll")]
-    private static extern bool GetConsoleMode(IntPtr hConsoleHandle, out uint lpMode);
-
-    [DllImport("kernel32.dll")]
-    private static extern bool SetConsoleMode(IntPtr hConsoleHandle, uint dwMode);
-#endif
-
-#endif
-    #endregion
 
     #endregion
 

@@ -1,27 +1,18 @@
-﻿#pragma warning disable CA1822 // Mark members as static
+﻿#pragma warning disable IDE0060 // Remove unused parameter
 
 namespace Chubrik.XConsole;
 
 using System;
-using System.Runtime.InteropServices;
 using System.Threading;
 #if NET
 using System.Runtime.Versioning;
 #endif
 
 /// <summary>
-/// Instance for built-in and custom extensions.
+/// The most useful extensions for <see cref="ConsoleUtils"/>.
 /// </summary>
-#if NET7_0_OR_GREATER
-public sealed partial class ConsoleUtils
-#else
-public sealed class ConsoleUtils
-#endif
+public static class ConsoleUtilsExtensions
 {
-    internal ConsoleUtils() { }
-
-    #region Animations
-
     /// <summary>
     /// Starts an ellipsis animation at the current position.
     /// </summary>
@@ -31,21 +22,23 @@ public sealed class ConsoleUtils
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
 #endif
-    public IConsoleAnimation AnimateEllipsis()
+    public static IConsoleAnimation AnimateEllipsis(this ConsoleUtils utils)
     {
-        return new EllipsisAnimation(XConsole.CursorPosition, cancellationToken: null);
+        return XConsole.CursorPosition.AnimateEllipsis();
     }
 
-    /// <inheritdoc cref="AnimateEllipsis()"/>
+    /// <summary>
+    /// <inheritdoc cref="AnimateEllipsis(ConsoleUtils)"/>
+    /// </summary>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
 #endif
-    public IConsoleAnimation AnimateEllipsis(CancellationToken cancellationToken)
+    public static IConsoleAnimation AnimateEllipsis(this ConsoleUtils utils, CancellationToken cancellationToken)
     {
-        return new EllipsisAnimation(XConsole.CursorPosition, cancellationToken);
+        return XConsole.CursorPosition.AnimateEllipsis(cancellationToken);
     }
 
     /// <summary>
@@ -57,24 +50,24 @@ public sealed class ConsoleUtils
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
 #endif
-    public IConsoleAnimation AnimateSpinner()
+    public static IConsoleAnimation AnimateSpinner(this ConsoleUtils utils)
     {
-        return new SpinnerAnimation(XConsole.CursorPosition, cancellationToken: null);
+        return XConsole.CursorPosition.AnimateSpinner();
     }
 
-    /// <inheritdoc cref="AnimateSpinner()"/>
+    /// <summary>
+    /// <inheritdoc cref="AnimateSpinner(ConsoleUtils)"/>
+    /// </summary>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
 #endif
-    public IConsoleAnimation AnimateSpinner(CancellationToken cancellationToken)
+    public static IConsoleAnimation AnimateSpinner(this ConsoleUtils utils, CancellationToken cancellationToken)
     {
-        return new SpinnerAnimation(XConsole.CursorPosition, cancellationToken);
+        return XConsole.CursorPosition.AnimateSpinner(cancellationToken);
     }
-
-    #endregion
 
     /// <summary>
     /// Displays the <paramref name="message"/> and waits until the user presses Y or N and then Enter.
@@ -86,7 +79,8 @@ public sealed class ConsoleUtils
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
 #endif
-    public bool Confirm(string message = "Continue? [y/n]: ", string yes = "Yes", string no = "No")
+    public static bool Confirm(
+        this ConsoleUtils utils, string message = "Continue? [y/n]: ", string yes = "Yes", string no = "No")
     {
         var yesItem = ConsoleItem.Parse(yes);
         var noItem = ConsoleItem.Parse(no);
@@ -135,7 +129,6 @@ public sealed class ConsoleUtils
                         continue;
 
                     case ConsoleKey.Backspace:
-                    case ConsoleKey.Escape:
                         if (answer != null)
                         {
                             answer = null;
@@ -150,58 +143,4 @@ public sealed class ConsoleUtils
             }
         });
     }
-
-    #region Window resize
-#if NET
-
-    // https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-showwindow
-
-    private const int SW_HIDE = 0;
-    private const int SW_MAXIMIZE = 3;
-    private const int SW_MINIMIZE = 6;
-    private const int SW_RESTORE = 9;
-
-    private static readonly IntPtr _consolePtr = GetConsoleWindow();
-
-    /// <summary>
-    /// Hides the console window.
-    /// </summary>
-    [SupportedOSPlatform("windows")]
-    public void HideWindow() => ShowWindow(_consolePtr, SW_HIDE);
-
-    /// <summary>
-    /// Maximizes the console window.
-    /// </summary>
-    [SupportedOSPlatform("windows")]
-    public void MaximizeWindow() => ShowWindow(_consolePtr, SW_MAXIMIZE);
-
-    /// <summary>
-    /// Minimizes the console window.
-    /// </summary>
-    [SupportedOSPlatform("windows")]
-    public void MinimizeWindow() => ShowWindow(_consolePtr, SW_MINIMIZE);
-
-    /// <summary>
-    /// Restores the console window after minimization.
-    /// </summary>
-    [SupportedOSPlatform("windows")]
-    public void RestoreWindow() => ShowWindow(_consolePtr, SW_RESTORE);
-
-#if NET7_0_OR_GREATER
-    [LibraryImport("kernel32.dll")]
-    private static partial IntPtr GetConsoleWindow();
-
-    [LibraryImport("user32.dll", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static partial bool ShowWindow(IntPtr hWnd, int nCmdShow);
-#else
-    [DllImport("kernel32.dll", ExactSpelling = true)]
-    private static extern IntPtr GetConsoleWindow();
-
-    [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-    private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
-#endif
-
-#endif
-    #endregion
 }

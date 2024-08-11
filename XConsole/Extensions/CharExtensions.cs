@@ -4,10 +4,12 @@ namespace Chubrik.XConsole;
 
 using System;
 using System.Drawing;
+using System.Runtime.Versioning;
 
 /// <summary>
 /// Char extensions for coloring and underlining text in the console.
 /// </summary>
+[SupportedOSPlatform("windows")]
 public static class CharExtensions
 {
     #region Foreground color

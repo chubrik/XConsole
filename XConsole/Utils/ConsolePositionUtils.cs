@@ -14,7 +14,7 @@ using System.Runtime.Versioning;
 [UnsupportedOSPlatform("ios")]
 [UnsupportedOSPlatform("tvos")]
 #endif
-public static class ConsolePositionExtensions
+public static class ConsolePositionUtils
 {
     /// <summary>
     /// Starts an ellipsis animation at the cpecified position.
