@@ -44,17 +44,19 @@ public static class Program
         var sysFolder = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.System));
         var files = sysFolder.GetFiles("*.exe");
         var fileIndex = 0;
-        Console.Pin(() => ["m`This is pin!\n", $"g`Number of files: ", $"W`{fileIndex}"]);
+        var flleMaxIndex = Math.Min(100, files.Length) - 1;
+        Console.Pin(() => ["m`This is pin!\n", $"g`Number of files: ", $"W`{fileIndex + 1}"]);
         var endPosList = new List<ConsolePosition>();
         var animationList = new List<IConsoleAnimation>();
         var random = new Random();
 
-        for (; fileIndex < Math.Min(100, files.Length); fileIndex++)
+        for (; fileIndex <= flleMaxIndex; fileIndex++)
         {
             await Task.Delay(50);
             var color = Color.FromArgb(random.Next(255), random.Next(255), random.Next(255));
             var bgColor = Color.FromArgb(random.Next(64), random.Next(64), random.Next(64));
             var endPos = Console.WriteLine(files[fileIndex].Name.Color(color).BgColor(bgColor) + ' ').End;
+            Console.Extras.TaskbarProgress(fileIndex, flleMaxIndex, TaskbarProgressLevel.Warning);
             endPosList.Add(endPos);
 
             if ((fileIndex + 1) % 10 == 0)
@@ -66,10 +68,15 @@ public static class Program
             }
         }
 
+        Console.Extras.TaskbarProgressAnimate();
+
         foreach (var animation in animationList)
         {
             await Task.Delay(150);
             animation.Stop().TryWrite("Cb`ok");
         }
+
+        Console.Extras.TaskbarProgressReset();
+        Console.Extras.AppHighlight();
     }
 }
