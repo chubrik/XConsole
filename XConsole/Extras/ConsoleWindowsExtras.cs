@@ -1,6 +1,6 @@
 ﻿#pragma warning disable IDE0060 // Remove unused parameter
 
-namespace Chubrik.XConsole;
+namespace Chubrik.XConsole.Extras;
 
 using System;
 using System.Runtime.InteropServices;
@@ -9,15 +9,15 @@ using System.Runtime.Versioning;
 #endif
 
 /// <summary>
-/// The most useful Windows extensions for <see cref="ConsoleUtils"/>.
+/// The most useful Windows extensions for <see cref="ConsoleExtras"/>.
 /// </summary>
 #if NET
 [SupportedOSPlatform("windows")]
 #endif
 #if NET7_0_OR_GREATER
-public static partial class ConsoleWindowsUtils
+public static partial class ConsoleWindowsExtras
 #else
-public static class ConsoleWindowsUtils
+public static class ConsoleWindowsExtras
 #endif
 {
     private static readonly IntPtr _consolePtr = GetConsoleWindow();
@@ -37,22 +37,22 @@ public static class ConsoleWindowsUtils
     /// <summary>
     /// Hides the console window.
     /// </summary>
-    public static void HideWindow(this ConsoleUtils utils) => ShowWindow(_consolePtr, WINDOW_HIDE);
+    public static void HideWindow(this ConsoleExtras extras) => ShowWindow(_consolePtr, WINDOW_HIDE);
 
     /// <summary>
     /// Maximizes the console window.
     /// </summary>
-    public static void MaximizeWindow(this ConsoleUtils utils) => ShowWindow(_consolePtr, WINDOW_MAXIMIZE);
+    public static void MaximizeWindow(this ConsoleExtras extras) => ShowWindow(_consolePtr, WINDOW_MAXIMIZE);
 
     /// <summary>
     /// Minimizes the console window.
     /// </summary>
-    public static void MinimizeWindow(this ConsoleUtils utils) => ShowWindow(_consolePtr, WINDOW_MINIMIZE);
+    public static void MinimizeWindow(this ConsoleExtras extras) => ShowWindow(_consolePtr, WINDOW_MINIMIZE);
 
     /// <summary>
     /// Restores the console window after minimization.
     /// </summary>
-    public static void RestoreWindow(this ConsoleUtils utils) => ShowWindow(_consolePtr, WINDOW_RESTORE);
+    public static void RestoreWindow(this ConsoleExtras extras) => ShowWindow(_consolePtr, WINDOW_RESTORE);
 
     private const int WINDOW_HIDE = 0;
     private const int WINDOW_MAXIMIZE = 3;

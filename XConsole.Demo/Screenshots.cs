@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Chubrik.XConsole.Extras;
+using System;
 using System.Drawing;
 
 namespace Chubrik.XConsole.Demo;

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Chubrik.XConsole.Extras;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -30,14 +31,14 @@ public static class Program
         Console.WriteLine();
         //
 
-        if (!Console.Utils.Confirm())
+        if (!Console.Extras.Confirm())
             return;
 
         //
         Console.WriteLine();
         //
 
-        Console.Utils.MaximizeWindow();
+        Console.Extras.MaximizeWindow();
         //Console.SetCursorPosition(0, 8950);
 
         var sysFolder = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.System));

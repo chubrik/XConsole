@@ -1,6 +1,6 @@
 ﻿#pragma warning disable IDE0060 // Remove unused parameter
 
-namespace Chubrik.XConsole;
+namespace Chubrik.XConsole.Extras;
 
 using System;
 using System.Threading;
@@ -9,9 +9,9 @@ using System.Runtime.Versioning;
 #endif
 
 /// <summary>
-/// The most useful extensions for <see cref="ConsoleUtils"/>.
+/// The most useful extensions for <see cref="ConsoleExtras"/>.
 /// </summary>
-public static class ConsoleUtilsExtensions
+public static class ConsoleExtrasExtensions
 {
     /// <summary>
     /// Starts an ellipsis animation at the current position.
@@ -22,13 +22,13 @@ public static class ConsoleUtilsExtensions
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
 #endif
-    public static IConsoleAnimation AnimateEllipsis(this ConsoleUtils utils)
+    public static IConsoleAnimation AnimateEllipsis(this ConsoleExtras extras)
     {
         return XConsole.CursorPosition.AnimateEllipsis();
     }
 
     /// <summary>
-    /// <inheritdoc cref="AnimateEllipsis(ConsoleUtils)"/>
+    /// <inheritdoc cref="AnimateEllipsis(ConsoleExtras)"/>
     /// </summary>
 #if NET
     [UnsupportedOSPlatform("android")]
@@ -36,7 +36,7 @@ public static class ConsoleUtilsExtensions
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
 #endif
-    public static IConsoleAnimation AnimateEllipsis(this ConsoleUtils utils, CancellationToken cancellationToken)
+    public static IConsoleAnimation AnimateEllipsis(this ConsoleExtras extras, CancellationToken cancellationToken)
     {
         return XConsole.CursorPosition.AnimateEllipsis(cancellationToken);
     }
@@ -50,13 +50,13 @@ public static class ConsoleUtilsExtensions
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
 #endif
-    public static IConsoleAnimation AnimateSpinner(this ConsoleUtils utils)
+    public static IConsoleAnimation AnimateSpinner(this ConsoleExtras extras)
     {
         return XConsole.CursorPosition.AnimateSpinner();
     }
 
     /// <summary>
-    /// <inheritdoc cref="AnimateSpinner(ConsoleUtils)"/>
+    /// <inheritdoc cref="AnimateSpinner(ConsoleExtras)"/>
     /// </summary>
 #if NET
     [UnsupportedOSPlatform("android")]
@@ -64,7 +64,7 @@ public static class ConsoleUtilsExtensions
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
 #endif
-    public static IConsoleAnimation AnimateSpinner(this ConsoleUtils utils, CancellationToken cancellationToken)
+    public static IConsoleAnimation AnimateSpinner(this ConsoleExtras extras, CancellationToken cancellationToken)
     {
         return XConsole.CursorPosition.AnimateSpinner(cancellationToken);
     }
@@ -80,7 +80,7 @@ public static class ConsoleUtilsExtensions
     [UnsupportedOSPlatform("tvos")]
 #endif
     public static bool Confirm(
-        this ConsoleUtils utils, string message = "Continue? [y/n]: ", string yes = "Yes", string no = "No")
+        this ConsoleExtras extras, string message = "Continue? [y/n]: ", string yes = "Yes", string no = "No")
     {
         var yesItem = ConsoleItem.Parse(yes);
         var noItem = ConsoleItem.Parse(no);

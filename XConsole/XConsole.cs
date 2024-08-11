@@ -42,7 +42,7 @@ using System.Diagnostics.CodeAnalysis;
 /// return begin and end <see cref="ConsolePosition"/> within the console buffer area.
 /// </item>
 /// <item><see cref="ReadLine()"/> has additional modes that mask or hides the typed characters on the screen.</item>
-/// <item><see cref="Utils"/> is singleton instance for pre-built and custom extensions.</item>
+/// <item><see cref="Extras"/> is singleton instance for pre-built and custom extensions.</item>
 /// </list>
 /// </para>
 /// <see href="https://github.com/chubrik/XConsole#xconsole">More info</see>
@@ -87,10 +87,8 @@ public static class XConsole
         set => _coloringEnabled = !value;
     }
 
-    /// <summary>
-    /// Instance for built-in and custom extensions.
-    /// </summary>
-    public static ConsoleUtils Utils { get; } = new();
+    /// <inheritdoc cref="Extras.ConsoleExtras"/>
+    public static Extras.ConsoleExtras Extras { get; } = new();
 
     /// <summary>
     /// Executes the <paramref name="action"/> callback synchronously.

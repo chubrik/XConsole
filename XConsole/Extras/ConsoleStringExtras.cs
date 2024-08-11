@@ -1,6 +1,6 @@
 ﻿#if NET
 
-namespace Chubrik.XConsole;
+namespace Chubrik.XConsole.Extras;
 
 using System;
 using System.Drawing;
@@ -12,7 +12,7 @@ using System.Runtime.Versioning;
 /// String extensions for coloring and underlining text in the console.
 /// </summary>
 [SupportedOSPlatform("windows")]
-public static class StringExtensions
+public static class ConsoleStringExtras
 {
     private const int _rgbMaxValue = 16777215;
     private const string _foregroundConsoleColorFormat = "\x1b[{0}m{1}\x1b[39m";

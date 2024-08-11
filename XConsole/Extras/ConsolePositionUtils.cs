@@ -1,4 +1,4 @@
-﻿namespace Chubrik.XConsole;
+﻿namespace Chubrik.XConsole.Extras;
 
 using System.Threading;
 #if NET
@@ -14,7 +14,7 @@ using System.Runtime.Versioning;
 [UnsupportedOSPlatform("ios")]
 [UnsupportedOSPlatform("tvos")]
 #endif
-public static class ConsolePositionUtils
+public static class ConsolePositionExtras
 {
     /// <summary>
     /// Starts an ellipsis animation at the cpecified position.
