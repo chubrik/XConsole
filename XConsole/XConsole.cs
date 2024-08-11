@@ -1569,7 +1569,7 @@ public static class XConsole
                         case '\x1b':
 
 #if NET
-                            if (VirtualTerminal.IsEnabled)
+                            if (Chubrik.XConsole.Extras.VirtualTerminal.IsEnabled)
                             {
                                 for (charIndex++; charIndex < charCount; charIndex++)
                                 {

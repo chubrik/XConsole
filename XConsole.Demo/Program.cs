@@ -38,7 +38,7 @@ public static class Program
         Console.WriteLine();
         //
 
-        Console.Extras.MaximizeWindow();
+        Console.Extras.WindowMaximize();
         //Console.SetCursorPosition(0, 8950);
 
         var sysFolder = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.System));

@@ -22,21 +22,8 @@ public static class ConsoleExtrasExtensions
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
 #endif
-    public static IConsoleAnimation AnimateEllipsis(this ConsoleExtras extras)
-    {
-        return XConsole.CursorPosition.AnimateEllipsis();
-    }
-
-    /// <summary>
-    /// <inheritdoc cref="AnimateEllipsis(ConsoleExtras)"/>
-    /// </summary>
-#if NET
-    [UnsupportedOSPlatform("android")]
-    [UnsupportedOSPlatform("browser")]
-    [UnsupportedOSPlatform("ios")]
-    [UnsupportedOSPlatform("tvos")]
-#endif
-    public static IConsoleAnimation AnimateEllipsis(this ConsoleExtras extras, CancellationToken cancellationToken)
+    public static IConsoleAnimation AnimateEllipsis(
+        this ConsoleExtras extras, CancellationToken? cancellationToken = null)
     {
         return XConsole.CursorPosition.AnimateEllipsis(cancellationToken);
     }
@@ -50,21 +37,8 @@ public static class ConsoleExtrasExtensions
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
 #endif
-    public static IConsoleAnimation AnimateSpinner(this ConsoleExtras extras)
-    {
-        return XConsole.CursorPosition.AnimateSpinner();
-    }
-
-    /// <summary>
-    /// <inheritdoc cref="AnimateSpinner(ConsoleExtras)"/>
-    /// </summary>
-#if NET
-    [UnsupportedOSPlatform("android")]
-    [UnsupportedOSPlatform("browser")]
-    [UnsupportedOSPlatform("ios")]
-    [UnsupportedOSPlatform("tvos")]
-#endif
-    public static IConsoleAnimation AnimateSpinner(this ConsoleExtras extras, CancellationToken cancellationToken)
+    public static IConsoleAnimation AnimateSpinner(
+        this ConsoleExtras extras, CancellationToken? cancellationToken = null)
     {
         return XConsole.CursorPosition.AnimateSpinner(cancellationToken);
     }
