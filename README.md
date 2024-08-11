@@ -81,7 +81,7 @@ The following table shows all standard console colors and their letter designati
 ### 24-bit colors
 If you’re running your application on Windows 10+ with .NET 5+, extended colors are available to you:
 ```csharp
-using Chubrik.XConsole.Extras;
+using Chubrik.XConsole.StringExtensions;
 
 // Different ways to the same 24-bit color
 Console.WriteLine("Orange text".Color(Color.Orange)); // Color structure

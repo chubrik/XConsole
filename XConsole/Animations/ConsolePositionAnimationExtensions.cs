@@ -1,4 +1,4 @@
-﻿namespace Chubrik.XConsole.Extras;
+﻿namespace Chubrik.XConsole;
 
 using System.Threading;
 #if NET
@@ -6,7 +6,7 @@ using System.Runtime.Versioning;
 #endif
 
 /// <summary>
-/// The most useful extra extensions for <see cref="ConsolePosition"/>.
+/// Animation extensions for <see cref="ConsolePosition"/>.
 /// </summary>
 #if NET
 [UnsupportedOSPlatform("android")]
@@ -14,7 +14,7 @@ using System.Runtime.Versioning;
 [UnsupportedOSPlatform("ios")]
 [UnsupportedOSPlatform("tvos")]
 #endif
-public static class ConsolePositionExtras
+public static class ConsolePositionAnimationExtensions
 {
     /// <summary>
     /// Starts an ellipsis animation at the specified position.

@@ -1,4 +1,4 @@
-﻿using Chubrik.XConsole.Extras;
+﻿using Chubrik.XConsole.StringExtensions;
 using System;
 using System.Drawing;
 

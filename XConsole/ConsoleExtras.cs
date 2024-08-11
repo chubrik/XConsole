@@ -1,4 +1,4 @@
-﻿namespace Chubrik.XConsole.Extras;
+﻿namespace Chubrik.XConsole;
 
 /// <summary>
 /// Singleton instance for pre-built and custom extensions.

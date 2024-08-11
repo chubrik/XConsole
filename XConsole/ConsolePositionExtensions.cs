@@ -11,6 +11,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+#if NET
+using System.Runtime.Versioning;
+#endif
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
 #endif
@@ -18,6 +21,12 @@ using System.Diagnostics.CodeAnalysis;
 /// <summary>
 /// The most useful extensions for <see cref="ConsolePosition"/>.
 /// </summary>
+#if NET
+[UnsupportedOSPlatform("android")]
+[UnsupportedOSPlatform("browser")]
+[UnsupportedOSPlatform("ios")]
+[UnsupportedOSPlatform("tvos")]
+#endif
 public static class ConsolePositionExtensions
 {
     #region Write

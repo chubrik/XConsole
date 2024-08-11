@@ -1,4 +1,4 @@
-﻿namespace Chubrik.XConsole.Extras;
+﻿namespace Chubrik.XConsole;
 
 using System;
 using System.Threading;

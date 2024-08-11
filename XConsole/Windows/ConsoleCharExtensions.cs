@@ -1,6 +1,6 @@
 ﻿#if NET
 
-namespace Chubrik.XConsole.Extras;
+namespace Chubrik.XConsole.StringExtensions;
 
 using System;
 using System.Drawing;
@@ -10,7 +10,7 @@ using System.Runtime.Versioning;
 /// Char extensions for coloring and underlining text in the console.
 /// </summary>
 [SupportedOSPlatform("windows")]
-public static class ConsoleCharExtras
+public static class ConsoleCharExtensions
 {
     #region Foreground color
 

@@ -1,6 +1,6 @@
 ﻿#if NET
 
-namespace Chubrik.XConsole.Extras;
+namespace Chubrik.XConsole;
 
 using System;
 using System.Runtime.InteropServices;

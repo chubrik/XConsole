@@ -87,8 +87,8 @@ public static class XConsole
         set => _coloringEnabled = !value;
     }
 
-    /// <inheritdoc cref="Extras.ConsoleExtras"/>
-    public static Extras.ConsoleExtras Extras { get; } = new();
+    /// <inheritdoc cref="ConsoleExtras"/>
+    public static ConsoleExtras Extras { get; } = new();
 
     /// <summary>
     /// Executes the <paramref name="action"/> callback synchronously.
@@ -1569,7 +1569,7 @@ public static class XConsole
                         case '\x1b':
 
 #if NET
-                            if (Chubrik.XConsole.Extras.VirtualTerminal.IsEnabled)
+                            if (VirtualTerminal.IsEnabled)
                             {
                                 for (charIndex++; charIndex < charCount; charIndex++)
                                 {

@@ -1,6 +1,6 @@
 ﻿#pragma warning disable IDE0060 // Remove unused parameter
 
-namespace Chubrik.XConsole.Extras;
+namespace Chubrik.XConsole;
 
 using System;
 using System.Runtime.InteropServices;
@@ -15,9 +15,9 @@ using System.Runtime.Versioning;
 [SupportedOSPlatform("windows")]
 #endif
 #if NET7_0_OR_GREATER
-public static partial class ConsoleWindowsExtras
+public static partial class ConsoleWindowsExtensions
 #else
-public static class ConsoleWindowsExtras
+public static class ConsoleWindowsExtensions
 #endif
 {
     private static readonly IntPtr _consolePtr = GetConsoleWindow();

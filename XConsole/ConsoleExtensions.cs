@@ -1,48 +1,17 @@
 ﻿#pragma warning disable IDE0060 // Remove unused parameter
 
-namespace Chubrik.XConsole.Extras;
+namespace Chubrik.XConsole;
 
 using System;
-using System.Threading;
 #if NET
 using System.Runtime.Versioning;
 #endif
 
 /// <summary>
-/// The most useful extensions for <see cref="ConsoleExtras"/>.
+/// Common extensions for <see cref="ConsoleExtras"/>.
 /// </summary>
-public static class ConsoleExtrasExtensions
+public static class ConsoleExtensions
 {
-    /// <summary>
-    /// Starts an ellipsis animation at the current position.
-    /// </summary>
-#if NET
-    [UnsupportedOSPlatform("android")]
-    [UnsupportedOSPlatform("browser")]
-    [UnsupportedOSPlatform("ios")]
-    [UnsupportedOSPlatform("tvos")]
-#endif
-    public static IConsoleAnimation AnimateEllipsis(
-        this ConsoleExtras extras, CancellationToken? cancellationToken = null)
-    {
-        return XConsole.CursorPosition.AnimateEllipsis(cancellationToken);
-    }
-
-    /// <summary>
-    /// Starts a spinner animation at the current position.
-    /// </summary>
-#if NET
-    [UnsupportedOSPlatform("android")]
-    [UnsupportedOSPlatform("browser")]
-    [UnsupportedOSPlatform("ios")]
-    [UnsupportedOSPlatform("tvos")]
-#endif
-    public static IConsoleAnimation AnimateSpinner(
-        this ConsoleExtras extras, CancellationToken? cancellationToken = null)
-    {
-        return XConsole.CursorPosition.AnimateSpinner(cancellationToken);
-    }
-
     /// <summary>
     /// Displays the <paramref name="message"/> and waits until the user presses Y or N and then Enter.
     /// </summary>
@@ -56,6 +25,8 @@ public static class ConsoleExtrasExtensions
     public static bool Confirm(
         this ConsoleExtras extras, string message = "Continue? [y/n]: ", string yes = "Yes", string no = "No")
     {
+        // todo Without positioning and without UnsupportedOSPlatform
+
         var yesItem = ConsoleItem.Parse(yes);
         var noItem = ConsoleItem.Parse(no);
         var yesLength = yesItem.Value.Length;

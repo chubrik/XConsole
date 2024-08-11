@@ -1,4 +1,4 @@
-﻿namespace Chubrik.XConsole.Extras;
+﻿namespace Chubrik.XConsole;
 
 #if NET
 using System.Runtime.Versioning;
