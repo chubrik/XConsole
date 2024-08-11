@@ -45,17 +45,18 @@ internal readonly struct ConsoleItem(
 
         if (value.Length > 2 && value[2] == '`' && char0 <= 'y')
         {
-            var backColor = _colorMap[value[1]];
+            var char1 = (int)value[1];
 
-            if (backColor != -1)
+            if (char1 <= 'y')
             {
-                if (char0 <= 'y')
+                var backColor = _colorMap[char1];
+
+                if (backColor != -1)
                 {
                     var foreColor = _colorMap[char0];
 
                     if (foreColor != -1)
-                        return new(
-                            value.Substring(3), ConsoleItemType.BothColors,
+                        return new(value.Substring(3), ConsoleItemType.BothColors,
                             foreColor: (ConsoleColor)foreColor, backColor: (ConsoleColor)backColor);
 
                     if (char0 == ' ')
