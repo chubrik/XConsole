@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 internal abstract class ConsoleAnimation : IConsoleAnimation
 {
-    protected static readonly Random _random = new();
+    protected static readonly Random Random = new();
 
     private readonly CancellationTokenSource _cts;
     private readonly Task _task;

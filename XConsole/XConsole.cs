@@ -281,7 +281,6 @@ public static class XConsole
             {
                 if (pinHeight != prePinHeight)
                     pinClear = _newLine + new string(' ', Console.BufferWidth * pinHeight - 1);
-
 #if NET
                 (origLeft, origTop) = Console.GetCursorPosition();
 #else
@@ -361,7 +360,6 @@ public static class XConsole
             {
                 if (pinHeight != prePinHeight)
                     pinClear = _newLine + new string(' ', Console.BufferWidth * pinHeight - 1);
-
 #if NET
                 (origLeft, origTop) = Console.GetCursorPosition();
 #else
@@ -435,7 +433,8 @@ public static class XConsole
         return actualTop >= 0 && actualTop < bufferHeight ? unchecked((int)actualTop) : null;
     }
 
-    internal static ConsolePosition WriteToPosition(ConsolePosition position, ConsoleItem[] items, bool viewportOnly = false)
+    internal static ConsolePosition WriteToPosition(
+        ConsolePosition position, ConsoleItem[] items, bool viewportOnly = false)
     {
         if (!_positioningEnabled)
             return default;
@@ -452,7 +451,6 @@ public static class XConsole
 #else
             (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
-
             if (viewportOnly && origTop + _pinHeight - positionActualTop >= Console.WindowHeight)
                 throw new ArgumentOutOfRangeException(nameof(position));
 
@@ -474,7 +472,6 @@ public static class XConsole
 #else
             (endLeft, endTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
-
             if (endTop == _maxTop)
             {
                 var lineWrapCount = CalcLineWrapCount(items, origLeft);
@@ -551,7 +548,7 @@ public static class XConsole
     /// There are three <paramref name="mode"/> variants:
     /// <br/>• <see cref="ConsoleReadLineMode.Default"/> – default behavior.
     /// <br/>• <see cref="ConsoleReadLineMode.Masked"/> –
-    /// each typed character is displayed as the specified <paramref name="maskChar"/>.
+    /// each typed character is displayed as default or specified <paramref name="maskChar"/>.
     /// <br/>• <see cref="ConsoleReadLineMode.Hidden"/> – typed characters are not displayed.
     /// </para>
     /// </summary>
@@ -559,7 +556,7 @@ public static class XConsole
     /// There are three <paramref name="mode"/> variants:
     /// <br/>• <see cref="ConsoleReadLineMode.Default"/> – default behavior.
     /// <br/>• <see cref="ConsoleReadLineMode.Masked"/> –
-    /// each typed character is displayed as the specified <paramref name="maskChar"/>.
+    /// each typed character is displayed as default or specified <paramref name="maskChar"/>.
     /// <br/>• <see cref="ConsoleReadLineMode.Hidden"/> – typed characters are not displayed.
     /// </param>
     /// <param name="maskChar">Char used for mask each character in masked <paramref name="mode"/>.</param>
@@ -767,7 +764,6 @@ public static class XConsole
                     {
                         if (pinHeight != prePinHeight)
                             pinClear = _newLine + new string(' ', Console.BufferWidth * pinHeight - 1);
-
 #if NET
                         (origLeft, origTop) = Console.GetCursorPosition();
 #else
@@ -850,7 +846,6 @@ public static class XConsole
                 WriteItems(logItems);
                 (endLeft, endTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
-
                 if (isWriteLine)
                 {
                     Console.WriteLine();
@@ -912,7 +907,6 @@ public static class XConsole
                     WriteItems(logItems);
                     (endLeft, endTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
-
                     if (isWriteLine)
                     {
                         Console.WriteLine();
@@ -948,7 +942,6 @@ public static class XConsole
                     {
                         if (pinHeight != prePinHeight)
                             pinClear = _newLine + new string(' ', Console.BufferWidth * pinHeight - 1);
-
 #if NET
                         (beginLeft, beginTop) = Console.GetCursorPosition();
 #else
@@ -974,7 +967,6 @@ public static class XConsole
 #else
                     (endLeft, endTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
-
                     if (isWriteLine)
                     {
                         Console.WriteLine(_newLine);
@@ -1537,7 +1529,6 @@ public static class XConsole
                             continue;
 
                         case '\x1b':
-
 #if NET
                             if (VirtualTerminal.IsEnabled)
                             {
@@ -1552,13 +1543,11 @@ public static class XConsole
                                 continue;
                             }
                             else
-                            {
 #endif
+                            {
                                 left++;
                                 break;
-#if NET
                             }
-#endif
 
                         default:
                             continue;

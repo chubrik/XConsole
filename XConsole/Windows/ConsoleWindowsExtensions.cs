@@ -197,13 +197,11 @@ public static class ConsoleWindowsExtensions
 #else
         var isWindows = true; // todo .NET Framework
 #endif
-
 #if NETSTANDARD1_3
         var isSupportedOsVersion = true; // todo
 #else
         var isSupportedOsVersion = Environment.OSVersion.Version >= new Version(6, 1);
 #endif
-
         return isWindows && isSupportedOsVersion;
     }
 

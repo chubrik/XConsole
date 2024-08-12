@@ -1,4 +1,6 @@
-﻿namespace Chubrik.XConsole;
+﻿#pragma warning disable IDE0060 // Remove unused parameter
+
+namespace Chubrik.XConsole;
 
 using System.Threading;
 #if NET

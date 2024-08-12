@@ -7,19 +7,21 @@ using System.Threading.Tasks;
 internal sealed class EllipsisAnimation(ConsolePosition position, CancellationToken? cancellationToken)
     : ConsoleAnimation(position, cancellationToken)
 {
-    private readonly TimeSpan _delay = TimeSpan.FromMilliseconds(_random.Next(100, 151));
     protected override string Clear { get; } = "   ";
+
+    private static readonly ConsoleItem _darkDot = new(".", ConsoleItemType.ForeColor, foreColor: ConsoleColor.DarkGray);
+    private static readonly ConsoleItem _grayDot = new(".", ConsoleItemType.ForeColor, foreColor: ConsoleColor.Gray);
 
     protected override async Task LoopAsync(CancellationToken cancellationToken)
     {
         var position = Position;
-        var delay = _delay;
+        var delay = TimeSpan.FromMilliseconds(Random.Next(100, 151));
         var delayX2 = delay + delay;
-        var frame1 = new[] { ConsoleItem.Parse("d`.") };
-        var frame2 = new[] { new ConsoleItem("."), ConsoleItem.Parse("d`.") };
-        var frame3 = new[] { ConsoleItem.Parse("d`."), new ConsoleItem("."), ConsoleItem.Parse("d`.") };
-        var frame4 = new[] { ConsoleItem.Parse("d` ."), new ConsoleItem(".") };
-        var frame5 = new[] { ConsoleItem.Parse("d`  .") };
+        var frame1 = new[] { _darkDot };
+        var frame2 = new[] { _grayDot, _darkDot };
+        var frame3 = new[] { _darkDot, _grayDot, _darkDot };
+        var frame4 = new[] { new ConsoleItem(" .", ConsoleItemType.ForeColor, foreColor: ConsoleColor.DarkGray), _grayDot };
+        var frame5 = new[] { new ConsoleItem("  .", ConsoleItemType.ForeColor, foreColor: ConsoleColor.DarkGray) };
         var frame6 = new[] { new ConsoleItem("   ") };
 
         for (; ; )

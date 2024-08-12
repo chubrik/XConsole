@@ -4,9 +4,7 @@ namespace Chubrik.XConsole;
 
 using System;
 using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
 
-[SupportedOSPlatform("windows")]
 #if NET7_0_OR_GREATER
 internal static partial class VirtualTerminal
 #else

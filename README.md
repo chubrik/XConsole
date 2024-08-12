@@ -110,9 +110,9 @@ The dynamic pin will be automatically updated every time the `Write` or `WriteLi
 Pin is resistant to line wrapping and to console buffer overflow (9000+ log lines).
 
 ```csharp
-Console.Pin("Simple static pin");           // Simple static pin
-Console.Pin("Y`Multicolor", " static pin"); // Multicolor static pin
-Console.Pin("Multiline\nstatic pin");       // Multiline static pin
+Console.Pin("Simple static pin");             // Simple static pin
+Console.Pin(["Y`Multicolor", " static pin"]); // Multicolor static pin
+Console.Pin("Multiline\nstatic pin");         // Multiline static pin
 
 Console.Pin(() => "Simple pin, value=" + value);                   // Simple dynamic pin
 Console.Pin(() => ["Y`Multicolor", " pin, value=", "C`" + value]); // Multicolor dynamic pin
