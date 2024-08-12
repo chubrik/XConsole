@@ -3,9 +3,6 @@
 namespace Chubrik.XConsole;
 
 using System;
-#if NET
-using System.Runtime.Versioning;
-#endif
 
 /// <summary>
 /// Common extensions for <see cref="ConsoleExtras"/>.
@@ -16,26 +13,33 @@ public static class ConsoleExtensions
     /// Displays the <paramref name="message"/> and waits until the user presses Y or N and then Enter.
     /// </summary>
     /// <returns>True or False according to the user’s decision.</returns>
-#if NET
-    [UnsupportedOSPlatform("android")]
-    [UnsupportedOSPlatform("browser")]
-    [UnsupportedOSPlatform("ios")]
-    [UnsupportedOSPlatform("tvos")]
-#endif
     public static bool Confirm(
         this ConsoleExtras extras, string message = "Continue? [y/n]: ", string yes = "Yes", string no = "No")
     {
-        // todo Without positioning and without UnsupportedOSPlatform
-
         var yesItem = ConsoleItem.Parse(yes);
         var noItem = ConsoleItem.Parse(no);
-        var yesLength = yesItem.Value.Length;
-        var noLength = noItem.Value.Length;
+        var yesLength = yesItem.GetSingleLineLengthOrZero();
+        var noLength = noItem.GetSingleLineLengthOrZero();
+
+        if (yesLength == 0)
+        {
+            yes = "Yes";
+            yesLength = yes.Length;
+        }
+
+        if (noLength == 0)
+        {
+            no = "No";
+            noLength = no.Length;
+        }
+
+        var yesClear = new string('\b', yesLength) + new string(' ', yesLength) + new string('\b', yesLength);
+        var noClear = new string('\b', noLength) + new string(' ', noLength) + new string('\b', noLength);
 
         return XConsole.Sync(() =>
         {
             bool? answer = null;
-            var answerPosition = XConsole.Write(message).End;
+            XConsole.Write(message);
 
             for (; ; )
             {
@@ -44,25 +48,30 @@ public static class ConsoleExtensions
                 switch (key)
                 {
                     case ConsoleKey.Y:
-                        if (answer != true)
-                        {
-                            if (answer == false)
-                                answerPosition.Write(new string(' ', noLength));
+                        if (answer == null)
+                            XConsole.Write(yes);
+                        else if (answer == false)
+                            XConsole.Write([noClear, yes]);
 
-                            answer = true;
-                            XConsole.CursorPosition = XConsole.WriteToPosition(answerPosition, [yesItem]);
-                        }
+                        answer = true;
                         continue;
 
                     case ConsoleKey.N:
-                        if (answer != false)
-                        {
-                            if (answer == true)
-                                answerPosition.Write(new string(' ', yesLength));
+                        if (answer == null)
+                            XConsole.Write(no);
+                        else if (answer == true)
+                            XConsole.Write([yesClear, no]);
 
-                            answer = false;
-                            XConsole.CursorPosition = XConsole.WriteToPosition(answerPosition, [noItem]);
-                        }
+                        answer = false;
+                        continue;
+
+                    case ConsoleKey.Backspace:
+                        if (answer == true)
+                            XConsole.Write(yesClear);
+                        else if (answer == false)
+                            XConsole.Write(noClear);
+
+                        answer = null;
                         continue;
 
                     case ConsoleKey.Enter:
@@ -70,15 +79,6 @@ public static class ConsoleExtensions
                         {
                             XConsole.WriteLine();
                             return answer.Value;
-                        }
-                        continue;
-
-                    case ConsoleKey.Backspace:
-                        if (answer != null)
-                        {
-                            answer = null;
-                            answerPosition.Write(new string(' ', Math.Max(yesLength, noLength)));
-                            XConsole.CursorPosition = answerPosition;
                         }
                         continue;
 

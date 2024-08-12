@@ -73,6 +73,42 @@ internal readonly struct ConsoleItem(
         return new(value);
     }
 
+    public int GetSingleLineLengthOrZero()
+    {
+        var value = Value;
+        var valueLength = value.Length;
+        var length = 0;
+        int @char;
+
+        for (var i = 0; i < valueLength; i++)
+        {
+            @char = value[i];
+
+            if (@char == '\n' || @char == '\r' || @char == '\t' || @char == '\b')
+                return 0;
+#if NET
+            if (@char == '\x1b' && VirtualTerminal.IsEnabled)
+            {
+                for (; i < valueLength; i++)
+                {
+                    @char = value[i];
+
+                    if (@char == '\n' || @char == '\r' || @char == '\t' || @char == '\b')
+                        return 0;
+
+                    if ((@char >= 'A' && @char <= 'Z') || (@char >= 'a' && @char <= 'z'))
+                        break;
+                }
+
+                continue;
+            }
+#endif
+            length++;
+        }
+
+        return length;
+    }
+
     private static readonly int[] _colorMap =
     [
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
