@@ -9,7 +9,6 @@ namespace Chubrik.XConsole;
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Text;
 #if NET
@@ -30,7 +29,7 @@ using System.Diagnostics.CodeAnalysis;
 /// resistant to multithreading. Also supports the “NO_COLOR” convention to disable any colors.
 /// </item>
 /// <item>
-/// <see cref="Pin()"/> methods pin text below the regular log messages.
+/// <see cref="Pin(string?)"/> methods pin text below the regular log messages.
 /// Text can be dynamic, multiline and colored. It’s resistant to console buffer overflow.
 /// </item>
 /// <item>
@@ -38,7 +37,7 @@ using System.Diagnostics.CodeAnalysis;
 /// resistant to console buffer overflow and always points to the correct position within the console buffer area.
 /// </item>
 /// <item>
-/// <see cref="Write()"/> and <see cref="WriteLine()"/> overloads
+/// <see cref="Write(string?)"/> and <see cref="WriteLine(string?)"/> overloads
 /// return begin and end <see cref="ConsolePosition"/> within the console buffer area.
 /// </item>
 /// <item><see cref="ReadLine()"/> has additional modes that mask or hides the typed characters on the screen.</item>
@@ -115,18 +114,32 @@ public static class XConsole
     private static int _pinHeight = 0;
 
     /// <summary>
-    /// At least one argument should be specified.
+    /// Pins the specified string value as a static text below the regular log messages.
+    /// Text can be multiline and <see href="https://github.com/chubrik/XConsole#coloring">colored</see>.
+    /// Pin is resistant to console buffer overflow.
     /// </summary>
+    /// <param name="value">
+    /// The value for pin below the regular log messages.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </param>
     /// <remarks>
-    /// Please, use overloads:
-    /// <br/>• <see cref="Pin(string?[])"/>
-    /// <br/>• <see cref="Pin(IReadOnlyList{string?})"/>
-    /// <br/>• <see cref="Pin(Func{string?})"/>
-    /// <br/>• <see cref="Pin(Func{IReadOnlyList{string?}})"/>
+    /// See also:<br/>• <seealso cref="Unpin()"/>
     /// </remarks>
-    /// <exception cref="InvalidOperationException"/>
-    [Obsolete("At least one argument should be specified.", error: true)]
-    public static void Pin() => throw new InvalidOperationException();
+#if NET
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+#endif
+    public static void Pin(string? value)
+    {
+        if (!_positioningEnabled)
+            return;
+
+        var values = new[] { value };
+        _getPinValues = () => values;
+        UpdatePin();
+    }
 
     /// <summary>
     /// Pins the specified set of string values as a static text below the regular log messages.
@@ -146,24 +159,6 @@ public static class XConsole
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
 #endif
-    public static void Pin(params string?[] values)
-    {
-        Debug.Assert(values.Length > 0);
-
-        if (!_positioningEnabled)
-            return;
-
-        _getPinValues = () => values;
-        UpdatePin();
-    }
-
-    /// <inheritdoc cref="Pin(string?[])"/>
-#if NET
-    [UnsupportedOSPlatform("android")]
-    [UnsupportedOSPlatform("browser")]
-    [UnsupportedOSPlatform("ios")]
-    [UnsupportedOSPlatform("tvos")]
-#endif
     public static void Pin(IReadOnlyList<string?> values)
     {
         if (!_positioningEnabled)
@@ -176,7 +171,7 @@ public static class XConsole
     /// <summary>
     /// Pins the value from <paramref name="getValue"/> callback as a dynamic text below the regular log messages.
     /// Text can be multiline and <see href="https://github.com/chubrik/XConsole#coloring">colored</see>,
-    /// it updates every time <see cref="Write()"/> or <see cref="WriteLine()"/> method are called.
+    /// it updates every time <see cref="Write(string?)"/> or <see cref="WriteLine(string?)"/> method are called.
     /// Pin is resistant to console buffer overflow.
     /// </summary>
     /// <param name="getValue">
@@ -199,14 +194,21 @@ public static class XConsole
         if (!_positioningEnabled)
             return;
 
-        _getPinValues = () => [getValue()];
+        var values = new string?[1];
+
+        _getPinValues = () =>
+        {
+            values[0] = getValue();
+            return values;
+        };
+
         UpdatePin();
     }
 
     /// <summary>
     /// Pins the values from <paramref name="getValues"/> callback as a dynamic text below the regular log messages.
     /// Text can be multiline and <see href="https://github.com/chubrik/XConsole#coloring">colored</see>,
-    /// it updates every time <see cref="Write()"/> or <see cref="WriteLine()"/> method are called.
+    /// it updates every time <see cref="Write(string?)"/> or <see cref="WriteLine(string?)"/> method are called.
     /// Pin is resistant to console buffer overflow.
     /// </summary>
     /// <param name="getValues">
@@ -323,7 +325,7 @@ public static class XConsole
     /// </summary>
     /// <remarks>
     /// See also:
-    /// <br/>• <seealso cref="Pin(string?[])"/>
+    /// <br/>• <seealso cref="Pin(string?)"/>
     /// <br/>• <seealso cref="Pin(IReadOnlyList{string?})"/>
     /// <br/>• <seealso cref="Pin(Func{string?})"/>
     /// <br/>• <seealso cref="Pin(Func{IReadOnlyList{string?}})"/>
@@ -622,14 +624,6 @@ public static class XConsole
     #region Write common
 
     /// <summary>
-    /// At least one argument should be specified.
-    /// </summary>
-    /// <remarks>Please, use overloads.</remarks>
-    /// <exception cref="InvalidOperationException"/>
-    [Obsolete("At least one argument should be specified.", error: true)]
-    public static void Write() => throw new InvalidOperationException();
-
-    /// <summary>
     /// <inheritdoc cref="Console.Write(string?)"/>
     /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
     /// </summary>
@@ -656,18 +650,6 @@ public static class XConsole
     /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
     /// </param>
     /// <inheritdoc cref="Write(string?)"/>
-    public static (ConsolePosition Begin, ConsolePosition End) Write(params string?[] values)
-    {
-        Debug.Assert(values.Length > 0);
-        var items = new ConsoleItem[values.Length];
-
-        for (var i = 0; i < values.Length; i++)
-            items[i] = ConsoleItem.Parse(values[i]);
-
-        return WriteBase(items, isWriteLine: false);
-    }
-
-    /// <inheritdoc cref="Write(string?[])"/>
     public static (ConsolePosition Begin, ConsolePosition End) Write(IReadOnlyList<string?> values)
     {
         var items = new ConsoleItem[values.Count];
@@ -698,18 +680,6 @@ public static class XConsole
     /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
     /// </param>
     /// <inheritdoc cref="WriteLine(string?)"/>
-    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(params string?[] values)
-    {
-        Debug.Assert(values.Length > 0);
-        var items = new ConsoleItem[values.Length];
-
-        for (var i = 0; i < values.Length; i++)
-            items[i] = ConsoleItem.Parse(values[i]);
-
-        return WriteBase(items, isWriteLine: true);
-    }
-
-    /// <inheritdoc cref="WriteLine(string?[])"/>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(IReadOnlyList<string?> values)
     {
         var items = new ConsoleItem[values.Count];

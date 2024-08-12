@@ -68,8 +68,8 @@ To make a multicolor message split it to parts with individual color prefixes
 and pass them to single `WriteLine` method.
 Be sure that your messages will not be broken by other threads.
 ```csharp
-Console.WriteLine("G`This line is colored using simple microsyntax");                   // Single color
-Console.WriteLine("C`It is easy ", "Wb`to use many", "R` colors in ", "Y`one message"); // Multicolor
+Console.WriteLine("G`This line is colored using simple microsyntax");                     // Single color
+Console.WriteLine(["C`It is easy ", "Wb`to use many", "R` colors in ", "Y`one message"]); // Multicolor
 ```
 ![XConsole single color](https://raw.githubusercontent.com/chubrik/XConsole/main/img/colors-standard.png)
 

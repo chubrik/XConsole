@@ -21,8 +21,8 @@ using System.Runtime.Versioning;
 /// <remarks>
 /// See also these extension methods that write text directly to a position
 /// and return the new <see cref="ConsolePosition"/> structure:
-/// <br/>• <seealso cref="ConsolePositionExtensions.Write(ConsolePosition)"/>
-/// <br/>• <seealso cref="ConsolePositionExtensions.TryWrite(ConsolePosition)"/>
+/// <br/>• <seealso cref="ConsolePositionExtensions.Write(ConsolePosition, string?)"/>
+/// <br/>• <seealso cref="ConsolePositionExtensions.TryWrite(ConsolePosition, string?)"/>
 /// </remarks>
 #if NET
 [UnsupportedOSPlatform("android")]

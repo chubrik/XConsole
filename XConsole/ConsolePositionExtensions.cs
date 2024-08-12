@@ -9,7 +9,6 @@ namespace Chubrik.XConsole;
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 #if NET
 using System.Runtime.Versioning;
@@ -31,10 +30,6 @@ public static class ConsolePositionExtensions
 {
     #region Write
 
-    /// <inheritdoc cref="TryWrite(ConsolePosition)"/>
-    [Obsolete("At least one argument should be specified.", error: true)]
-    public static void Write(this ConsolePosition position) => throw new InvalidOperationException();
-
     /// <returns>The new end <see cref="ConsolePosition"/> structure.</returns>
     /// <exception cref="ArgumentOutOfRangeException"/>
     /// <inheritdoc cref="TryWrite(ConsolePosition, string?)"/>
@@ -45,19 +40,7 @@ public static class ConsolePositionExtensions
 
     /// <returns>The new end <see cref="ConsolePosition"/> structure.</returns>
     /// <exception cref="ArgumentOutOfRangeException"/>
-    /// <inheritdoc cref="TryWrite(ConsolePosition, string?[])"/>
-    public static ConsolePosition Write(this ConsolePosition position, params string?[] values)
-    {
-        Debug.Assert(values.Length > 0);
-        var items = new ConsoleItem[values.Length];
-
-        for (var i = 0; i < values.Length; i++)
-            items[i] = ConsoleItem.Parse(values[i]);
-
-        return XConsole.WriteToPosition(position, items);
-    }
-
-    /// <inheritdoc cref="Write(ConsolePosition, string?[])"/>
+    /// <inheritdoc cref="TryWrite(ConsolePosition, IReadOnlyList{string?})"/>
     public static ConsolePosition Write(this ConsolePosition position, IReadOnlyList<string?> values)
     {
         var items = new ConsoleItem[values.Count];
@@ -239,10 +222,6 @@ public static class ConsolePositionExtensions
 
     #region TryWrite
 
-    /// <inheritdoc cref="XConsole.Write()"/>
-    [Obsolete("At least one argument should be specified.", error: true)]
-    public static void TryWrite(this ConsolePosition position) => throw new InvalidOperationException();
-
     /// <summary>
     /// Wtites the specified string directly to a position.
     /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
@@ -271,18 +250,6 @@ public static class ConsolePositionExtensions
     /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
     /// </param>
     /// <inheritdoc cref="TryWrite(ConsolePosition, string?)"/>
-    public static ConsolePosition? TryWrite(this ConsolePosition position, params string?[] values)
-    {
-        Debug.Assert(values.Length > 0);
-        var items = new ConsoleItem[values.Length];
-
-        for (var i = 0; i < values.Length; i++)
-            items[i] = ConsoleItem.Parse(values[i]);
-
-        return TryWriteBase(position, items);
-    }
-
-    /// <inheritdoc cref="TryWrite(ConsolePosition, string?[])"/>
     public static ConsolePosition? TryWrite(this ConsolePosition position, IReadOnlyList<string?> values)
     {
         var items = new ConsoleItem[values.Count];

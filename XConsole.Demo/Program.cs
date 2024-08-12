@@ -11,7 +11,7 @@ public static class Program
 {
     public static async Task Main()
     {
-        Console.WriteLine("Cb`Hello", "R`, ", "Ym`World", "G`!");
+        Console.WriteLine(["Cb`Hello", "R`, ", "Ym`World", "G`!"]);
 
         //
         Console.WriteLine();

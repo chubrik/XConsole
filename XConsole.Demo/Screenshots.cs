@@ -15,7 +15,7 @@ public static class Screenshots
         Console.WriteLine("Regular log message: 7 apples");
         Console.WriteLine("Regular log message: 21 bananas");
         Console.WriteLine("Regular log message: 3 limes");
-        Console.WriteLine("C`It is easy ", "Wb`to use many", "R` colors in ", "Y`one message", "d`  (safe for multitasking)");
+        Console.WriteLine(["C`It is easy ", "Wb`to use many", "R` colors in ", "Y`one message", "d`  (safe for multitasking)"]);
         Console.WriteLine("Regular log message: 2 apples");
         Console.WriteLine("Regular log message: 11 bananas");
         Console.WriteLine("Regular log message: 5 limes");
@@ -43,8 +43,8 @@ public static class Screenshots
 
         Console.WriteLine("Regular log message: 9 apples");
         Console.WriteLine("Regular log message: 10 bananas");
-        Console.WriteLine("Regular log message: 1 limes", "M`  This text was written later using saved position");
-        Console.WriteLine("Regular log message: 18 apples", "M`  (positioning is safe for 9000+ log lines)");
+        Console.WriteLine(["Regular log message: 1 limes", "M`  This text was written later using saved position"]);
+        Console.WriteLine(["Regular log message: 18 apples", "M`  (positioning is safe for 9000+ log lines)"]);
         Console.WriteLine("Regular log message: 6 bananas");
         Console.WriteLine("Regular log message: 10 limes");
 
@@ -63,28 +63,28 @@ public static class Screenshots
     public static void ColorsStandard()
     {
         Console.WriteLine("G`This line is colored using simple microsyntax");
-        Console.WriteLine("C`It is easy ", "Wb`to use many", "R` colors in ", "Y`one message");
+        Console.WriteLine(["C`It is easy ", "Wb`to use many", "R` colors in ", "Y`one message"]);
     }
 
     public static void ColorsTable()
     {
         Console.WriteLine("d`code                        result  comment");
-        Console.WriteLine("Console.Write(", "y`\"W`text\"", ");    ", "W`text    [W]", "hite");
-        Console.WriteLine("Console.Write(", "y`\"Y`text\"", ");    ", "Y`text    [Y]", "ellow");
-        Console.WriteLine("Console.Write(", "y`\"C`text\"", ");    ", "C`text    [C]", "yan");
-        Console.WriteLine("Console.Write(", "y`\"G`text\"", ");    ", "G`text    [G]", "reen");
-        Console.WriteLine("Console.Write(", "y`\"M`text\"", ");    ", "M`text    [M]", "agenta");
-        Console.WriteLine("Console.Write(", "y`\"R`text\"", ");    ", "R`text    [R]", "ed");
-        Console.WriteLine("Console.Write(", "y`\"B`text\"", ");    ", "B`text    [B]", "lue");
-        Console.WriteLine("Console.Write(", "y`\"w`text\"", ");    ", "w`text    ", "dark [w]hite (gray)");
-        Console.WriteLine("Console.Write(", "y`\"y`text\"", ");    ", "y`text    ", "dark ", "y`[y]", "ellow");
-        Console.WriteLine("Console.Write(", "y`\"c`text\"", ");    ", "c`text    ", "dark ", "c`[c]", "yan");
-        Console.WriteLine("Console.Write(", "y`\"g`text\"", ");    ", "g`text    ", "dark ", "g`[g]", "reen");
-        Console.WriteLine("Console.Write(", "y`\"m`text\"", ");    ", "m`text    ", "dark ", "m`[m]", "agenta");
-        Console.WriteLine("Console.Write(", "y`\"r`text\"", ");    ", "r`text    ", "dark ", "r`[r]", "ed");
-        Console.WriteLine("Console.Write(", "y`\"b`text\"", ");    ", "b`text    ", "dark ", "b`[b]", "lue");
-        Console.WriteLine("Console.Write(", "y`\"d`text\"", ");    ", "d`text    [d]", "ark gray");
-        Console.WriteLine("Console.Write(", "y`\"n`text\"", ");    ", "n`text    ", "d`[n]", "o color (black)");
+        Console.WriteLine(["Console.Write(", "y`\"W`text\"", ");    ", "W`text    [W]", "hite"]);
+        Console.WriteLine(["Console.Write(", "y`\"Y`text\"", ");    ", "Y`text    [Y]", "ellow"]);
+        Console.WriteLine(["Console.Write(", "y`\"C`text\"", ");    ", "C`text    [C]", "yan"]);
+        Console.WriteLine(["Console.Write(", "y`\"G`text\"", ");    ", "G`text    [G]", "reen"]);
+        Console.WriteLine(["Console.Write(", "y`\"M`text\"", ");    ", "M`text    [M]", "agenta"]);
+        Console.WriteLine(["Console.Write(", "y`\"R`text\"", ");    ", "R`text    [R]", "ed"]);
+        Console.WriteLine(["Console.Write(", "y`\"B`text\"", ");    ", "B`text    [B]", "lue"]);
+        Console.WriteLine(["Console.Write(", "y`\"w`text\"", ");    ", "w`text    ", "dark [w]hite (gray)"]);
+        Console.WriteLine(["Console.Write(", "y`\"y`text\"", ");    ", "y`text    ", "dark ", "y`[y]", "ellow"]);
+        Console.WriteLine(["Console.Write(", "y`\"c`text\"", ");    ", "c`text    ", "dark ", "c`[c]", "yan"]);
+        Console.WriteLine(["Console.Write(", "y`\"g`text\"", ");    ", "g`text    ", "dark ", "g`[g]", "reen"]);
+        Console.WriteLine(["Console.Write(", "y`\"m`text\"", ");    ", "m`text    ", "dark ", "m`[m]", "agenta"]);
+        Console.WriteLine(["Console.Write(", "y`\"r`text\"", ");    ", "r`text    ", "dark ", "r`[r]", "ed"]);
+        Console.WriteLine(["Console.Write(", "y`\"b`text\"", ");    ", "b`text    ", "dark ", "b`[b]", "lue"]);
+        Console.WriteLine(["Console.Write(", "y`\"d`text\"", ");    ", "d`text    [d]", "ark gray"]);
+        Console.WriteLine(["Console.Write(", "y`\"n`text\"", ");    ", "n`text    ", "d`[n]", "o color (black)"]);
     }
 
     public static void ColorsExtended()
