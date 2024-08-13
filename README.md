@@ -46,6 +46,7 @@ using Console = Chubrik.XConsole.XConsole;
 ```csproj
 <ItemGroup>
   <!-- Safely upgrade an entire project to XConsole -->
+  <Using Include="Chubrik.XConsole" />
   <Using Include="Chubrik.XConsole.XConsole" Alias="Console" />
 </ItemGroup>
 ```

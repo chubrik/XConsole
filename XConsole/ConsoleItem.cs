@@ -19,18 +19,13 @@ internal readonly struct ConsoleItem(
 
     public static ConsoleItem Parse(string? value)
     {
-        if (string.IsNullOrEmpty(value))
-            return new(string.Empty);
+        if (value == null || value.Length < 2)
+            return new(value ?? string.Empty);
 
         var char0 = (int)value[0];
+        var char1 = (int)value[1];
 
-        if (char0 == '`')
-            return new(value.Substring(1));
-
-        if (value.Length == 1)
-            return new(value);
-
-        if (value[1] == '`')
+        if (char1 == '`')
         {
             if (char0 <= 'y')
             {
@@ -43,11 +38,9 @@ internal readonly struct ConsoleItem(
             return new(value);
         }
 
-        if (value.Length > 2 && value[2] == '`' && char0 <= 'y')
+        if (value.Length >= 3 && value[2] == '`')
         {
-            var char1 = (int)value[1];
-
-            if (char1 <= 'y')
+            if (char0 <= 'y' && char1 <= 'y')
             {
                 var backColor = _colorMap[char1];
 
@@ -84,7 +77,7 @@ internal readonly struct ConsoleItem(
         {
             @char = value[i];
 
-            if (@char == '\n' || @char == '\r' || @char == '\t' || @char == '\b')
+            if (@char < ' ')
                 return 0;
 #if NET
             if (@char == '\x1b' && VirtualTerminal.IsEnabled)
@@ -93,7 +86,7 @@ internal readonly struct ConsoleItem(
                 {
                     @char = value[i];
 
-                    if (@char == '\n' || @char == '\r' || @char == '\t' || @char == '\b')
+                    if (@char < ' ')
                         return 0;
 
                     if ((@char >= 'A' && @char <= 'Z') || (@char >= 'a' && @char <= 'z'))

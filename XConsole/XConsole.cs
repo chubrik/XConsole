@@ -497,8 +497,7 @@ public static class XConsole
     /// <inheritdoc cref="Console.ReadLine()"/>
     /// <remarks>
     /// See also:
-    /// <br/>• <seealso cref="ReadLine(ConsoleReadLineMode)"/> – overload with masked and hidden modes.
-    /// <br/>• <seealso cref="ReadLine(ConsoleReadLineMode, char)"/> – masked mode with specified mask character.
+    /// <br/>• <seealso cref="ReadLine(ConsoleReadLineMode, char)"/> – reads the line in masked or hidden modes.
     /// </remarks>
 #if NET
     [UnsupportedOSPlatform("android")]
@@ -515,40 +514,8 @@ public static class XConsole
     /// <para>
     /// There are three <paramref name="mode"/> variants:
     /// <br/>• <see cref="ConsoleReadLineMode.Default"/> – default behavior.
-    /// <br/>• <see cref="ConsoleReadLineMode.Masked"/> – typed characters are displayed as a mask.
-    /// <br/>• <see cref="ConsoleReadLineMode.Hidden"/> – typed characters are not displayed.
-    /// </para>
-    /// </summary>
-    /// <param name="mode">
-    /// There are three <paramref name="mode"/> variants:
-    /// <br/>• <see cref="ConsoleReadLineMode.Default"/> – default behavior.
-    /// <br/>• <see cref="ConsoleReadLineMode.Masked"/> – typed characters are displayed as a mask.
-    /// <br/>• <see cref="ConsoleReadLineMode.Hidden"/> – typed characters are not displayed.
-    /// </param>
-    /// <remarks>
-    /// See also:<br/>
-    /// • <seealso cref="ReadLine(ConsoleReadLineMode, char)"/> – masked mode with specified mask character.
-    /// </remarks>
-    /// <returns>
-    /// The next line of characters from the input stream, or <see cref="string.Empty"/> if no more lines are available.
-    /// </returns>
-    /// <inheritdoc cref="Console.ReadLine()"/>
-#if NET
-    [UnsupportedOSPlatform("android")]
-    [UnsupportedOSPlatform("browser")]
-#endif
-    public static string ReadLine(ConsoleReadLineMode mode)
-    {
-        return ReadLine(mode: mode, maskChar: '\u2022');
-    }
-
-    /// <summary>
-    /// <inheritdoc cref="Console.ReadLine()"/>
-    /// <para>
-    /// There are three <paramref name="mode"/> variants:
-    /// <br/>• <see cref="ConsoleReadLineMode.Default"/> – default behavior.
     /// <br/>• <see cref="ConsoleReadLineMode.Masked"/> –
-    /// each typed character is displayed as default or specified <paramref name="maskChar"/>.
+    /// each typed character is displayed as default or custom <paramref name="maskChar"/>.
     /// <br/>• <see cref="ConsoleReadLineMode.Hidden"/> – typed characters are not displayed.
     /// </para>
     /// </summary>
@@ -556,29 +523,26 @@ public static class XConsole
     /// There are three <paramref name="mode"/> variants:
     /// <br/>• <see cref="ConsoleReadLineMode.Default"/> – default behavior.
     /// <br/>• <see cref="ConsoleReadLineMode.Masked"/> –
-    /// each typed character is displayed as default or specified <paramref name="maskChar"/>.
+    /// each typed character is displayed as default or custom <paramref name="maskChar"/>.
     /// <br/>• <see cref="ConsoleReadLineMode.Hidden"/> – typed characters are not displayed.
     /// </param>
     /// <param name="maskChar">Char used for mask each character in masked <paramref name="mode"/>.</param>
-    /// <remarks>
-    /// See also:<br/>• <seealso cref="ReadLine(ConsoleReadLineMode)"/> – masked mode with default mask character.
-    /// </remarks>
-    /// <inheritdoc cref="ReadLine(ConsoleReadLineMode)"/>
+    /// <inheritdoc cref="Console.ReadLine()"/>
 #if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
 #endif
-    public static string ReadLine(ConsoleReadLineMode mode, char maskChar)
+    public static string? ReadLine(ConsoleReadLineMode mode, char maskChar = '\u2022')
     {
         switch (mode)
         {
             case ConsoleReadLineMode.Default:
-                return ReadLine() ?? string.Empty;
+                return ReadLine();
 
             case ConsoleReadLineMode.Masked:
             case ConsoleReadLineMode.Hidden:
                 var isMaskedMode = mode == ConsoleReadLineMode.Masked;
-                var text = string.Empty;
+                var result = string.Empty;
                 ConsoleKeyInfo keyInfo;
 
                 lock (_syncLock)
@@ -587,19 +551,26 @@ public static class XConsole
                     {
                         keyInfo = Console.ReadKey(intercept: true);
 
-                        if (keyInfo.Key == ConsoleKey.Backspace && text.Length > 0)
+                        if (keyInfo.Key == ConsoleKey.Backspace && result.Length > 0)
                         {
                             if (isMaskedMode)
                                 Console.Write("\b \b");
 
-                            text = text.Substring(0, text.Length - 1);
+                            result = result.Substring(0, result.Length - 1);
                         }
-                        else if (!char.IsControl(keyInfo.KeyChar))
+                        else if (
+                            !char.IsControl(keyInfo.KeyChar) ||
+                            keyInfo.Key == ConsoleKey.Tab ||
+                            keyInfo.KeyChar == '\x1a')
                         {
+#if NET
+                            if (!OperatingSystem.IsWindows() && keyInfo.KeyChar == '\x1a')
+                                return null;
+#endif
                             if (isMaskedMode)
                                 Console.Write(maskChar);
 
-                            text += keyInfo.KeyChar;
+                            result += keyInfo.KeyChar;
                         }
                     }
                     while (keyInfo.Key != ConsoleKey.Enter);
@@ -607,7 +578,10 @@ public static class XConsole
                     Console.WriteLine();
                 }
 
-                return text;
+                if (result.Length > 0 && result[0] == '\x1a')
+                    return null;
+
+                return result;
 
             default:
                 throw new ArgumentOutOfRangeException(nameof(mode));
@@ -1622,8 +1596,7 @@ public static class XConsole
 #endif
     public static ConsoleKeyInfo ReadKey()
     {
-        lock (_syncLock)
-            return Console.ReadKey();
+        return ReadKey(intercept: false);
     }
 
     /// <inheritdoc cref="Console.ReadKey(bool)"/>
@@ -1635,8 +1608,12 @@ public static class XConsole
 #endif
     public static ConsoleKeyInfo ReadKey(bool intercept)
     {
-        lock (_syncLock)
-            return Console.ReadKey(intercept: intercept);
+        var key = Console.ReadKey(intercept: true);
+
+        if (!intercept)
+            Write(key.KeyChar);
+
+        return key;
     }
 
     /// <inheritdoc cref="Console.Out"/>
