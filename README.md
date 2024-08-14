@@ -30,7 +30,7 @@ More ways see on [NuGet Gallery](https://www.nuget.org/packages/XConsole/).
 PM> Install-Package XConsole
 ```
 ```csproj
-<PackageReference Include="XConsole" Version="1.4.*" />
+<PackageReference Include="XConsole" Version="1.5.*" />
 ```
 <br><br>
 
