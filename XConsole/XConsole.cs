@@ -565,7 +565,10 @@ public static class XConsole
                         {
 #if NET
                             if (!OperatingSystem.IsWindows() && keyInfo.KeyChar == '\x1a')
+                            {
+                                Console.WriteLine();
                                 return null;
+                            }
 #endif
                             if (isMaskedMode)
                                 Console.Write(maskChar);

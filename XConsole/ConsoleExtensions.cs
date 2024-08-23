@@ -12,7 +12,7 @@ public static class ConsoleExtensions
     /// <summary>
     /// Displays the <paramref name="message"/> and waits until the user presses Y or N and then Enter.
     /// </summary>
-    /// <returns>True or False according to the user’s decision.</returns>
+    /// <returns><see langword="True"/> or <see langword="false"/> according to the user’s decision.</returns>
     public static bool Confirm(
         this ConsoleExtras extras, string message = "Continue? [y/n]: ", string yes = "Yes", string no = "No")
     {

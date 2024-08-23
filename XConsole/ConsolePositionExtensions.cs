@@ -1,6 +1,4 @@
 ﻿#pragma warning disable CS1573 // Parameter has no matching param tag in the XML comment (but other parameters do)
-#pragma warning disable CS1584 // XML comment has syntactically incorrect cref attribute
-#pragma warning disable CS1658 // Warning is overriding an error
 #if !NET
 #pragma warning disable CS8604 // Possible null reference argument.
 #endif
@@ -232,7 +230,7 @@ public static class ConsolePositionExtensions
     /// </param>
     /// <returns>
     /// The new end <see cref="ConsolePosition"/> structure,
-    /// or <see cref="null"/> if the current position actually points outside the console buffer area.
+    /// or <see langword="null"/> if the current position actually points outside the console buffer area.
     /// </returns>
     /// <exception cref="System.Security.SecurityException"/>
     /// <exception cref="System.IO.IOException"/>

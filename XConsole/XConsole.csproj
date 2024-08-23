@@ -4,6 +4,7 @@
     <TargetFrameworks>net8.0;net7.0;net6.0;net5.0;netstandard2.0;netstandard1.3;netframework462</TargetFrameworks>
     <AllowUnsafeBlocks Condition="'$(TargetFramework)'=='net7.0'">true</AllowUnsafeBlocks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NoWarn>IDE0130</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup>
