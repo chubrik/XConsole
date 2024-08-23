@@ -14,6 +14,9 @@ using System.Text;
 #if NET
 using System.Runtime.Versioning;
 #endif
+#if NET9_0_OR_GREATER
+using System.Threading;
+#endif
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
 #endif
@@ -52,7 +55,11 @@ public static class XConsole
 
     private static readonly string _newLine = Environment.NewLine;
     private static readonly bool _positioningEnabled;
+#if NET9_0_OR_GREATER
+    private static readonly Lock _syncLock = new();
+#else
     private static readonly object _syncLock = new();
+#endif
 
     private static bool _coloringEnabled = Environment.GetEnvironmentVariable("NO_COLOR") == null;
     private static bool _cursorVisible;
@@ -565,7 +572,10 @@ public static class XConsole
                         {
 #if NET
                             if (!OperatingSystem.IsWindows() && keyInfo.KeyChar == '\x1a')
+                            {
+                                Console.WriteLine();
                                 return null;
+                            }
 #endif
                             if (isMaskedMode)
                                 Console.Write(maskChar);
@@ -1190,6 +1200,30 @@ public static class XConsole
         return WriteBase([ConsoleItem.Parse(string.Format(format, arg ?? []))], isWriteLine: false);
     }
 
+#if NET9_0_OR_GREATER
+    /// <summary>
+    /// <inheritdoc cref="Console.Write(string, ReadOnlySpan{object?})"/>
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </summary>
+    /// <param name="format">
+    /// A composite format string.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </param>
+    /// <returns><inheritdoc cref="Write(string?)"/></returns>
+    /// <inheritdoc cref="Console.Write(string, ReadOnlySpan{object?})"/>
+    public static (ConsolePosition Begin, ConsolePosition End) Write(
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string format, params ReadOnlySpan<object?> arg)
+    {
+        if (format.Length == 0)
+        {
+            var position = CursorPosition;
+            return (position, position);
+        }
+
+        return WriteBase([ConsoleItem.Parse(string.Format(format, arg))], isWriteLine: false);
+    }
+#endif
+
     /// <inheritdoc cref="Console.Write(uint)"/>
     /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(uint value)
@@ -1376,6 +1410,27 @@ public static class XConsole
 
         return WriteBase([ConsoleItem.Parse(string.Format(format, arg ?? []))], isWriteLine: true);
     }
+
+#if NET9_0_OR_GREATER
+    /// <summary>
+    /// <inheritdoc cref="Console.WriteLine(string, ReadOnlySpan{object?})"/>
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </summary>
+    /// <param name="format">
+    /// A composite format string.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </param>
+    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
+    /// <inheritdoc cref="Console.WriteLine(string, ReadOnlySpan{object?})"/>
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string format, params ReadOnlySpan<object?> arg)
+    {
+        if (format.Length == 0)
+            return WriteLine();
+
+        return WriteBase([ConsoleItem.Parse(string.Format(format, arg))], isWriteLine: true);
+    }
+#endif
 
     /// <inheritdoc cref="Console.WriteLine(uint)"/>
     /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
@@ -1790,15 +1845,18 @@ public static class XConsole
     }
 
     /// <inheritdoc cref="Console.WindowWidth"/>
-#if NET
-    [UnsupportedOSPlatform("android")]
-    [UnsupportedOSPlatform("browser")]
-    [UnsupportedOSPlatform("ios")]
-    [UnsupportedOSPlatform("tvos")]
-#endif
     public static int WindowWidth
     {
+#if NET
+        [UnsupportedOSPlatform("android")]
+        [UnsupportedOSPlatform("browser")]
+        [UnsupportedOSPlatform("ios")]
+        [UnsupportedOSPlatform("tvos")]
+#endif
         get => Console.WindowWidth;
+#if NET
+        [SupportedOSPlatform("windows")]
+#endif
         set
         {
             lock (_syncLock)
@@ -1807,15 +1865,18 @@ public static class XConsole
     }
 
     /// <inheritdoc cref="Console.WindowHeight"/>
-#if NET
-    [UnsupportedOSPlatform("android")]
-    [UnsupportedOSPlatform("browser")]
-    [UnsupportedOSPlatform("ios")]
-    [UnsupportedOSPlatform("tvos")]
-#endif
     public static int WindowHeight
     {
+#if NET
+        [UnsupportedOSPlatform("android")]
+        [UnsupportedOSPlatform("browser")]
+        [UnsupportedOSPlatform("ios")]
+        [UnsupportedOSPlatform("tvos")]
+#endif
         get => Console.WindowHeight;
+#if NET
+        [SupportedOSPlatform("windows")]
+#endif
         set
         {
             lock (_syncLock)
@@ -1834,10 +1895,7 @@ public static class XConsole
 
     /// <inheritdoc cref="Console.SetWindowSize(int, int)"/>
 #if NET
-    [UnsupportedOSPlatform("android")]
-    [UnsupportedOSPlatform("browser")]
-    [UnsupportedOSPlatform("ios")]
-    [UnsupportedOSPlatform("tvos")]
+    [SupportedOSPlatform("windows")]
 #endif
     public static void SetWindowSize(int width, int height)
     {

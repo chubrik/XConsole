@@ -1,8 +1,4 @@
-﻿#if !NET
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-#endif
-
-namespace Chubrik.XConsole;
+﻿namespace Chubrik.XConsole;
 
 using System;
 
@@ -82,6 +78,8 @@ internal readonly struct ConsoleItem(
 #if NET
             if (@char == '\x1b' && VirtualTerminal.IsEnabled)
             {
+                i++;
+
                 for (; i < valueLength; i++)
                 {
                     @char = value[i];
