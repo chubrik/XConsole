@@ -200,6 +200,20 @@ public static class ConsolePositionExtensions
         return XConsole.WriteToPosition(position, [ConsoleItem.Parse(string.Format(format, arg ?? []))]);
     }
 
+#if NET9_0_OR_GREATER
+    /// <returns>The new end <see cref="ConsolePosition"/> structure.</returns>
+    /// <exception cref="ArgumentOutOfRangeException"/>
+    /// <inheritdoc cref="TryWrite(ConsolePosition, string, ReadOnlySpan{object?})"/>
+    public static ConsolePosition Write(this ConsolePosition position,
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string format, params ReadOnlySpan<object?> arg)
+    {
+        if (format.Length == 0)
+            return position;
+
+        return XConsole.WriteToPosition(position, [ConsoleItem.Parse(string.Format(format, arg))]);
+    }
+#endif
+
     /// <returns>The new end <see cref="ConsolePosition"/> structure.</returns>
     /// <exception cref="ArgumentOutOfRangeException"/>
     /// <inheritdoc cref="TryWrite(ConsolePosition, uint)"/>
@@ -460,6 +474,28 @@ public static class ConsolePositionExtensions
 
         return TryWriteBase(position, [ConsoleItem.Parse(string.Format(format, arg ?? []))]);
     }
+
+#if NET9_0_OR_GREATER
+    /// <summary>
+    /// Writes the text representation of the specified span of objects directly to a position
+    /// using the specified format information.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </summary>
+    /// <param name="format">
+    /// A composite format string.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </param>
+    /// <inheritdoc cref="Console.Write(string, ReadOnlySpan{object?})"/>
+    /// <inheritdoc cref="TryWrite(ConsolePosition, string?)"/>
+    public static ConsolePosition? TryWrite(this ConsolePosition position,
+        [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string format, params ReadOnlySpan<object?> arg)
+    {
+        if (format.Length == 0)
+            return position;
+
+        return TryWriteBase(position, [ConsoleItem.Parse(string.Format(format, arg))]);
+    }
+#endif
 
     /// <summary>
     /// Writes the text representation of the specified 32-bit unsigned integer value directly to a position.
