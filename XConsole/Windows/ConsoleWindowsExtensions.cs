@@ -88,16 +88,7 @@ public static class ConsoleWindowsExtensions
         FlashWindowEx(ref fInfo);
     }
 
-    private static readonly bool _isAppHighlightSupported = GetIsAppHighlightSupported();
-
-    private static bool GetIsAppHighlightSupported()
-    {
-#if NETSTANDARD1_3
-        return true; // todo
-#else
-        return Environment.OSVersion.Version.Major >= 5;
-#endif
-    }
+    private static readonly bool _isAppHighlightSupported = IsOSMinVersion(5, 0); // Windows 2000
 
     private const uint APP_HIGHLIGHT_RESET = 0;
     private const uint APP_HIGHLIGHT_WINDOW = 1;
@@ -186,24 +177,7 @@ public static class ConsoleWindowsExtensions
             extras.TaskbarProgressReset();
     }
 
-    private static readonly bool _isTaskbarProgressSupported = GetIsTaskbarProgressSupported();
-
-    private static bool GetIsTaskbarProgressSupported()
-    {
-#if NET
-        var isWindows = OperatingSystem.IsWindows();
-#elif NETSTANDARD
-        var isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-#else
-        var isWindows = true; // todo .NET Framework
-#endif
-#if NETSTANDARD1_3
-        var isSupportedOsVersion = true; // todo
-#else
-        var isSupportedOsVersion = Environment.OSVersion.Version >= new Version(6, 1);
-#endif
-        return isWindows && isSupportedOsVersion;
-    }
+    private static readonly bool _isTaskbarProgressSupported = IsOSWindows() && IsOSMinVersion(6, 1); // Windows 7
 
     private static readonly ITaskbarInstance _taskbarInstance = (ITaskbarInstance)new TaskbarInstance();
 
@@ -286,6 +260,60 @@ public static class ConsoleWindowsExtensions
 #else
     [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+#endif
+
+    #endregion
+
+    #region Private utils
+
+    private static bool IsOSWindows()
+    {
+#if NET
+        return OperatingSystem.IsWindows();
+#elif NETSTANDARD
+        return RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+#else // NETFRAMEWORK
+        var platform = Environment.OSVersion.Platform;
+
+        return platform == PlatformID.Win32NT ||
+               platform == PlatformID.Win32Windows ||
+               platform == PlatformID.Win32S ||
+               platform == PlatformID.WinCE;
+#endif
+    }
+
+    private static bool IsOSMinVersion(int major, int minor)
+    {
+#if NETSTANDARD1_3
+        var osVersionInfo = new OSVERSIONINFO();
+        osVersionInfo.dwOSVersionInfoSize = Marshal.SizeOf(osVersionInfo);
+
+        if (GetVersionEx(ref osVersionInfo))
+            return osVersionInfo.dwMajorVersion > major ||
+                (osVersionInfo.dwMajorVersion == major && osVersionInfo.dwMinorVersion >= minor);
+
+        return false;
+#else
+        return Environment.OSVersion.Version >= new Version(major, minor);
+#endif
+    }
+
+#if NETSTANDARD1_3
+    [StructLayout(LayoutKind.Sequential)]
+    private struct OSVERSIONINFO
+    {
+        public int dwOSVersionInfoSize;
+        public int dwMajorVersion;
+        public int dwMinorVersion;
+        public int dwBuildNumber;
+        public int dwPlatformId;
+
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+        public string szCSDVersion;
+    }
+
+    [DllImport("kernel32.dll")]
+    private static extern bool GetVersionEx(ref OSVERSIONINFO osVersionInfo);
 #endif
 
     #endregion

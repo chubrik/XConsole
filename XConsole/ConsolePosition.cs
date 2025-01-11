@@ -73,7 +73,6 @@ public readonly struct ConsolePosition
         ShiftTop = shiftTop;
     }
 
-
 #pragma warning disable CS1734 // XML comment has a paramref tag, but there is no parameter by that name
     /// <summary>
     /// <paramref name="Left"/> and <paramref name="top"/> arguments should be specified.
