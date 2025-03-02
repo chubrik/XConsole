@@ -9,20 +9,40 @@ internal sealed class EllipsisAnimation(ConsolePosition position, CancellationTo
 {
     protected override string Clear { get; } = "   ";
 
-    private static readonly ConsoleItem _darkDot = new(".", ConsoleItemType.ForeColor, foreColor: ConsoleColor.DarkGray);
-    private static readonly ConsoleItem _grayDot = new(".", ConsoleItemType.ForeColor, foreColor: ConsoleColor.Gray);
-
     protected override async Task LoopAsync(CancellationToken cancellationToken)
     {
         var position = Position;
         var delay = TimeSpan.FromMilliseconds(Random.Next(100, 151));
         var delayX2 = delay + delay;
-        var frame1 = new[] { _darkDot };
-        var frame2 = new[] { _grayDot, _darkDot };
-        var frame3 = new[] { _darkDot, _grayDot, _darkDot };
-        var frame4 = new[] { new ConsoleItem(" .", ConsoleItemType.ForeColor, foreColor: ConsoleColor.DarkGray), _grayDot };
-        var frame5 = new[] { new ConsoleItem("  .", ConsoleItemType.ForeColor, foreColor: ConsoleColor.DarkGray) };
-        var frame6 = new[] { new ConsoleItem("   ") };
+
+        ConsoleItem[] frame1;
+        ConsoleItem[] frame2;
+        ConsoleItem[] frame3;
+        ConsoleItem[] frame4;
+        ConsoleItem[] frame5;
+        ConsoleItem[] frame6 = [new("   ")];
+
+#if NET
+        if (VirtualTerminal.IsEnabled)
+        {
+            frame1 = [new("\x1b[90m.\x1b[39m", type: ConsoleItemType.Ansi)];
+            frame2 = [new("\x1b[37m.\x1b[90m.\x1b[39m", type: ConsoleItemType.Ansi)];
+            frame3 = [new("\x1b[90m.\x1b[37m.\x1b[90m.\x1b[39m", type: ConsoleItemType.Ansi)];
+            frame4 = [new(" \x1b[90m.\x1b[37m.\x1b[39m", type: ConsoleItemType.Ansi)];
+            frame5 = [new("  \x1b[90m.\x1b[39m", type: ConsoleItemType.Ansi)];
+        }
+        else
+#endif
+        {
+            var darkDot = new ConsoleItem(".", ConsoleItemType.ForeColor, foreColor: ConsoleColor.DarkGray);
+            var grayDot = new ConsoleItem(".", ConsoleItemType.ForeColor, foreColor: ConsoleColor.Gray);
+
+            frame1 = [darkDot];
+            frame2 = [grayDot, darkDot];
+            frame3 = [darkDot, grayDot, darkDot];
+            frame4 = [new(" .", ConsoleItemType.ForeColor, foreColor: ConsoleColor.DarkGray), grayDot];
+            frame5 = [new("  .", ConsoleItemType.ForeColor, foreColor: ConsoleColor.DarkGray)];
+        }
 
         for (; ; )
         {
