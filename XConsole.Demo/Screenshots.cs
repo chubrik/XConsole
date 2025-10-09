@@ -51,7 +51,7 @@ public static class Screenshots
         Console.Pin(() =>
         [
             "W`Pinned multiline results:\n",
-            "Apples=", "R`154", ", bananas=", "Y`241", ", limes=", "G`87", ", tital=", "nc`482", ", time=", "g`12:48\n",
+            "Apples=", "R`154", ", bananas=", "Y`241", ", limes=", "G`87", ", total=", "nc`482", ", time=", "g`12:48\n",
             "d`(Pin will not be broken after 9000 log lines)"
         ]);
 
@@ -95,7 +95,7 @@ public static class Screenshots
         Console.WriteLine($"Aqua with {"a navy".BgColor(Color.Navy)} background".Color(Color.Aqua));
     }
 
-    public static void DynamicPin1()
+    public static void Pin1()
     {
         var value = 25;
         Console.WriteLine("Regular log message");
@@ -109,7 +109,7 @@ public static class Screenshots
                 return;
     }
 
-    public static void DynamicPin2()
+    public static void Pin2()
     {
         var value = 25;
         Console.WriteLine("Regular log message");
@@ -123,7 +123,7 @@ public static class Screenshots
                 return;
     }
 
-    public static void DynamicPin3()
+    public static void Pin3()
     {
         var value = 25;
         Console.WriteLine("Regular log message");
