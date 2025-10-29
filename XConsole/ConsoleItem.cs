@@ -62,7 +62,7 @@ internal readonly struct ConsoleItem(
         return new(value);
     }
 
-    public int GetSingleLineLengthOrZero()
+    public int GetSingleLineLengthOrMinusOne()
     {
         var value = Value;
         var valueLength = value.Length;
@@ -74,26 +74,32 @@ internal readonly struct ConsoleItem(
             @char = value[i];
 
             if (@char < ' ')
-                return 0;
-#if NET
-            if (@char == '\x1b' && VirtualTerminal.IsEnabled)
             {
-                i++;
-
-                for (; i < valueLength; i++)
+#if NET
+                if (@char == '\x1b' && VirtualTerminal.IsEnabled)
                 {
-                    @char = value[i];
+                    i++;
 
-                    if (@char < ' ')
-                        return 0;
+                    for (; i < valueLength; i++)
+                    {
+                        @char = value[i];
 
-                    if ((@char >= 'A' && @char <= 'Z') || (@char >= 'a' && @char <= 'z'))
-                        break;
+                        if (@char < ' ')
+                            return -1;
+
+                        if ((@char >= 'A' && @char <= 'Z') || (@char >= 'a' && @char <= 'z'))
+                            break;
+                    }
+
+                    continue;
                 }
-
-                continue;
-            }
+                else
 #endif
+                {
+                    return -1;
+                }
+            }
+
             result++;
         }
 

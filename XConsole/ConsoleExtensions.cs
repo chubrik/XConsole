@@ -18,23 +18,26 @@ public static class ConsoleExtensions
     {
         var yesItem = ConsoleItem.Parse(yes);
         var noItem = ConsoleItem.Parse(no);
-        var yesLength = yesItem.GetSingleLineLengthOrZero();
-        var noLength = noItem.GetSingleLineLengthOrZero();
+        var yesLength = yesItem.GetSingleLineLengthOrMinusOne();
+        var noLength = noItem.GetSingleLineLengthOrMinusOne();
 
-        if (yesLength == 0)
+        if (yesLength < 0)
         {
-            yes = "Yes";
-            yesLength = yes.Length;
+            yesItem = new ConsoleItem("Yes");
+            yesLength = 3;
         }
 
-        if (noLength == 0)
+        if (noLength < 0)
         {
-            no = "No";
-            noLength = no.Length;
+            noItem = new ConsoleItem("No");
+            noLength = 2;
         }
 
-        var yesClear = new string('\b', yesLength) + new string(' ', yesLength) + new string('\b', yesLength);
-        var noClear = new string('\b', noLength) + new string(' ', noLength) + new string('\b', noLength);
+        var yesClear =
+            new ConsoleItem(new string('\b', yesLength) + new string(' ', yesLength) + new string('\b', yesLength));
+
+        var noClear =
+            new ConsoleItem(new string('\b', noLength) + new string(' ', noLength) + new string('\b', noLength));
 
         return XConsole.Sync(() =>
         {
@@ -49,27 +52,27 @@ public static class ConsoleExtensions
                 {
                     case ConsoleKey.Y:
                         if (result == null)
-                            XConsole.Write(yes);
+                            XConsole.WriteItemsIsolated([yesItem]);
                         else if (result == false)
-                            XConsole.Write([noClear, yes]);
+                            XConsole.WriteItemsIsolated([noClear, yesItem]);
 
                         result = true;
                         continue;
 
                     case ConsoleKey.N:
                         if (result == null)
-                            XConsole.Write(no);
+                            XConsole.WriteItemsIsolated([noItem]);
                         else if (result == true)
-                            XConsole.Write([yesClear, no]);
+                            XConsole.WriteItemsIsolated([yesClear, noItem]);
 
                         result = false;
                         continue;
 
                     case ConsoleKey.Backspace:
                         if (result == true)
-                            XConsole.Write(yesClear);
+                            XConsole.WriteItemsIsolated([yesClear]);
                         else if (result == false)
-                            XConsole.Write(noClear);
+                            XConsole.WriteItemsIsolated([noClear]);
 
                         result = null;
                         continue;

@@ -1473,6 +1473,18 @@ public static class XConsole
 
     #region Private utils
 
+    internal static void WriteItemsIsolated(ConsoleItem[] items)
+    {
+        if (items.Length > 1)
+        {
+            Console.CursorVisible = false;
+            WriteItems(items);
+            Console.CursorVisible = _cursorVisible;
+        }
+        else
+            WriteItems(items);
+    }
+
     private static void WriteItems(ConsoleItem[] items)
     {
         if (!_coloringEnabled)
