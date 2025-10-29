@@ -288,7 +288,9 @@ public static class ConsoleWindowsExtensions
 
     private static bool IsOSMinVersion(int major, int minor)
     {
-#if NETSTANDARD1_3
+#if !NETSTANDARD1_3
+        return Environment.OSVersion.Version >= new Version(major, minor);
+#else
         var osVersionInfo = new OSVERSIONINFO();
         osVersionInfo.dwOSVersionInfoSize = Marshal.SizeOf(osVersionInfo);
 
@@ -297,8 +299,6 @@ public static class ConsoleWindowsExtensions
                 (osVersionInfo.dwMajorVersion == major && osVersionInfo.dwMinorVersion >= minor);
 
         return false;
-#else
-        return Environment.OSVersion.Version >= new Version(major, minor);
 #endif
     }
 

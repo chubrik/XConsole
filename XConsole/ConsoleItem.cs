@@ -66,7 +66,7 @@ internal readonly struct ConsoleItem(
     {
         var value = Value;
         var valueLength = value.Length;
-        var length = 0;
+        var result = 0;
         int @char;
 
         for (var i = 0; i < valueLength; i++)
@@ -94,10 +94,10 @@ internal readonly struct ConsoleItem(
                 continue;
             }
 #endif
-            length++;
+            result++;
         }
 
-        return length;
+        return result;
     }
 
     private static readonly int[] _colorMap =

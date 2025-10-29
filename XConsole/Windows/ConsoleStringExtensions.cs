@@ -14,7 +14,7 @@ using System.Runtime.Versioning;
 [SupportedOSPlatform("windows")]
 public static class ConsoleStringExtensions
 {
-    private const int _rgbMaxValue = 16777215;
+    private const int _rgbMaxValue = 0xFFFFFF;
     private const string _foregroundConsoleColorFormat = "\x1b[{0}m{1}\x1b[39m";
     private const string _backgroundConsoleColorFormat = "\x1b[{0}m{1}\x1b[49m";
     private const string _foregroundRgbColorFormat = "\x1b[38;2;{0};{1};{2}m{3}\x1b[39m";

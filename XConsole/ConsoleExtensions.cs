@@ -38,7 +38,7 @@ public static class ConsoleExtensions
 
         return XConsole.Sync(() =>
         {
-            bool? answer = null;
+            bool? result = null;
             XConsole.Write(message);
 
             for (; ; )
@@ -48,37 +48,37 @@ public static class ConsoleExtensions
                 switch (key)
                 {
                     case ConsoleKey.Y:
-                        if (answer == null)
+                        if (result == null)
                             XConsole.Write(yes);
-                        else if (answer == false)
+                        else if (result == false)
                             XConsole.Write([noClear, yes]);
 
-                        answer = true;
+                        result = true;
                         continue;
 
                     case ConsoleKey.N:
-                        if (answer == null)
+                        if (result == null)
                             XConsole.Write(no);
-                        else if (answer == true)
+                        else if (result == true)
                             XConsole.Write([yesClear, no]);
 
-                        answer = false;
+                        result = false;
                         continue;
 
                     case ConsoleKey.Backspace:
-                        if (answer == true)
+                        if (result == true)
                             XConsole.Write(yesClear);
-                        else if (answer == false)
+                        else if (result == false)
                             XConsole.Write(noClear);
 
-                        answer = null;
+                        result = null;
                         continue;
 
                     case ConsoleKey.Enter:
-                        if (answer != null)
+                        if (result != null)
                         {
                             XConsole.WriteLine();
-                            return answer.Value;
+                            return result.Value;
                         }
                         continue;
 

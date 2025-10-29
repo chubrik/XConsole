@@ -13,14 +13,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-#if NET
-using System.Runtime.Versioning;
-#endif
 #if NET9_0_OR_GREATER
 using System.Threading;
 #endif
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
+#endif
+#if NET
+using System.Runtime.Versioning;
 #endif
 
 /// <summary>
@@ -297,7 +297,7 @@ public static class XConsole
 #endif
                 Console.CursorVisible = false;
                 Console.Write(pinClear);
-                Console.SetCursorPosition(0, origTop);
+                Console.SetCursorPosition(left: 0, origTop);
             }
             else
             {
@@ -490,7 +490,7 @@ public static class XConsole
                 _shiftTop = shiftTop;
             }
             else if (_pinHeight > 0)
-                Console.SetCursorPosition(0, origTop + _pinHeight);
+                Console.SetCursorPosition(left: 0, origTop + _pinHeight);
 
             Console.SetCursorPosition(origLeft, origTop);
             Console.CursorVisible = _cursorVisible;
@@ -783,7 +783,7 @@ public static class XConsole
                     else
                         _pinHeight = pinEndTop - (origTop + 1);
 
-                    Console.SetCursorPosition(0, origTop);
+                    Console.SetCursorPosition(left: 0, origTop);
                     Console.WriteLine();
                     Console.CursorVisible = _cursorVisible;
                 }
@@ -971,7 +971,7 @@ public static class XConsole
                         else
                             _pinHeight = pinEndTop - (endTop + 1);
 
-                        Console.SetCursorPosition(0, endTop);
+                        Console.SetCursorPosition(left: 0, endTop);
                         Console.WriteLine();
                     }
                     else
@@ -1456,65 +1456,67 @@ public static class XConsole
 
     private static void WriteItems(ConsoleItem[] items)
     {
-        if (_coloringEnabled)
+        if (!_coloringEnabled)
         {
-            ConsoleItem item;
-
-            for (var i = 0; i < items.Length; i++)
-            {
-                item = items[i];
-
-                switch (item.Type)
-                {
-                    case ConsoleItemType.Plain:
-                    {
-                        Console.Write(item.Value);
-                        continue;
-                    }
-                    case ConsoleItemType.ForeColor:
-                    {
-                        var origForeColor = Console.ForegroundColor;
-                        Console.ForegroundColor = item.ForeColor;
-                        Console.Write(item.Value);
-                        Console.ForegroundColor = origForeColor;
-                        continue;
-                    }
-                    case ConsoleItemType.BackColor:
-                    {
-                        var origBackColor = Console.BackgroundColor;
-                        Console.BackgroundColor = item.BackColor;
-                        Console.Write(item.Value);
-                        Console.BackgroundColor = origBackColor;
-                        continue;
-                    }
-                    case ConsoleItemType.BothColors:
-                    {
-                        var origForeColor = Console.ForegroundColor;
-                        var origBackColor = Console.BackgroundColor;
-                        Console.ForegroundColor = item.ForeColor;
-                        Console.BackgroundColor = item.BackColor;
-                        Console.Write(item.Value);
-                        Console.ForegroundColor = origForeColor;
-                        Console.BackgroundColor = origBackColor;
-                        continue;
-                    }
-                    case ConsoleItemType.Ansi:
-                    {
-                        var origForeColor = Console.ForegroundColor;
-                        var origBackColor = Console.BackgroundColor;
-                        Console.Write(item.Value);
-                        Console.ForegroundColor = origForeColor;
-                        Console.BackgroundColor = origBackColor;
-                        continue;
-                    }
-                    default:
-                        throw new InvalidOperationException();
-                }
-            }
-        }
-        else
             for (var i = 0; i < items.Length; i++)
                 Console.Write(items[i].Value);
+
+            return;
+        }
+
+        ConsoleItem item;
+
+        for (var i = 0; i < items.Length; i++)
+        {
+            item = items[i];
+
+            switch (item.Type)
+            {
+                case ConsoleItemType.Plain:
+                {
+                    Console.Write(item.Value);
+                    continue;
+                }
+                case ConsoleItemType.ForeColor:
+                {
+                    var origForeColor = Console.ForegroundColor;
+                    Console.ForegroundColor = item.ForeColor;
+                    Console.Write(item.Value);
+                    Console.ForegroundColor = origForeColor;
+                    continue;
+                }
+                case ConsoleItemType.BackColor:
+                {
+                    var origBackColor = Console.BackgroundColor;
+                    Console.BackgroundColor = item.BackColor;
+                    Console.Write(item.Value);
+                    Console.BackgroundColor = origBackColor;
+                    continue;
+                }
+                case ConsoleItemType.BothColors:
+                {
+                    var origForeColor = Console.ForegroundColor;
+                    var origBackColor = Console.BackgroundColor;
+                    Console.ForegroundColor = item.ForeColor;
+                    Console.BackgroundColor = item.BackColor;
+                    Console.Write(item.Value);
+                    Console.ForegroundColor = origForeColor;
+                    Console.BackgroundColor = origBackColor;
+                    continue;
+                }
+                case ConsoleItemType.Ansi:
+                {
+                    var origForeColor = Console.ForegroundColor;
+                    var origBackColor = Console.BackgroundColor;
+                    Console.Write(item.Value);
+                    Console.ForegroundColor = origForeColor;
+                    Console.BackgroundColor = origBackColor;
+                    continue;
+                }
+                default:
+                    throw new InvalidOperationException();
+            }
+        }
     }
 
     private static int CalcLineWrapCount(ConsoleItem[] items, int beginLeft)

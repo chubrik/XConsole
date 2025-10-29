@@ -8,11 +8,11 @@ namespace Chubrik.XConsole;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-#if NET
-using System.Runtime.Versioning;
-#endif
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
+#endif
+#if NET
+using System.Runtime.Versioning;
 #endif
 
 /// <summary>
