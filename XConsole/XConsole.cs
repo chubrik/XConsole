@@ -1,6 +1,8 @@
 ﻿#pragma warning disable CS1573 // Parameter has no matching param tag in the XML comment (but other parameters do)
 #if NET
+#pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable CA1416 // Validate platform compatibility
+#pragma warning restore IDE0079 // Remove unnecessary suppression
 #else
 #pragma warning disable CS8604 // Possible null reference argument.
 #endif
@@ -61,7 +63,7 @@ public static class XConsole
     private static readonly object _syncLock = new();
 #endif
 
-    private static bool _coloringEnabled = Environment.GetEnvironmentVariable("NO_COLOR") == null;
+    private static bool _coloringEnabled = string.IsNullOrEmpty(Environment.GetEnvironmentVariable("NO_COLOR"));
     private static bool _cursorVisible;
     private static int _maxTop;
     private static long _shiftTop = 0;
