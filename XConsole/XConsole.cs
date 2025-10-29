@@ -283,31 +283,24 @@ public static class XConsole
         {
             if (_getPinValues == null)
                 return;
-
+#if NET
+            (origLeft, origTop) = Console.GetCursorPosition();
+#else
+            (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
+#endif
             pinHeight = _pinHeight;
 
             if (pinHeight > 0)
             {
                 if (pinHeight != prePinHeight)
                     pinClear = _newLine + new string(' ', Console.BufferWidth * pinHeight - 1);
-#if NET
-                (origLeft, origTop) = Console.GetCursorPosition();
-#else
-                (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
+
                 Console.CursorVisible = false;
                 Console.Write(pinClear);
                 Console.SetCursorPosition(left: 0, origTop);
             }
             else
-            {
-#if NET
-                (origLeft, origTop) = Console.GetCursorPosition();
-#else
-                (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
                 Console.CursorVisible = false;
-            }
 
             Console.WriteLine();
             WriteItems(pinItems);
@@ -367,13 +360,14 @@ public static class XConsole
 
             if (pinHeight > 0)
             {
-                if (pinHeight != prePinHeight)
-                    pinClear = _newLine + new string(' ', Console.BufferWidth * pinHeight - 1);
 #if NET
                 (origLeft, origTop) = Console.GetCursorPosition();
 #else
                 (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
+                if (pinHeight != prePinHeight)
+                    pinClear = _newLine + new string(' ', Console.BufferWidth * pinHeight - 1);
+
                 Console.CursorVisible = false;
                 Console.Write(pinClear);
                 Console.SetCursorPosition(origLeft, origTop);
@@ -727,13 +721,13 @@ public static class XConsole
 
             lock (_syncLock)
             {
+#if NET
+                (origLeft, origTop) = Console.GetCursorPosition();
+#else
+                (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
+#endif
                 if (_getPinValues == null)
                 {
-#if NET
-                    (origLeft, origTop) = Console.GetCursorPosition();
-#else
-                    (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
                     Console.WriteLine();
 
                     if (origTop == _maxTop)
@@ -750,24 +744,13 @@ public static class XConsole
                     {
                         if (pinHeight != prePinHeight)
                             pinClear = _newLine + new string(' ', Console.BufferWidth * pinHeight - 1);
-#if NET
-                        (origLeft, origTop) = Console.GetCursorPosition();
-#else
-                        (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
+
                         Console.CursorVisible = false;
                         Console.Write(pinClear);
                         Console.SetCursorPosition(origLeft, origTop);
                     }
                     else
-                    {
-#if NET
-                        (origLeft, origTop) = Console.GetCursorPosition();
-#else
-                        (origLeft, origTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
                         Console.CursorVisible = false;
-                    }
 
                     Console.WriteLine(_newLine);
                     WriteItems(pinItems);
@@ -922,30 +905,24 @@ public static class XConsole
                 }
                 else
                 {
+#if NET
+                    (beginLeft, beginTop) = Console.GetCursorPosition();
+#else
+                    (beginLeft, beginTop) = (Console.CursorLeft, Console.CursorTop);
+#endif
                     pinHeight = _pinHeight;
 
                     if (pinHeight > 0)
                     {
                         if (pinHeight != prePinHeight)
                             pinClear = _newLine + new string(' ', Console.BufferWidth * pinHeight - 1);
-#if NET
-                        (beginLeft, beginTop) = Console.GetCursorPosition();
-#else
-                        (beginLeft, beginTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
+
                         Console.CursorVisible = false;
                         Console.Write(pinClear);
                         Console.SetCursorPosition(beginLeft, beginTop);
                     }
                     else
-                    {
-#if NET
-                        (beginLeft, beginTop) = Console.GetCursorPosition();
-#else
-                        (beginLeft, beginTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
                         Console.CursorVisible = false;
-                    }
 
                     WriteItems(logItems);
 #if NET
