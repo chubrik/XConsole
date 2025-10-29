@@ -509,7 +509,49 @@ public static class XConsole
     public static string? ReadLine()
     {
         lock (_syncLock)
-            return Console.ReadLine();
+        {
+            var result = Console.ReadLine();
+            var getPinValues = _getPinValues;
+
+            if (getPinValues != null)
+            {
+                Console.CursorVisible = false;
+                var pinValues = getPinValues();
+                var pinItems = new ConsoleItem[pinValues.Count];
+
+                for (var i = 0; i < pinValues.Count; i++)
+                    pinItems[i] = ConsoleItem.Parse(pinValues[i]);
+
+                var pinHeight = _pinHeight;
+                var origTop = Console.CursorTop;
+
+                if (pinHeight > 0)
+                {
+                    var pinClear = new string(' ', Console.BufferWidth * pinHeight - 1);
+                    Console.Write(pinClear);
+                    Console.SetCursorPosition(left: 0, origTop);
+                }
+
+                Console.WriteLine();
+                WriteItems(pinItems);
+                var pinEndTop = Console.CursorTop;
+
+                if (pinEndTop == _maxTop)
+                {
+                    _pinHeight = 1 + CalcLineWrapCount(pinItems, beginLeft: 0);
+                    var shift = origTop + _pinHeight - _maxTop;
+                    _shiftTop += shift;
+                    origTop -= shift;
+                }
+                else
+                    _pinHeight = pinEndTop - origTop;
+
+                Console.SetCursorPosition(left: 0, origTop);
+                Console.CursorVisible = _cursorVisible;
+            }
+
+            return result;
+        }
     }
 
     /// <summary>
@@ -569,7 +611,7 @@ public static class XConsole
 #if NET
                             if (!OperatingSystem.IsWindows() && keyInfo.KeyChar == '\x1a')
                             {
-                                Console.WriteLine();
+                                WriteLine();
                                 return null;
                             }
 #endif
@@ -581,7 +623,7 @@ public static class XConsole
                     }
                     while (keyInfo.Key != ConsoleKey.Enter);
 
-                    Console.WriteLine();
+                    WriteLine();
                 }
 
                 if (result.Length > 0 && result[0] == '\x1a')
