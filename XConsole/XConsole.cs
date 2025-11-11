@@ -12,6 +12,7 @@ namespace Chubrik.XConsole;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 #if NET9_0_OR_GREATER
 using System.Threading;
@@ -121,6 +122,9 @@ public static class XConsole
 
     private static Func<IReadOnlyList<string?>>? _getPinValues = null;
     private static int _pinHeight = 0;
+    private static int _pinClearWidth = 0;
+    private static int _pinClearHeight = 0;
+    private static string _pinClear = string.Empty;
 
     /// <summary>
     /// Pins the specified string value as a static text below the regular log messages.
@@ -265,8 +269,6 @@ public static class XConsole
         if (getPinValues == null)
             return;
 
-        var pinHeight = _pinHeight;
-        var pinClear = GetPinClear(pinHeight);
         var pinValues = getPinValues();
         var pinItems = new ConsoleItem[pinValues.Count];
 
@@ -279,13 +281,15 @@ public static class XConsole
         {
             if (_getPinValues == null)
                 return;
+
+            if (_pinHeight == 0)
+                _pinHeight = 1;
 #if NET
             (logLeft, logTop) = Console.GetCursorPosition();
 #else
             (logLeft, logTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
-            WriteBaseWithPin(
-                logItems: null, isWriteLine: false, pinHeight, pinClear, pinItems,
+            WriteBaseWithPin(logItems: null, isWriteLine: false, pinItems,
                 logBeginLeft: logLeft, logBeginTop: ref logTop, out _, out _);
         }
     }
@@ -312,8 +316,6 @@ public static class XConsole
         if (!_positioningEnabled)
             return;
 
-        var pinHeight = _pinHeight;
-        var pinClear = GetPinClear(pinHeight);
         int logLeft, logTop;
 
         lock (_syncLock)
@@ -325,22 +327,30 @@ public static class XConsole
 #else
             (logLeft, logTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
-            if (pinHeight != _pinHeight)
-                pinClear = GetPinClear(_pinHeight);
-
+            var pinClear = GetPinClear();
             Console.CursorVisible = false;
             Console.Write(pinClear);
             Console.SetCursorPosition(logLeft, logTop);
             Console.CursorVisible = _cursorVisible;
             _getPinValues = null;
+            _pinHeight = 0;
         }
     }
 
-    private static string GetPinClear(int pinHeight)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static string GetPinClear()
     {
-        return pinHeight > 0
-            ? _newLine + new string(' ', Console.BufferWidth * pinHeight - 1)
-            : string.Empty;
+        var pinClearWidth = Console.BufferWidth;
+        var pinClearHeight = _pinHeight;
+
+        if (_pinClearWidth != pinClearWidth || _pinClearHeight != pinClearHeight)
+        {
+            _pinClearWidth = pinClearWidth;
+            _pinClearHeight = pinClearHeight;
+            _pinClear = _newLine + new string(' ', pinClearWidth * pinClearHeight - 1);
+        }
+
+        return _pinClear;
     }
 
     #endregion
@@ -484,16 +494,14 @@ public static class XConsole
             if (_getPinValues != null)
             {
                 Console.CursorVisible = false;
-                Console.CursorTop--;
-                var pinClear = GetPinClear(_pinHeight);
+                Console.CursorTop--; //todo calculate
                 var pinValues = _getPinValues();
                 var pinItems = new ConsoleItem[pinValues.Count];
 
                 for (var i = 0; i < pinValues.Count; i++)
                     pinItems[i] = ConsoleItem.Parse(pinValues[i]);
 
-                WriteBaseWithPin(
-                    logItems: null, isWriteLine: false, _pinHeight, pinClear, pinItems,
+                WriteBaseWithPin(logItems: null, isWriteLine: false, pinItems,
                     logBeginLeft, ref logBeginTop, out _, out _);
             }
 
@@ -625,8 +633,6 @@ public static class XConsole
         }
         else
         {
-            var pinHeight = _pinHeight;
-            var pinClear = GetPinClear(pinHeight);
             var pinValues = getPinValues();
             var pinItems = new ConsoleItem[pinValues.Count];
 
@@ -652,8 +658,7 @@ public static class XConsole
                 }
                 else
                 {
-                    WriteBaseWithPin(
-                        logItems: null, isWriteLine: true, pinHeight, pinClear, pinItems,
+                    WriteBaseWithPin(logItems: null, isWriteLine: true, pinItems,
                         logBeginLeft: logLeft, logBeginTop: ref logTop, out _, out _);
                 }
 
@@ -703,8 +708,6 @@ public static class XConsole
         }
         else
         {
-            var pinHeight = _pinHeight;
-            var pinClear = GetPinClear(pinHeight);
             var pinValues = getPinValues();
             var pinItems = new ConsoleItem[pinValues.Count];
 
@@ -725,8 +728,7 @@ public static class XConsole
                 }
                 else
                 {
-                    WriteBaseWithPin(
-                        logItems, isWriteLine, pinHeight, pinClear, pinItems,
+                    WriteBaseWithPin(logItems, isWriteLine, pinItems,
                         logBeginLeft, ref logBeginTop, out logEndLeft, out logEndTop);
                 }
 
@@ -770,12 +772,10 @@ public static class XConsole
     }
 
     private static void WriteBaseWithPin(
-        ConsoleItem[]? logItems, bool isWriteLine, int pinHeight, string pinClear, ConsoleItem[] pinItems,
+        ConsoleItem[]? logItems, bool isWriteLine, ConsoleItem[] pinItems,
         int logBeginLeft, ref int logBeginTop, out int logEndLeft, out int logEndTop)
     {
-        if (pinHeight != _pinHeight)
-            pinClear = GetPinClear(_pinHeight);
-
+        var pinClear = GetPinClear();
         Console.CursorVisible = false;
         Console.Write(pinClear);
         Console.SetCursorPosition(logBeginLeft, logBeginTop);
