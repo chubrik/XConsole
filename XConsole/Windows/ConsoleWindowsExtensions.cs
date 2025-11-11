@@ -274,51 +274,15 @@ public static class ConsoleWindowsExtensions
     {
 #if NET
         return OperatingSystem.IsWindows();
-#elif NETSTANDARD
+#else
         return RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-#else // NETFRAMEWORK
-        var platform = Environment.OSVersion.Platform;
-
-        return platform == PlatformID.Win32NT ||
-               platform == PlatformID.Win32Windows ||
-               platform == PlatformID.Win32S ||
-               platform == PlatformID.WinCE;
 #endif
     }
 
     private static bool IsOSMinVersion(int major, int minor)
     {
-#if !NETSTANDARD1_3
         return Environment.OSVersion.Version >= new Version(major, minor);
-#else
-        var osVersionInfo = new OSVERSIONINFO();
-        osVersionInfo.dwOSVersionInfoSize = Marshal.SizeOf(osVersionInfo);
-
-        if (GetVersionEx(ref osVersionInfo))
-            return osVersionInfo.dwMajorVersion > major ||
-                (osVersionInfo.dwMajorVersion == major && osVersionInfo.dwMinorVersion >= minor);
-
-        return false;
-#endif
     }
-
-#if NETSTANDARD1_3
-    [StructLayout(LayoutKind.Sequential)]
-    private struct OSVERSIONINFO
-    {
-        public int dwOSVersionInfoSize;
-        public int dwMajorVersion;
-        public int dwMinorVersion;
-        public int dwBuildNumber;
-        public int dwPlatformId;
-
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
-        public string szCSDVersion;
-    }
-
-    [DllImport("kernel32.dll")]
-    private static extern bool GetVersionEx(ref OSVERSIONINFO osVersionInfo);
-#endif
 
     #endregion
 }

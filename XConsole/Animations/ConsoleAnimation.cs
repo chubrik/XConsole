@@ -55,9 +55,7 @@ internal abstract class ConsoleAnimation : IConsoleAnimation
     public void Dispose()
     {
         Stop();
-#if !NETSTANDARD1_3
         _task.Dispose();
-#endif
         _cts.Dispose();
     }
 }

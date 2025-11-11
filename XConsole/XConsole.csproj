@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net9.0;net8.0;net7.0;net6.0;net5.0;netstandard2.0;netstandard1.3;netframework462</TargetFrameworks>
+    <TargetFrameworks>net9.0;net7.0;net5.0;netstandard2.0</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>IDE0130;NETSDK1215</NoWarn>
   </PropertyGroup>
@@ -23,11 +23,6 @@
     <None Include="..\img\icon.png" Link="Pack\icon.png" Pack="true" PackagePath="" />
     <None Include="..\LICENSE" Link="Pack\LICENSE" Pack="true" PackagePath="" />
     <None Include="..\README.md" Link="Pack\README.md" Pack="true" PackagePath="" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.ValueTuple" Version="4.5.*" Condition="'$(TargetFramework)'=='netstandard1.3'" />
-    <PackageReference Include="System.ValueTuple" Version="4.*" Condition="'$(TargetFramework)'=='netframework462'" />
   </ItemGroup>
 
 </Project>

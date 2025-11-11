@@ -2065,7 +2065,6 @@ public static class XConsole
             return Console.OpenStandardInput();
     }
 
-#if !NETSTANDARD1_3
     /// <inheritdoc cref="Console.OpenStandardInput(int)"/>
 #if NET
     [UnsupportedOSPlatform("android")]
@@ -2076,7 +2075,6 @@ public static class XConsole
         lock (_syncLock)
             return Console.OpenStandardInput(bufferSize: bufferSize);
     }
-#endif
 
     /// <inheritdoc cref="Console.OpenStandardOutput()"/>
     public static Stream OpenStandardOutput()
@@ -2085,14 +2083,12 @@ public static class XConsole
             return Console.OpenStandardOutput();
     }
 
-#if !NETSTANDARD1_3
     /// <inheritdoc cref="Console.OpenStandardOutput(int)"/>
     public static Stream OpenStandardOutput(int bufferSize)
     {
         lock (_syncLock)
             return Console.OpenStandardOutput(bufferSize: bufferSize);
     }
-#endif
 
     /// <inheritdoc cref="Console.OpenStandardError()"/>
     public static Stream OpenStandardError()
@@ -2100,13 +2096,11 @@ public static class XConsole
         return Console.OpenStandardError();
     }
 
-#if !NETSTANDARD1_3
     /// <inheritdoc cref="Console.OpenStandardError(int)"/>
     public static Stream OpenStandardError(int bufferSize)
     {
         return Console.OpenStandardError(bufferSize: bufferSize);
     }
-#endif
 
     /// <inheritdoc cref="Console.SetIn(TextReader)"/>
 #if NET
