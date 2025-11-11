@@ -1033,6 +1033,15 @@ public static class XConsole
         return WriteBase(new ConsoleItem(new string(buffer, index, count)), [], isWriteLine: false);
     }
 
+#if NET10_0_OR_GREATER
+    /// <inheritdoc cref="Console.Write(ReadOnlySpan{char})"/>
+    /// <returns><inheritdoc cref="Write(string?)"/></returns>
+    public static (ConsolePosition Begin, ConsolePosition End) Write(ReadOnlySpan<char> value)
+    {
+        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: false);
+    }
+#endif
+
     /// <inheritdoc cref="Console.Write(decimal)"/>
     /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(decimal value)
@@ -1273,6 +1282,15 @@ public static class XConsole
 
         return WriteBase(new ConsoleItem(new string(buffer, index, count)), [], isWriteLine: true);
     }
+
+#if NET10_0_OR_GREATER
+    /// <inheritdoc cref="Console.WriteLine(ReadOnlySpan{char})"/>
+    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(ReadOnlySpan<char> value)
+    {
+        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: true);
+    }
+#endif
 
     /// <inheritdoc cref="Console.WriteLine(decimal)"/>
     /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
