@@ -638,76 +638,7 @@ public static class XConsole
 
     #endregion
 
-    #region Write, WriteLine
-
     #region Write common
-
-    /// <summary>
-    /// <inheritdoc cref="Console.Write(string?)"/>
-    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
-    /// </summary>
-    /// <param name="value">
-    /// The value to write.
-    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
-    /// </param>
-    /// <returns>
-    /// Begin and end <see cref="ConsolePosition"/> structures, resistant to console buffer overflow
-    /// and always point to the correct positions within the console buffer area.
-    /// </returns>
-    /// <inheritdoc cref="Console.Write(string?)"/>
-    public static (ConsolePosition Begin, ConsolePosition End) Write(string? value)
-    {
-        return WriteBase([ConsoleItem.Parse(value)], isWriteLine: false);
-    }
-
-    /// <summary>
-    /// Writes the specified set of string values to the standard output stream.
-    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
-    /// </summary>
-    /// <param name="values">
-    /// The set of values to write.
-    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
-    /// </param>
-    /// <inheritdoc cref="Write(string?)"/>
-    public static (ConsolePosition Begin, ConsolePosition End) Write(IReadOnlyList<string?> values)
-    {
-        var items = new ConsoleItem[values.Count];
-
-        for (var i = 0; i < values.Count; i++)
-            items[i] = ConsoleItem.Parse(values[i]);
-
-        return WriteBase(items, isWriteLine: false);
-    }
-
-    /// <summary>
-    /// <inheritdoc cref="Console.WriteLine(string?)"/>
-    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
-    /// </summary>
-    /// <inheritdoc cref="Write(string?)"/>
-    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(string? value)
-    {
-        return WriteBase([ConsoleItem.Parse(value)], isWriteLine: true);
-    }
-
-    /// <summary>
-    /// Writes the specified set of string values, followed by the current line terminator,
-    /// to the standard output stream.
-    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
-    /// </summary>
-    /// <param name="values">
-    /// The set of values to write.
-    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
-    /// </param>
-    /// <inheritdoc cref="WriteLine(string?)"/>
-    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(IReadOnlyList<string?> values)
-    {
-        var items = new ConsoleItem[values.Count];
-
-        for (var i = 0; i < values.Count; i++)
-            items[i] = ConsoleItem.Parse(values[i]);
-
-        return WriteBase(items, isWriteLine: true);
-    }
 
     /// <inheritdoc cref="Console.WriteLine()"/>
     /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
@@ -1029,96 +960,43 @@ public static class XConsole
 
     #endregion
 
-    #region Write overloads
+    #region Write API
 
-    /// <inheritdoc cref="Console.Write(bool)"/>
-    /// <returns><inheritdoc cref="Write(string?)"/></returns>
-    public static (ConsolePosition Begin, ConsolePosition End) Write(bool value)
+    /// <summary>
+    /// <inheritdoc cref="Console.Write(string?)"/>
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </summary>
+    /// <param name="value">
+    /// The value to write.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </param>
+    /// <returns>
+    /// Begin and end <see cref="ConsolePosition"/> structures, resistant to console buffer overflow
+    /// and always point to the correct positions within the console buffer area.
+    /// </returns>
+    /// <inheritdoc cref="Console.Write(string?)"/>
+    public static (ConsolePosition Begin, ConsolePosition End) Write(string? value)
     {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: false);
+        return WriteBase([ConsoleItem.Parse(value)], isWriteLine: false);
     }
 
-    /// <inheritdoc cref="Console.Write(char)"/>
-    /// <returns><inheritdoc cref="Write(string?)"/></returns>
-    public static (ConsolePosition Begin, ConsolePosition End) Write(char value)
+    /// <summary>
+    /// Writes the specified set of string values to the standard output stream.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </summary>
+    /// <param name="values">
+    /// The set of values to write.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </param>
+    /// <inheritdoc cref="Write(string?)"/>
+    public static (ConsolePosition Begin, ConsolePosition End) Write(IReadOnlyList<string?> values)
     {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: false);
-    }
+        var items = new ConsoleItem[values.Count];
 
-    /// <inheritdoc cref="Console.Write(char[])"/>
-    /// <returns><inheritdoc cref="Write(string?)"/></returns>
-    public static (ConsolePosition Begin, ConsolePosition End) Write(char[]? buffer)
-    {
-        if (buffer == null || buffer.Length == 0)
-        {
-            var position = CursorPosition;
-            return (position, position);
-        }
+        for (var i = 0; i < values.Count; i++)
+            items[i] = ConsoleItem.Parse(values[i]);
 
-        return WriteBase([new ConsoleItem(new string(buffer))], isWriteLine: false);
-    }
-
-    /// <inheritdoc cref="Console.Write(char[], int, int)"/>
-    /// <returns><inheritdoc cref="Write(string?)"/></returns>
-    public static (ConsolePosition Begin, ConsolePosition End) Write(char[] buffer, int index, int count)
-    {
-        if (count == 0)
-        {
-            var position = CursorPosition;
-            return (position, position);
-        }
-
-        return WriteBase([new ConsoleItem(new string(buffer, index, count))], isWriteLine: false);
-    }
-
-    /// <inheritdoc cref="Console.Write(decimal)"/>
-    /// <returns><inheritdoc cref="Write(string?)"/></returns>
-    public static (ConsolePosition Begin, ConsolePosition End) Write(decimal value)
-    {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: false);
-    }
-
-    /// <inheritdoc cref="Console.Write(double)"/>
-    /// <returns><inheritdoc cref="Write(string?)"/></returns>
-    public static (ConsolePosition Begin, ConsolePosition End) Write(double value)
-    {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: false);
-    }
-
-    /// <inheritdoc cref="Console.Write(int)"/>
-    /// <returns><inheritdoc cref="Write(string?)"/></returns>
-    public static (ConsolePosition Begin, ConsolePosition End) Write(int value)
-    {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: false);
-    }
-
-    /// <inheritdoc cref="Console.Write(long)"/>
-    /// <returns><inheritdoc cref="Write(string?)"/></returns>
-    public static (ConsolePosition Begin, ConsolePosition End) Write(long value)
-    {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: false);
-    }
-
-    /// <inheritdoc cref="Console.Write(object?)"/>
-    /// <returns><inheritdoc cref="Write(string?)"/></returns>
-    public static (ConsolePosition Begin, ConsolePosition End) Write(object? value)
-    {
-        var valueStr = value?.ToString();
-
-        if (string.IsNullOrEmpty(valueStr))
-        {
-            var position = CursorPosition;
-            return (position, position);
-        }
-
-        return WriteBase([new ConsoleItem(valueStr)], isWriteLine: false);
-    }
-
-    /// <inheritdoc cref="Console.Write(float)"/>
-    /// <returns><inheritdoc cref="Write(string?)"/></returns>
-    public static (ConsolePosition Begin, ConsolePosition End) Write(float value)
-    {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: false);
+        return WriteBase(items, isWriteLine: false);
     }
 
     /// <summary>
@@ -1245,9 +1123,84 @@ public static class XConsole
     }
 #endif
 
+    /// <inheritdoc cref="Console.Write(bool)"/>
+    /// <returns><inheritdoc cref="Write(string?)"/></returns>
+    public static (ConsolePosition Begin, ConsolePosition End) Write(bool value)
+    {
+        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: false);
+    }
+
+    /// <inheritdoc cref="Console.Write(char)"/>
+    /// <returns><inheritdoc cref="Write(string?)"/></returns>
+    public static (ConsolePosition Begin, ConsolePosition End) Write(char value)
+    {
+        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: false);
+    }
+
+    /// <inheritdoc cref="Console.Write(char[])"/>
+    /// <returns><inheritdoc cref="Write(string?)"/></returns>
+    public static (ConsolePosition Begin, ConsolePosition End) Write(char[]? buffer)
+    {
+        if (buffer == null || buffer.Length == 0)
+        {
+            var position = CursorPosition;
+            return (position, position);
+        }
+
+        return WriteBase([new ConsoleItem(new string(buffer))], isWriteLine: false);
+    }
+
+    /// <inheritdoc cref="Console.Write(char[], int, int)"/>
+    /// <returns><inheritdoc cref="Write(string?)"/></returns>
+    public static (ConsolePosition Begin, ConsolePosition End) Write(char[] buffer, int index, int count)
+    {
+        if (count == 0)
+        {
+            var position = CursorPosition;
+            return (position, position);
+        }
+
+        return WriteBase([new ConsoleItem(new string(buffer, index, count))], isWriteLine: false);
+    }
+
+    /// <inheritdoc cref="Console.Write(decimal)"/>
+    /// <returns><inheritdoc cref="Write(string?)"/></returns>
+    public static (ConsolePosition Begin, ConsolePosition End) Write(decimal value)
+    {
+        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: false);
+    }
+
+    /// <inheritdoc cref="Console.Write(double)"/>
+    /// <returns><inheritdoc cref="Write(string?)"/></returns>
+    public static (ConsolePosition Begin, ConsolePosition End) Write(double value)
+    {
+        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: false);
+    }
+
+    /// <inheritdoc cref="Console.Write(float)"/>
+    /// <returns><inheritdoc cref="Write(string?)"/></returns>
+    public static (ConsolePosition Begin, ConsolePosition End) Write(float value)
+    {
+        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: false);
+    }
+
+    /// <inheritdoc cref="Console.Write(int)"/>
+    /// <returns><inheritdoc cref="Write(string?)"/></returns>
+    public static (ConsolePosition Begin, ConsolePosition End) Write(int value)
+    {
+        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: false);
+    }
+
     /// <inheritdoc cref="Console.Write(uint)"/>
     /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(uint value)
+    {
+        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: false);
+    }
+
+    /// <inheritdoc cref="Console.Write(long)"/>
+    /// <returns><inheritdoc cref="Write(string?)"/></returns>
+    public static (ConsolePosition Begin, ConsolePosition End) Write(long value)
     {
         return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: false);
     }
@@ -1259,89 +1212,53 @@ public static class XConsole
         return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: false);
     }
 
-    #endregion
-
-    #region WriteLine overloads
-
-    /// <inheritdoc cref="Console.WriteLine(bool)"/>
-    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
-    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(bool value)
-    {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: true);
-    }
-
-    /// <inheritdoc cref="Console.WriteLine(char)"/>
-    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
-    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(char value)
-    {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: true);
-    }
-
-    /// <inheritdoc cref="Console.WriteLine(char[])"/>
-    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
-    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(char[]? buffer)
-    {
-        if (buffer == null || buffer.Length == 0)
-            return WriteLine();
-
-        return WriteBase([new ConsoleItem(new string(buffer))], isWriteLine: true);
-    }
-
-    /// <inheritdoc cref="Console.WriteLine(char[], int, int)"/>
-    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
-    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(char[] buffer, int index, int count)
-    {
-        if (count == 0)
-            return WriteLine();
-
-        return WriteBase([new ConsoleItem(new string(buffer, index, count))], isWriteLine: true);
-    }
-
-    /// <inheritdoc cref="Console.WriteLine(decimal)"/>
-    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
-    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(decimal value)
-    {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: true);
-    }
-
-    /// <inheritdoc cref="Console.WriteLine(double)"/>
-    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
-    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(double value)
-    {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: true);
-    }
-
-    /// <inheritdoc cref="Console.WriteLine(int)"/>
-    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
-    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(int value)
-    {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: true);
-    }
-
-    /// <inheritdoc cref="Console.WriteLine(long)"/>
-    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
-    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(long value)
-    {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: true);
-    }
-
-    /// <inheritdoc cref="Console.WriteLine(object?)"/>
-    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
-    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(object? value)
+    /// <inheritdoc cref="Console.Write(object?)"/>
+    /// <returns><inheritdoc cref="Write(string?)"/></returns>
+    public static (ConsolePosition Begin, ConsolePosition End) Write(object? value)
     {
         var valueStr = value?.ToString();
 
         if (string.IsNullOrEmpty(valueStr))
-            return WriteLine();
+        {
+            var position = CursorPosition;
+            return (position, position);
+        }
 
-        return WriteBase([new ConsoleItem(valueStr)], isWriteLine: true);
+        return WriteBase([new ConsoleItem(valueStr)], isWriteLine: false);
     }
 
-    /// <inheritdoc cref="Console.WriteLine(float)"/>
-    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
-    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(float value)
+    #endregion
+
+    #region WriteLine API
+
+    /// <summary>
+    /// <inheritdoc cref="Console.WriteLine(string?)"/>
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </summary>
+    /// <inheritdoc cref="Write(string?)"/>
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(string? value)
     {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: true);
+        return WriteBase([ConsoleItem.Parse(value)], isWriteLine: true);
+    }
+
+    /// <summary>
+    /// Writes the specified set of string values, followed by the current line terminator,
+    /// to the standard output stream.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </summary>
+    /// <param name="values">
+    /// The set of values to write.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </param>
+    /// <inheritdoc cref="WriteLine(string?)"/>
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(IReadOnlyList<string?> values)
+    {
+        var items = new ConsoleItem[values.Count];
+
+        for (var i = 0; i < values.Count; i++)
+            items[i] = ConsoleItem.Parse(values[i]);
+
+        return WriteBase(items, isWriteLine: true);
     }
 
     /// <summary>
@@ -1453,9 +1370,78 @@ public static class XConsole
     }
 #endif
 
+    /// <inheritdoc cref="Console.WriteLine(bool)"/>
+    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(bool value)
+    {
+        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: true);
+    }
+
+    /// <inheritdoc cref="Console.WriteLine(char)"/>
+    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(char value)
+    {
+        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: true);
+    }
+
+    /// <inheritdoc cref="Console.WriteLine(char[])"/>
+    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(char[]? buffer)
+    {
+        if (buffer == null || buffer.Length == 0)
+            return WriteLine();
+
+        return WriteBase([new ConsoleItem(new string(buffer))], isWriteLine: true);
+    }
+
+    /// <inheritdoc cref="Console.WriteLine(char[], int, int)"/>
+    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(char[] buffer, int index, int count)
+    {
+        if (count == 0)
+            return WriteLine();
+
+        return WriteBase([new ConsoleItem(new string(buffer, index, count))], isWriteLine: true);
+    }
+
+    /// <inheritdoc cref="Console.WriteLine(decimal)"/>
+    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(decimal value)
+    {
+        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: true);
+    }
+
+    /// <inheritdoc cref="Console.WriteLine(double)"/>
+    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(double value)
+    {
+        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: true);
+    }
+
+    /// <inheritdoc cref="Console.WriteLine(float)"/>
+    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(float value)
+    {
+        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: true);
+    }
+
+    /// <inheritdoc cref="Console.WriteLine(int)"/>
+    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(int value)
+    {
+        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: true);
+    }
+
     /// <inheritdoc cref="Console.WriteLine(uint)"/>
     /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(uint value)
+    {
+        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: true);
+    }
+
+    /// <inheritdoc cref="Console.WriteLine(long)"/>
+    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(long value)
     {
         return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: true);
     }
@@ -1467,11 +1453,21 @@ public static class XConsole
         return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: true);
     }
 
-    #endregion
+    /// <inheritdoc cref="Console.WriteLine(object?)"/>
+    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(object? value)
+    {
+        var valueStr = value?.ToString();
+
+        if (string.IsNullOrEmpty(valueStr))
+            return WriteLine();
+
+        return WriteBase([new ConsoleItem(valueStr)], isWriteLine: true);
+    }
 
     #endregion
 
-    #region Private utils
+    #region Internal utils
 
     internal static void WriteItemsIsolated(ConsoleItem[] items)
     {
