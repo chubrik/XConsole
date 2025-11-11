@@ -265,19 +265,15 @@ public static class XConsole
         if (getPinValues == null)
             return;
 
-        var prePinHeight = _pinHeight;
-
-        var pinClear = prePinHeight > 0
-            ? _newLine + new string(' ', Console.BufferWidth * prePinHeight - 1)
-            : string.Empty;
-
+        var pinHeight = _pinHeight;
+        var pinClear = GetPinClear(pinHeight);
         var pinValues = getPinValues();
         var pinItems = new ConsoleItem[pinValues.Count];
 
         for (var i = 0; i < pinValues.Count; i++)
             pinItems[i] = ConsoleItem.Parse(pinValues[i]);
 
-        int pinHeight, logLeft, logTop, pinEndTop;
+        int logLeft, logTop;
 
         lock (_syncLock)
         {
@@ -288,36 +284,9 @@ public static class XConsole
 #else
             (logLeft, logTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
-            pinHeight = _pinHeight;
-
-            if (pinHeight > 0)
-            {
-                if (pinHeight != prePinHeight)
-                    pinClear = _newLine + new string(' ', Console.BufferWidth * pinHeight - 1);
-
-                Console.CursorVisible = false;
-                Console.Write(pinClear);
-                Console.SetCursorPosition(left: 0, logTop);
-            }
-            else
-                Console.CursorVisible = false;
-
-            Console.WriteLine();
-            WriteItems(pinItems);
-            pinEndTop = Console.CursorTop;
-
-            if (pinEndTop == _maxTop)
-            {
-                _pinHeight = 1 + GetLineWrapCount(pinItems, beginLeft: 0);
-                var shift = logTop + _pinHeight - _maxTop;
-                _shiftTop += shift;
-                logTop -= shift;
-            }
-            else
-                _pinHeight = pinEndTop - logTop;
-
-            Console.SetCursorPosition(logLeft, logTop);
-            Console.CursorVisible = _cursorVisible;
+            WriteBaseWithPin(
+                logItems: null, isWriteLine: false, pinHeight, pinClear, pinItems,
+                logBeginLeft: logLeft, logBeginTop: ref logTop, out _, out _);
         }
     }
 
@@ -343,40 +312,35 @@ public static class XConsole
         if (!_positioningEnabled)
             return;
 
-        var prePinHeight = _pinHeight;
-
-        var pinClear = prePinHeight > 0
-            ? _newLine + new string(' ', Console.BufferWidth * prePinHeight - 1)
-            : string.Empty;
-
-        int pinHeight, logLeft, logTop;
+        var pinHeight = _pinHeight;
+        var pinClear = GetPinClear(pinHeight);
+        int logLeft, logTop;
 
         lock (_syncLock)
         {
             if (_getPinValues == null)
                 return;
-
-            pinHeight = _pinHeight;
-
-            if (pinHeight > 0)
-            {
 #if NET
-                (logLeft, logTop) = Console.GetCursorPosition();
+            (logLeft, logTop) = Console.GetCursorPosition();
 #else
-                (logLeft, logTop) = (Console.CursorLeft, Console.CursorTop);
+            (logLeft, logTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
-                if (pinHeight != prePinHeight)
-                    pinClear = _newLine + new string(' ', Console.BufferWidth * pinHeight - 1);
+            if (pinHeight != _pinHeight)
+                pinClear = GetPinClear(_pinHeight);
 
-                Console.CursorVisible = false;
-                Console.Write(pinClear);
-                Console.SetCursorPosition(logLeft, logTop);
-                Console.CursorVisible = _cursorVisible;
-                _pinHeight = 0;
-            }
-
+            Console.CursorVisible = false;
+            Console.Write(pinClear);
+            Console.SetCursorPosition(logLeft, logTop);
+            Console.CursorVisible = _cursorVisible;
             _getPinValues = null;
         }
+    }
+
+    private static string GetPinClear(int pinHeight)
+    {
+        return pinHeight > 0
+            ? _newLine + new string(' ', Console.BufferWidth * pinHeight - 1)
+            : string.Empty;
     }
 
     #endregion
@@ -478,12 +442,12 @@ public static class XConsole
             if (endTop == _maxTop)
             {
                 var lineWrapCount = GetLineWrapCount(items, beginLeft);
-                var shift = beginTop + lineWrapCount - endTop;
+                var shift = beginTop - endTop + lineWrapCount;
                 shiftTop += shift;
                 beginTop -= shift;
                 _shiftTop = shiftTop;
             }
-            else if (_pinHeight > 0)
+            else if (_pinHeight > 0) //todo WindowHeight
                 Console.SetCursorPosition(left: 0, beginTop + _pinHeight);
 
             Console.SetCursorPosition(beginLeft, beginTop);
@@ -510,44 +474,27 @@ public static class XConsole
     {
         lock (_syncLock)
         {
+#if NET
+            var (logBeginLeft, logBeginTop) = Console.GetCursorPosition();
+#else
+            var (logBeginLeft, logBeginTop) = (Console.CursorLeft, Console.CursorTop);
+#endif
             var result = Console.ReadLine();
-            var getPinValues = _getPinValues;
 
-            if (getPinValues != null)
+            if (_getPinValues != null)
             {
                 Console.CursorVisible = false;
-                var pinValues = getPinValues();
+                Console.CursorTop--;
+                var pinClear = GetPinClear(_pinHeight);
+                var pinValues = _getPinValues();
                 var pinItems = new ConsoleItem[pinValues.Count];
 
                 for (var i = 0; i < pinValues.Count; i++)
                     pinItems[i] = ConsoleItem.Parse(pinValues[i]);
 
-                var pinHeight = _pinHeight;
-                var logEndTop = Console.CursorTop;
-
-                if (pinHeight > 0)
-                {
-                    var pinClear = new string(' ', Console.BufferWidth * pinHeight - 1);
-                    Console.Write(pinClear);
-                    Console.SetCursorPosition(left: 0, logEndTop);
-                }
-
-                Console.WriteLine();
-                WriteItems(pinItems);
-                var pinEndTop = Console.CursorTop;
-
-                if (pinEndTop == _maxTop)
-                {
-                    _pinHeight = 1 + GetLineWrapCount(pinItems, beginLeft: 0);
-                    var shift = logEndTop + _pinHeight - _maxTop;
-                    _shiftTop += shift;
-                    logEndTop -= shift;
-                }
-                else
-                    _pinHeight = pinEndTop - logEndTop;
-
-                Console.SetCursorPosition(left: 0, logEndTop);
-                Console.CursorVisible = _cursorVisible;
+                WriteBaseWithPin(
+                    logItems: null, isWriteLine: false, _pinHeight, pinClear, pinItems,
+                    logBeginLeft, ref logBeginTop, out _, out _);
             }
 
             return result;
@@ -678,19 +625,13 @@ public static class XConsole
         }
         else
         {
-            var prePinHeight = _pinHeight;
-
-            var pinClear = prePinHeight > 0
-                ? _newLine + new string(' ', Console.BufferWidth * prePinHeight - 1)
-                : string.Empty;
-
+            var pinHeight = _pinHeight;
+            var pinClear = GetPinClear(pinHeight);
             var pinValues = getPinValues();
             var pinItems = new ConsoleItem[pinValues.Count];
 
             for (var i = 0; i < pinValues.Count; i++)
                 pinItems[i] = ConsoleItem.Parse(pinValues[i]);
-
-            int pinHeight, pinEndTop;
 
             lock (_syncLock)
             {
@@ -711,37 +652,9 @@ public static class XConsole
                 }
                 else
                 {
-                    pinHeight = _pinHeight;
-
-                    if (pinHeight > 0)
-                    {
-                        if (pinHeight != prePinHeight)
-                            pinClear = _newLine + new string(' ', Console.BufferWidth * pinHeight - 1);
-
-                        Console.CursorVisible = false;
-                        Console.Write(pinClear);
-                        Console.SetCursorPosition(logLeft, logTop);
-                    }
-                    else
-                        Console.CursorVisible = false;
-
-                    Console.WriteLine(_newLine);
-                    WriteItems(pinItems);
-                    pinEndTop = Console.CursorTop;
-
-                    if (pinEndTop == _maxTop)
-                    {
-                        _pinHeight = 1 + GetLineWrapCount(pinItems, beginLeft: 0);
-                        var shift = logTop + 1 + _pinHeight - _maxTop;
-                        _shiftTop += shift;
-                        logTop -= shift;
-                    }
-                    else
-                        _pinHeight = pinEndTop - (logTop + 1);
-
-                    Console.SetCursorPosition(left: 0, logTop);
-                    Console.WriteLine();
-                    Console.CursorVisible = _cursorVisible;
+                    WriteBaseWithPin(
+                        logItems: null, isWriteLine: true, pinHeight, pinClear, pinItems,
+                        logBeginLeft: logLeft, logBeginTop: ref logTop, out _, out _);
                 }
 
                 shiftTop = _shiftTop;
@@ -779,173 +692,42 @@ public static class XConsole
             {
 #if NET
                 (logBeginLeft, logBeginTop) = Console.GetCursorPosition();
-                Console.CursorVisible = false;
-                WriteItems(logItems);
-                (logEndLeft, logEndTop) = Console.GetCursorPosition();
 #else
                 (logBeginLeft, logBeginTop) = (Console.CursorLeft, Console.CursorTop);
-                Console.CursorVisible = false;
-                WriteItems(logItems);
-                (logEndLeft, logEndTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
-                if (isWriteLine)
-                {
-                    Console.WriteLine();
-                    Console.CursorVisible = _cursorVisible;
-
-                    if (logEndTop == _maxTop)
-                    {
-                        var logLineWrapCount = GetLineWrapCount(logItems, logBeginLeft);
-                        var shift = logBeginTop + logLineWrapCount + 1 - logEndTop;
-                        _shiftTop += shift;
-                        logBeginTop -= shift;
-                        logEndTop--;
-                    }
-                }
-                else
-                {
-                    Console.CursorVisible = _cursorVisible;
-
-                    if (logEndTop == _maxTop)
-                    {
-                        var logLineWrapCount = GetLineWrapCount(logItems, logBeginLeft);
-                        var shift = logBeginTop + logLineWrapCount - logEndTop;
-                        _shiftTop += shift;
-                        logBeginTop -= shift;
-                    }
-                }
+                WriteBaseNoPin(logItems, isWriteLine,
+                    logBeginLeft, logBeginTop, out logEndLeft, out logEndTop);
 
                 shiftTop = _shiftTop;
             }
         }
         else
         {
-            var prePinHeight = _pinHeight;
-
-            var pinClear = prePinHeight > 0
-                ? _newLine + new string(' ', Console.BufferWidth * prePinHeight - 1)
-                : string.Empty;
-
+            var pinHeight = _pinHeight;
+            var pinClear = GetPinClear(pinHeight);
             var pinValues = getPinValues();
             var pinItems = new ConsoleItem[pinValues.Count];
 
             for (var i = 0; i < pinValues.Count; i++)
                 pinItems[i] = ConsoleItem.Parse(pinValues[i]);
 
-            int pinHeight, pinEndTop;
-
             lock (_syncLock)
             {
+#if NET
+                (logBeginLeft, logBeginTop) = Console.GetCursorPosition();
+#else
+                (logBeginLeft, logBeginTop) = (Console.CursorLeft, Console.CursorTop);
+#endif
                 if (_getPinValues == null)
                 {
-#if NET
-                    (logBeginLeft, logBeginTop) = Console.GetCursorPosition();
-                    Console.CursorVisible = false;
-                    WriteItems(logItems);
-                    (logEndLeft, logEndTop) = Console.GetCursorPosition();
-#else
-                    (logBeginLeft, logBeginTop) = (Console.CursorLeft, Console.CursorTop);
-                    Console.CursorVisible = false;
-                    WriteItems(logItems);
-                    (logEndLeft, logEndTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
-                    if (isWriteLine)
-                    {
-                        Console.WriteLine();
-                        Console.CursorVisible = _cursorVisible;
-
-                        if (logEndTop == _maxTop)
-                        {
-                            var logLineWrapCount = GetLineWrapCount(logItems, logBeginLeft);
-                            var shift = logBeginTop + logLineWrapCount + 1 - logEndTop;
-                            _shiftTop += shift;
-                            logBeginTop -= shift;
-                            logEndTop--;
-                        }
-                    }
-                    else
-                    {
-                        Console.CursorVisible = _cursorVisible;
-
-                        if (logEndTop == _maxTop)
-                        {
-                            var logLineWrapCount = GetLineWrapCount(logItems, logBeginLeft);
-                            var shift = logBeginTop + logLineWrapCount - logEndTop;
-                            _shiftTop += shift;
-                            logBeginTop -= shift;
-                        }
-                    }
+                    WriteBaseNoPin(logItems, isWriteLine,
+                        logBeginLeft, logBeginTop, out logEndLeft, out logEndTop);
                 }
                 else
                 {
-#if NET
-                    (logBeginLeft, logBeginTop) = Console.GetCursorPosition();
-#else
-                    (logBeginLeft, logBeginTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
-                    pinHeight = _pinHeight;
-
-                    if (pinHeight > 0)
-                    {
-                        if (pinHeight != prePinHeight)
-                            pinClear = _newLine + new string(' ', Console.BufferWidth * pinHeight - 1);
-
-                        Console.CursorVisible = false;
-                        Console.Write(pinClear);
-                        Console.SetCursorPosition(logBeginLeft, logBeginTop);
-                    }
-                    else
-                        Console.CursorVisible = false;
-
-                    WriteItems(logItems);
-#if NET
-                    (logEndLeft, logEndTop) = Console.GetCursorPosition();
-#else
-                    (logEndLeft, logEndTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
-                    if (isWriteLine)
-                    {
-                        Console.WriteLine(_newLine);
-                        WriteItems(pinItems);
-                        pinEndTop = Console.CursorTop;
-
-                        if (pinEndTop == _maxTop)
-                        {
-                            var logLineWrapCount = GetLineWrapCount(logItems, logBeginLeft);
-                            _pinHeight = 1 + GetLineWrapCount(pinItems, beginLeft: 0);
-                            var shift = logBeginTop + logLineWrapCount + 1 + _pinHeight - _maxTop;
-                            _shiftTop += shift;
-                            logBeginTop -= shift;
-                            logEndTop = _maxTop - _pinHeight - 1;
-                        }
-                        else
-                            _pinHeight = pinEndTop - (logEndTop + 1);
-
-                        Console.SetCursorPosition(left: 0, logEndTop);
-                        Console.WriteLine();
-                    }
-                    else
-                    {
-                        Console.WriteLine();
-                        WriteItems(pinItems);
-                        pinEndTop = Console.CursorTop;
-
-                        if (pinEndTop == _maxTop)
-                        {
-                            var logLineWrapCount = GetLineWrapCount(logItems, logBeginLeft);
-                            _pinHeight = 1 + GetLineWrapCount(pinItems, beginLeft: 0);
-                            var shift = logBeginTop + logLineWrapCount + _pinHeight - _maxTop;
-                            _shiftTop += shift;
-                            logBeginTop -= shift;
-                            logEndTop = _maxTop - _pinHeight;
-                        }
-                        else
-                            _pinHeight = pinEndTop - logEndTop;
-
-                        Console.SetCursorPosition(logEndLeft, logEndTop);
-                    }
-
-                    Console.CursorVisible = _cursorVisible;
+                    WriteBaseWithPin(
+                        logItems, isWriteLine, pinHeight, pinClear, pinItems,
+                        logBeginLeft, ref logBeginTop, out logEndLeft, out logEndTop);
                 }
 
                 shiftTop = _shiftTop;
@@ -956,6 +738,85 @@ public static class XConsole
             new(left: logBeginLeft, top: logBeginTop, shiftTop: shiftTop),
             new(left: logEndLeft, top: logEndTop, shiftTop: shiftTop)
         );
+    }
+
+    private static void WriteBaseNoPin(
+        ConsoleItem[] logItems, bool isWriteLine,
+        int logBeginLeft, int logBeginTop, out int logEndLeft, out int logEndTop)
+    {
+        if (isWriteLine || logItems.Length > 1)
+            Console.CursorVisible = false;
+
+        WriteItems(logItems);
+#if NET
+        (logEndLeft, logEndTop) = Console.GetCursorPosition();
+#else
+        (logEndLeft, logEndTop) = (Console.CursorLeft, Console.CursorTop);
+#endif
+        if (isWriteLine)
+            Console.WriteLine();
+
+        Console.CursorVisible = _cursorVisible;
+
+        if (logEndTop == _maxTop)
+        {
+            var logEndLineWrap = isWriteLine ? 1 : 0;
+            var logLineWrapCount = GetLineWrapCount(logItems, logBeginLeft);
+            var shift = logBeginTop - logEndTop + logLineWrapCount + logEndLineWrap;
+            _shiftTop += shift;
+            logBeginTop -= shift;
+            logEndTop = logBeginTop + logLineWrapCount;
+        }
+    }
+
+    private static void WriteBaseWithPin(
+        ConsoleItem[]? logItems, bool isWriteLine, int pinHeight, string pinClear, ConsoleItem[] pinItems,
+        int logBeginLeft, ref int logBeginTop, out int logEndLeft, out int logEndTop)
+    {
+        if (pinHeight != _pinHeight)
+            pinClear = GetPinClear(_pinHeight);
+
+        Console.CursorVisible = false;
+        Console.Write(pinClear);
+        Console.SetCursorPosition(logBeginLeft, logBeginTop);
+
+        if (logItems != null)
+        {
+            WriteItems(logItems);
+#if NET
+            (logEndLeft, logEndTop) = Console.GetCursorPosition();
+#else
+            (logEndLeft, logEndTop) = (Console.CursorLeft, Console.CursorTop);
+#endif
+        }
+        else
+            (logEndLeft, logEndTop) = (logBeginLeft, logBeginTop);
+
+        Console.WriteLine(isWriteLine ? _newLine : string.Empty);
+
+        WriteItems(pinItems);
+        var pinEndTop = Console.CursorTop;
+
+        var logEndLineWrap = isWriteLine ? 1 : 0;
+
+        if (pinEndTop == _maxTop)
+        {
+            var logLineWrapCount = logItems != null ? GetLineWrapCount(logItems, logBeginLeft) : 0;
+            _pinHeight = 1 + GetLineWrapCount(pinItems, beginLeft: 0);
+            var shift = logBeginTop - pinEndTop + logLineWrapCount + logEndLineWrap + _pinHeight;
+            _shiftTop += shift;
+            logBeginTop -= shift;
+            logEndTop = logBeginTop + logLineWrapCount;
+        }
+        else
+            _pinHeight = pinEndTop - logEndTop - logEndLineWrap;
+
+        Console.SetCursorPosition(logEndLeft, logEndTop);
+
+        if (isWriteLine)
+            Console.WriteLine();
+
+        Console.CursorVisible = _cursorVisible;
     }
 
     #endregion
