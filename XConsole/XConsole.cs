@@ -411,7 +411,7 @@ public static class XConsole
     }
 
     internal static ConsolePosition WriteToPosition(
-        ConsolePosition position, ConsoleItem[] items, bool viewportOnly = false)
+        ConsolePosition position, ConsoleItem? singleItem, ConsoleItem[] manyItems, bool viewportOnly = false)
     {
         if (!_positioningEnabled)
             return default;
@@ -443,6 +443,7 @@ public static class XConsole
                 throw;
             }
 
+            var items = GetItems(singleItem, manyItems);
             WriteItems(items);
 #if NET
             (endLeft, endTop) = Console.GetCursorPosition();
@@ -595,6 +596,8 @@ public static class XConsole
 
     #region Write common
 
+    private static readonly ConsoleItem[] _singleItemArray = new ConsoleItem[1];
+
     /// <inheritdoc cref="Console.WriteLine()"/>
     /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine()
@@ -672,12 +675,14 @@ public static class XConsole
         );
     }
 
-    private static (ConsolePosition Begin, ConsolePosition End) WriteBase(ConsoleItem[] logItems, bool isWriteLine)
+    private static (ConsolePosition Begin, ConsolePosition End) WriteBase(
+        ConsoleItem? singleLogItem, ConsoleItem[] manyLogItems, bool isWriteLine)
     {
         if (!_positioningEnabled)
         {
             lock (_syncLock)
             {
+                var logItems = GetItems(singleLogItem, manyLogItems);
                 WriteItems(logItems);
 
                 if (isWriteLine)
@@ -700,6 +705,8 @@ public static class XConsole
 #else
                 (logBeginLeft, logBeginTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
+                var logItems = GetItems(singleLogItem, manyLogItems);
+
                 WriteBaseNoPin(logItems, isWriteLine,
                     logBeginLeft, logBeginTop, out logEndLeft, out logEndTop);
 
@@ -721,6 +728,8 @@ public static class XConsole
 #else
                 (logBeginLeft, logBeginTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
+                var logItems = GetItems(singleLogItem, manyLogItems);
+
                 if (_getPinValues == null)
                 {
                     WriteBaseNoPin(logItems, isWriteLine,
@@ -838,7 +847,7 @@ public static class XConsole
     /// <inheritdoc cref="Console.Write(string?)"/>
     public static (ConsolePosition Begin, ConsolePosition End) Write(string? value)
     {
-        return WriteBase([ConsoleItem.Parse(value)], isWriteLine: false);
+        return WriteBase(ConsoleItem.Parse(value), [], isWriteLine: false);
     }
 
     /// <summary>
@@ -857,7 +866,7 @@ public static class XConsole
         for (var i = 0; i < values.Count; i++)
             logItems[i] = ConsoleItem.Parse(values[i]);
 
-        return WriteBase(logItems, isWriteLine: false);
+        return WriteBase(null, logItems, isWriteLine: false);
     }
 
     /// <summary>
@@ -882,7 +891,7 @@ public static class XConsole
             return (position, position);
         }
 
-        return WriteBase([ConsoleItem.Parse(string.Format(format, arg0))], isWriteLine: false);
+        return WriteBase(ConsoleItem.Parse(string.Format(format, arg0)), [], isWriteLine: false);
     }
 
     /// <summary>
@@ -907,7 +916,7 @@ public static class XConsole
             return (position, position);
         }
 
-        return WriteBase([ConsoleItem.Parse(string.Format(format, arg0, arg1))], isWriteLine: false);
+        return WriteBase(ConsoleItem.Parse(string.Format(format, arg0, arg1)), [], isWriteLine: false);
     }
 
     /// <summary>
@@ -932,7 +941,7 @@ public static class XConsole
             return (position, position);
         }
 
-        return WriteBase([ConsoleItem.Parse(string.Format(format, arg0, arg1, arg2))], isWriteLine: false);
+        return WriteBase(ConsoleItem.Parse(string.Format(format, arg0, arg1, arg2)), [], isWriteLine: false);
     }
 
     /// <summary>
@@ -957,7 +966,7 @@ public static class XConsole
             return (position, position);
         }
 
-        return WriteBase([ConsoleItem.Parse(string.Format(format, arg ?? []))], isWriteLine: false);
+        return WriteBase(ConsoleItem.Parse(string.Format(format, arg ?? [])), [], isWriteLine: false);
     }
 
 #if NET9_0_OR_GREATER
@@ -980,7 +989,7 @@ public static class XConsole
             return (position, position);
         }
 
-        return WriteBase([ConsoleItem.Parse(string.Format(format, arg))], isWriteLine: false);
+        return WriteBase(ConsoleItem.Parse(string.Format(format, arg)), [], isWriteLine: false);
     }
 #endif
 
@@ -988,14 +997,14 @@ public static class XConsole
     /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(bool value)
     {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: false);
+        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: false);
     }
 
     /// <inheritdoc cref="Console.Write(char)"/>
     /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(char value)
     {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: false);
+        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: false);
     }
 
     /// <inheritdoc cref="Console.Write(char[])"/>
@@ -1008,7 +1017,7 @@ public static class XConsole
             return (position, position);
         }
 
-        return WriteBase([new ConsoleItem(new string(buffer))], isWriteLine: false);
+        return WriteBase(new ConsoleItem(new string(buffer)), [], isWriteLine: false);
     }
 
     /// <inheritdoc cref="Console.Write(char[], int, int)"/>
@@ -1021,56 +1030,56 @@ public static class XConsole
             return (position, position);
         }
 
-        return WriteBase([new ConsoleItem(new string(buffer, index, count))], isWriteLine: false);
+        return WriteBase(new ConsoleItem(new string(buffer, index, count)), [], isWriteLine: false);
     }
 
     /// <inheritdoc cref="Console.Write(decimal)"/>
     /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(decimal value)
     {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: false);
+        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: false);
     }
 
     /// <inheritdoc cref="Console.Write(double)"/>
     /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(double value)
     {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: false);
+        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: false);
     }
 
     /// <inheritdoc cref="Console.Write(float)"/>
     /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(float value)
     {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: false);
+        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: false);
     }
 
     /// <inheritdoc cref="Console.Write(int)"/>
     /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(int value)
     {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: false);
+        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: false);
     }
 
     /// <inheritdoc cref="Console.Write(uint)"/>
     /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(uint value)
     {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: false);
+        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: false);
     }
 
     /// <inheritdoc cref="Console.Write(long)"/>
     /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(long value)
     {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: false);
+        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: false);
     }
 
     /// <inheritdoc cref="Console.Write(ulong)"/>
     /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(ulong value)
     {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: false);
+        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: false);
     }
 
     /// <inheritdoc cref="Console.Write(object?)"/>
@@ -1085,7 +1094,7 @@ public static class XConsole
             return (position, position);
         }
 
-        return WriteBase([new ConsoleItem(valueStr)], isWriteLine: false);
+        return WriteBase(new ConsoleItem(valueStr), [], isWriteLine: false);
     }
 
     #endregion
@@ -1099,7 +1108,7 @@ public static class XConsole
     /// <inheritdoc cref="Write(string?)"/>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(string? value)
     {
-        return WriteBase([ConsoleItem.Parse(value)], isWriteLine: true);
+        return WriteBase(ConsoleItem.Parse(value), [], isWriteLine: true);
     }
 
     /// <summary>
@@ -1119,7 +1128,7 @@ public static class XConsole
         for (var i = 0; i < values.Count; i++)
             logItems[i] = ConsoleItem.Parse(values[i]);
 
-        return WriteBase(logItems, isWriteLine: true);
+        return WriteBase(null, logItems, isWriteLine: true);
     }
 
     /// <summary>
@@ -1141,7 +1150,7 @@ public static class XConsole
         if (format.Length == 0)
             return WriteLine();
 
-        return WriteBase([ConsoleItem.Parse(string.Format(format, arg0))], isWriteLine: true);
+        return WriteBase(ConsoleItem.Parse(string.Format(format, arg0)), [], isWriteLine: true);
     }
 
     /// <summary>
@@ -1163,7 +1172,7 @@ public static class XConsole
         if (format.Length == 0)
             return WriteLine();
 
-        return WriteBase([ConsoleItem.Parse(string.Format(format, arg0, arg1))], isWriteLine: true);
+        return WriteBase(ConsoleItem.Parse(string.Format(format, arg0, arg1)), [], isWriteLine: true);
     }
 
     /// <summary>
@@ -1185,7 +1194,7 @@ public static class XConsole
         if (format.Length == 0)
             return WriteLine();
 
-        return WriteBase([ConsoleItem.Parse(string.Format(format, arg0, arg1, arg2))], isWriteLine: true);
+        return WriteBase(ConsoleItem.Parse(string.Format(format, arg0, arg1, arg2)), [], isWriteLine: true);
     }
 
     /// <summary>
@@ -1207,7 +1216,7 @@ public static class XConsole
         if (format.Length == 0)
             return WriteLine();
 
-        return WriteBase([ConsoleItem.Parse(string.Format(format, arg ?? []))], isWriteLine: true);
+        return WriteBase(ConsoleItem.Parse(string.Format(format, arg ?? [])), [], isWriteLine: true);
     }
 
 #if NET9_0_OR_GREATER
@@ -1227,7 +1236,7 @@ public static class XConsole
         if (format.Length == 0)
             return WriteLine();
 
-        return WriteBase([ConsoleItem.Parse(string.Format(format, arg))], isWriteLine: true);
+        return WriteBase(ConsoleItem.Parse(string.Format(format, arg)), [], isWriteLine: true);
     }
 #endif
 
@@ -1235,14 +1244,14 @@ public static class XConsole
     /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(bool value)
     {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: true);
+        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: true);
     }
 
     /// <inheritdoc cref="Console.WriteLine(char)"/>
     /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(char value)
     {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: true);
+        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: true);
     }
 
     /// <inheritdoc cref="Console.WriteLine(char[])"/>
@@ -1252,7 +1261,7 @@ public static class XConsole
         if (buffer == null || buffer.Length == 0)
             return WriteLine();
 
-        return WriteBase([new ConsoleItem(new string(buffer))], isWriteLine: true);
+        return WriteBase(new ConsoleItem(new string(buffer)), [], isWriteLine: true);
     }
 
     /// <inheritdoc cref="Console.WriteLine(char[], int, int)"/>
@@ -1262,56 +1271,56 @@ public static class XConsole
         if (count == 0)
             return WriteLine();
 
-        return WriteBase([new ConsoleItem(new string(buffer, index, count))], isWriteLine: true);
+        return WriteBase(new ConsoleItem(new string(buffer, index, count)), [], isWriteLine: true);
     }
 
     /// <inheritdoc cref="Console.WriteLine(decimal)"/>
     /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(decimal value)
     {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: true);
+        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: true);
     }
 
     /// <inheritdoc cref="Console.WriteLine(double)"/>
     /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(double value)
     {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: true);
+        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: true);
     }
 
     /// <inheritdoc cref="Console.WriteLine(float)"/>
     /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(float value)
     {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: true);
+        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: true);
     }
 
     /// <inheritdoc cref="Console.WriteLine(int)"/>
     /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(int value)
     {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: true);
+        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: true);
     }
 
     /// <inheritdoc cref="Console.WriteLine(uint)"/>
     /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(uint value)
     {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: true);
+        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: true);
     }
 
     /// <inheritdoc cref="Console.WriteLine(long)"/>
     /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(long value)
     {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: true);
+        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: true);
     }
 
     /// <inheritdoc cref="Console.WriteLine(ulong)"/>
     /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(ulong value)
     {
-        return WriteBase([new ConsoleItem(value.ToString())], isWriteLine: true);
+        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: true);
     }
 
     /// <inheritdoc cref="Console.WriteLine(object?)"/>
@@ -1323,12 +1332,24 @@ public static class XConsole
         if (string.IsNullOrEmpty(valueStr))
             return WriteLine();
 
-        return WriteBase([new ConsoleItem(valueStr)], isWriteLine: true);
+        return WriteBase(new ConsoleItem(valueStr), [], isWriteLine: true);
     }
 
     #endregion
 
     #region Internal utils
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static ConsoleItem[] GetItems(ConsoleItem? singleItem, ConsoleItem[] manyItems)
+    {
+        if (singleItem != null)
+        {
+            _singleItemArray[0] = singleItem.Value;
+            return _singleItemArray;
+        }
+
+        return manyItems;
+    }
 
     internal static void WriteItemsIsolated(ConsoleItem[] items)
     {

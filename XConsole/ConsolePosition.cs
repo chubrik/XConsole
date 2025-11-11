@@ -98,7 +98,7 @@ public readonly struct ConsolePosition
     /// <inheritdoc cref="TryWrite(string?)"/>
     public ConsolePosition Write(string? value)
     {
-        return XConsole.WriteToPosition(this, [ConsoleItem.Parse(value)]);
+        return XConsole.WriteToPosition(this, ConsoleItem.Parse(value), []);
     }
 
     /// <returns>The new end <see cref="ConsolePosition"/> structure.</returns>
@@ -111,7 +111,7 @@ public readonly struct ConsolePosition
         for (var i = 0; i < values.Count; i++)
             items[i] = ConsoleItem.Parse(values[i]);
 
-        return XConsole.WriteToPosition(this, items);
+        return XConsole.WriteToPosition(this, null, items);
     }
 
     /// <summary>
@@ -132,7 +132,7 @@ public readonly struct ConsolePosition
     {
         try
         {
-            return XConsole.WriteToPosition(this, [ConsoleItem.Parse(value)]);
+            return XConsole.WriteToPosition(this, ConsoleItem.Parse(value), []);
         }
         catch (ArgumentOutOfRangeException)
         {
@@ -158,7 +158,7 @@ public readonly struct ConsolePosition
 
         try
         {
-            return XConsole.WriteToPosition(this, items);
+            return XConsole.WriteToPosition(this, null, items);
         }
         catch (ArgumentOutOfRangeException)
         {

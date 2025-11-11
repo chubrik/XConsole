@@ -47,7 +47,7 @@ public static class Program
         var flleMaxIndex = Math.Min(100, files.Length) - 1;
         Console.Pin(() => ["m`This is pin!\n", $"g`Number of files: ", $"W`{fileIndex + 1}"]);
         var endPosList = new List<ConsolePosition>();
-        var animationList = new List<IConsoleAnimation>();
+        var animations = new List<IConsoleAnimation>();
         var random = new Random();
 
         for (; fileIndex <= flleMaxIndex; fileIndex++)
@@ -59,18 +59,22 @@ public static class Program
             Console.Extras.TaskbarProgress(fileIndex, flleMaxIndex, TaskbarProgressLevel.Warning);
             endPosList.Add(endPos);
 
-            if ((fileIndex + 1) % 10 == 0)
+            if ((fileIndex - 2) % 10 == 0)
             {
-                var animation1 = endPosList[fileIndex - 7].AnimateEllipsis();
-                var animation2 = endPosList[fileIndex - 2].AnimateSpinner();
-                animationList.Add(animation1);
-                animationList.Add(animation2);
+                var animation1 = endPosList[fileIndex].AnimateSpinner();
+                animations.Add(animation1);
+            }
+
+            if ((fileIndex - 7) % 10 == 0)
+            {
+                var animation2 = endPosList[fileIndex].AnimateEllipsis();
+                animations.Add(animation2);
             }
         }
 
         Console.Extras.TaskbarProgressAnimate();
 
-        foreach (var animation in animationList)
+        foreach (var animation in animations)
         {
             await Task.Delay(150);
             animation.Stop().TryWrite("Cb`ok");
