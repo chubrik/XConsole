@@ -1,6 +1,4 @@
-﻿#pragma warning disable IDE0060 // Remove unused parameter
-
-namespace Chubrik.XConsole;
+﻿namespace Chubrik.XConsole;
 
 using System;
 
@@ -14,7 +12,7 @@ public static class ConsoleExtensions
     /// </summary>
     /// <returns><see langword="True"/> or <see langword="false"/> according to the user’s decision.</returns>
     public static bool Confirm(
-        this ConsoleExtras extras, string message = "Continue? [y/n]: ", string yes = "Yes", string no = "No")
+        this ConsoleExtras _, string message = "Continue? [y/n]: ", string yes = "Yes", string no = "No")
     {
         var yesItem = ConsoleItem.Parse(yes);
         var noItem = ConsoleItem.Parse(no);

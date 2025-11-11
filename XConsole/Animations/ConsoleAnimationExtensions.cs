@@ -1,6 +1,4 @@
-﻿#pragma warning disable IDE0060 // Remove unused parameter
-
-namespace Chubrik.XConsole;
+﻿namespace Chubrik.XConsole;
 
 using System.Threading;
 #if NET
@@ -22,7 +20,7 @@ public static class ConsoleAnimationExtensions
     /// Starts an ellipsis animation at the current position.
     /// </summary>
     public static IConsoleAnimation AnimateEllipsis(
-        this ConsoleExtras extras, CancellationToken? cancellationToken = null)
+        this ConsoleExtras _, CancellationToken? cancellationToken = null)
     {
         return XConsole.CursorPosition.AnimateEllipsis(cancellationToken);
     }
@@ -31,7 +29,7 @@ public static class ConsoleAnimationExtensions
     /// Starts a spinner animation at the current position.
     /// </summary>
     public static IConsoleAnimation AnimateSpinner(
-        this ConsoleExtras extras, CancellationToken? cancellationToken = null)
+        this ConsoleExtras _, CancellationToken? cancellationToken = null)
     {
         return XConsole.CursorPosition.AnimateSpinner(cancellationToken);
     }

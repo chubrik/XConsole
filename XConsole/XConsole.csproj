@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net10.0;net9.0;net7.0;net5.0;netstandard2.0</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <NoWarn>IDE0130;NETSDK1215</NoWarn>
+    <NoWarn>IDE0130</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -23,10 +23,6 @@
     <None Include="..\img\icon.png" Link="Pack\icon.png" Pack="true" PackagePath="" />
     <None Include="..\LICENSE" Link="Pack\LICENSE" Pack="true" PackagePath="" />
     <None Include="..\README.md" Link="Pack\README.md" Pack="true" PackagePath="" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="RangeCompat.cs" Visible="false" />
   </ItemGroup>
 
 </Project>

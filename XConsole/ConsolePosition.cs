@@ -76,16 +76,10 @@ public readonly struct ConsolePosition
         ShiftTop = shiftTop;
     }
 
-#pragma warning disable CS1734 // XML comment has a paramref tag, but there is no parameter by that name
     /// <summary>
-    /// <paramref name="Left"/> and <paramref name="top"/> arguments should be specified.
+    /// Arguments should be specified.
     /// </summary>
-    /// <remarks>
-    /// Please, use constructor overload:
-    /// <br/>• <see cref="ConsolePosition(int, int)"/>
-    /// </remarks>
     /// <exception cref="InvalidOperationException"/>
-#pragma warning restore CS1734 // XML comment has a paramref tag, but there is no parameter by that name
     [Obsolete("Arguments should be specified.", error: true)]
     public ConsolePosition() => throw new InvalidOperationException();
 

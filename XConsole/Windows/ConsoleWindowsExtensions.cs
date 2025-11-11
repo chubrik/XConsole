@@ -1,6 +1,4 @@
-﻿#pragma warning disable IDE0060 // Remove unused parameter
-
-namespace Chubrik.XConsole;
+﻿namespace Chubrik.XConsole;
 
 using System;
 using System.Runtime.InteropServices;
@@ -37,7 +35,7 @@ public static class ConsoleWindowsExtensions
     /// <summary>
     /// Reset current app highlighting.
     /// </summary>
-    public static void AppHighlightReset(this ConsoleExtras extras)
+    public static void AppHighlightReset(this ConsoleExtras _)
     {
         if (!_isAppHighlightSupported)
             return;
@@ -54,13 +52,12 @@ public static class ConsoleWindowsExtensions
     /// <summary>
     /// Set current app highlighting.
     /// </summary>
+    /// <param name="_"></param>
     /// <param name="kind">Sets what will be highlighted.</param>
     /// <param name="blinkCount">Sets the count of blinks. 0 for infinite blinking.</param>
     /// <param name="resetOnFocus">Automatically reset highlighting when a window comes into focus.</param>
     public static void AppHighlight(
-#pragma warning disable CS1573 // Parameter has no matching param tag in the XML comment (but other parameters do)
-        this ConsoleExtras extras,
-#pragma warning restore CS1573 // Parameter has no matching param tag in the XML comment (but other parameters do)
+        this ConsoleExtras _,
         AppHighlightKind kind = AppHighlightKind.WindowAndTaskbar,
         int blinkCount = 3,
         bool resetOnFocus = true)
@@ -124,7 +121,7 @@ public static class ConsoleWindowsExtensions
     /// <summary>
     /// Sets the taskbar button to the default appearance.
     /// </summary>
-    public static void TaskbarProgressReset(this ConsoleExtras extras)
+    public static void TaskbarProgressReset(this ConsoleExtras _)
     {
         if (!_isTaskbarProgressSupported)
             return;
@@ -135,7 +132,7 @@ public static class ConsoleWindowsExtensions
     /// <summary>
     /// Sets the taskbar button to animated progress appearance.
     /// </summary>
-    public static void TaskbarProgressAnimate(this ConsoleExtras extras)
+    public static void TaskbarProgressAnimate(this ConsoleExtras _)
     {
         if (!_isTaskbarProgressSupported)
             return;
@@ -146,12 +143,11 @@ public static class ConsoleWindowsExtensions
     /// <summary>
     /// Sets the taskbar button to specified progress appearance.
     /// </summary>
+    /// <param name="extras"></param>
     /// <param name="value">Current progress value on the taskbar button.</param>
     /// <param name="maxValue">Maximum progress value on the taskbar button.</param>
     /// <param name="level">The appearance type of the taskbar button.</param>
-#pragma warning disable CS1573 // Parameter has no matching param tag in the XML comment (but other parameters do)
     public static void TaskbarProgress(this ConsoleExtras extras,
-#pragma warning restore CS1573 // Parameter has no matching param tag in the XML comment (but other parameters do)
         double value, double maxValue, TaskbarProgressLevel level = TaskbarProgressLevel.Default)
     {
         if (!_isTaskbarProgressSupported)
@@ -235,22 +231,22 @@ public static class ConsoleWindowsExtensions
     /// <summary>
     /// Hides the console window.
     /// </summary>
-    public static void WindowHide(this ConsoleExtras extras) => ShowWindow(_consolePtr, WINDOW_HIDE);
+    public static void WindowHide(this ConsoleExtras _) => ShowWindow(_consolePtr, WINDOW_HIDE);
 
     /// <summary>
     /// Maximizes the console window.
     /// </summary>
-    public static void WindowMaximize(this ConsoleExtras extras) => ShowWindow(_consolePtr, WINDOW_MAXIMIZE);
+    public static void WindowMaximize(this ConsoleExtras _) => ShowWindow(_consolePtr, WINDOW_MAXIMIZE);
 
     /// <summary>
     /// Minimizes the console window.
     /// </summary>
-    public static void WindowMinimize(this ConsoleExtras extras) => ShowWindow(_consolePtr, WINDOW_MINIMIZE);
+    public static void WindowMinimize(this ConsoleExtras _) => ShowWindow(_consolePtr, WINDOW_MINIMIZE);
 
     /// <summary>
     /// Restores the console window after minimization.
     /// </summary>
-    public static void WindowRestore(this ConsoleExtras extras) => ShowWindow(_consolePtr, WINDOW_RESTORE);
+    public static void WindowRestore(this ConsoleExtras _) => ShowWindow(_consolePtr, WINDOW_RESTORE);
 
     private const int WINDOW_HIDE = 0;
     private const int WINDOW_MAXIMIZE = 3;

@@ -1,10 +1,6 @@
 ﻿#pragma warning disable CS1573 // Parameter has no matching param tag in the XML comment (but other parameters do)
 #if NET
-#pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable CA1416 // Validate platform compatibility
-#pragma warning restore IDE0079 // Remove unnecessary suppression
-#else
-#pragma warning disable CS8604 // Possible null reference argument.
 #endif
 
 namespace Chubrik.XConsole;
@@ -1102,8 +1098,13 @@ public static class XConsole
             var position = CursorPosition;
             return (position, position);
         }
-
+#if !NET
+#pragma warning disable CS8604 // Possible null reference argument.
+#endif
         return WriteBase(new ConsoleItem(valueStr), [], isWriteLine: false);
+#if !NET
+#pragma warning restore CS8604 // Possible null reference argument.
+#endif
     }
 
     #endregion
@@ -1349,8 +1350,13 @@ public static class XConsole
 
         if (string.IsNullOrEmpty(valueStr))
             return WriteLine();
-
+#if !NET
+#pragma warning disable CS8604 // Possible null reference argument.
+#endif
         return WriteBase(new ConsoleItem(valueStr), [], isWriteLine: true);
+#if !NET
+#pragma warning restore CS8604 // Possible null reference argument.
+#endif
     }
 
     #endregion

@@ -1,10 +1,8 @@
-﻿#if NETSTANDARD2_0
-
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+﻿#if !NET
 
 namespace System;
 
-public readonly struct Index(int value, bool fromEnd = false)
+internal readonly struct Index(int value, bool fromEnd = false)
 {
     public static Index Start => new(0);
     public static Index End => new(0, fromEnd: true);
@@ -12,7 +10,7 @@ public readonly struct Index(int value, bool fromEnd = false)
     public static implicit operator Index(int value) => new(value);
 }
 
-public readonly struct Range(Index start, Index end)
+internal readonly struct Range(Index start, Index end)
 {
     public Index Start { get; } = start;
     public Index End { get; } = end;
