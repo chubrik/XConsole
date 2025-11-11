@@ -28,7 +28,7 @@ internal readonly struct ConsoleItem(
                 var foreColor = _colorMap[char0];
 
                 if (foreColor != -1)
-                    return new(value.Substring(2), ConsoleItemType.ForeColor, foreColor: (ConsoleColor)foreColor);
+                    return new(value[2..], ConsoleItemType.ForeColor, foreColor: (ConsoleColor)foreColor);
             }
 
             return new(value);
@@ -45,11 +45,11 @@ internal readonly struct ConsoleItem(
                     var foreColor = _colorMap[char0];
 
                     if (foreColor != -1)
-                        return new(value.Substring(3), ConsoleItemType.BothColors,
+                        return new(value[3..], ConsoleItemType.BothColors,
                             foreColor: (ConsoleColor)foreColor, backColor: (ConsoleColor)backColor);
 
                     if (char0 == ' ')
-                        return new(value.Substring(3), ConsoleItemType.BackColor, backColor: (ConsoleColor)backColor);
+                        return new(value[3..], ConsoleItemType.BackColor, backColor: (ConsoleColor)backColor);
                 }
             }
 

@@ -557,7 +557,7 @@ public static class XConsole
                             if (isMaskedMode)
                                 Console.Write("\b \b");
 
-                            result = result.Substring(0, result.Length - 1);
+                            result = result[..^1];
                         }
                         else if (
                             !char.IsControl(keyInfo.KeyChar) ||
