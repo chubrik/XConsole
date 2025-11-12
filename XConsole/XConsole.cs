@@ -268,11 +268,9 @@ public static class XConsole
 
             if (_pinHeight == 0)
                 _pinHeight = 1;
-#if NET
-            (logLeft, logTop) = Console.GetCursorPosition();
-#else
-            (logLeft, logTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
+
+            (logLeft, logTop) = GetCursorPositionNoLock();
+
             WriteBaseWithPin(logItems: null, isWriteLine: false, pinItems,
                 logBeginLeft: logLeft, logBeginTop: ref logTop, out _, out _);
         }
@@ -304,12 +302,9 @@ public static class XConsole
         {
             if (_getPinValues == null)
                 return;
-#if NET
-            (logLeft, logTop) = Console.GetCursorPosition();
-#else
-            (logLeft, logTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
+
             var pinClear = GetPinClear();
+            (logLeft, logTop) = GetCursorPositionNoLock();
             Console.CursorVisible = false;
             Console.Write(pinClear);
             Console.SetCursorPosition(logLeft, logTop);
@@ -357,12 +352,8 @@ public static class XConsole
         {
             lock (_syncLock)
             {
-#if NET
-                var (left, top) = Console.GetCursorPosition();
+                var (left, top) = GetCursorPositionNoLock();
                 return new(left: left, top: top, shiftTop: _shiftTop);
-#else
-                return new(left: Console.CursorLeft, top: Console.CursorTop, shiftTop: _shiftTop);
-#endif
             }
         }
         set
@@ -403,12 +394,8 @@ public static class XConsole
 
         lock (_syncLock)
         {
-#if NET
-            (logLeft, logTop) = Console.GetCursorPosition();
-#else
-            (logLeft, logTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
             shiftTop = _shiftTop;
+            (logLeft, logTop) = GetCursorPositionNoLock();
             beginTop = unchecked((int)Math.Max(int.MinValue, position.InitialTop + position.ShiftTop - shiftTop));
             isOnViewport = logTop + _pinHeight - beginTop < Console.WindowHeight;
 
@@ -429,11 +416,8 @@ public static class XConsole
 
             items = GetItems(singleItem, manyItems);
             WriteItems(items);
-#if NET
-            (endLeft, endTop) = Console.GetCursorPosition();
-#else
-            (endLeft, endTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
+            (endLeft, endTop) = GetCursorPositionNoLock();
+
             if (endTop == _maxTop)
             {
                 var lineWrapCount = GetLineWrapCount(items, position.Left);
@@ -467,11 +451,7 @@ public static class XConsole
     {
         lock (_syncLock)
         {
-#if NET
-            var (logBeginLeft, logBeginTop) = Console.GetCursorPosition();
-#else
-            var (logBeginLeft, logBeginTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
+            var (logBeginLeft, logBeginTop) = GetCursorPositionNoLock();
             var result = Console.ReadLine();
 
             if (_getPinValues != null)
@@ -598,11 +578,7 @@ public static class XConsole
         {
             lock (_syncLock)
             {
-#if NET
-                (logLeft, logTop) = Console.GetCursorPosition();
-#else
-                (logLeft, logTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
+                (logLeft, logTop) = GetCursorPositionNoLock();
                 Console.WriteLine();
 
                 if (logTop == _maxTop)
@@ -624,11 +600,8 @@ public static class XConsole
 
             lock (_syncLock)
             {
-#if NET
-                (logLeft, logTop) = Console.GetCursorPosition();
-#else
-                (logLeft, logTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
+                (logLeft, logTop) = GetCursorPositionNoLock();
+
                 if (_getPinValues == null)
                 {
                     Console.WriteLine();
@@ -682,11 +655,7 @@ public static class XConsole
         {
             lock (_syncLock)
             {
-#if NET
-                (logBeginLeft, logBeginTop) = Console.GetCursorPosition();
-#else
-                (logBeginLeft, logBeginTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
+                (logBeginLeft, logBeginTop) = GetCursorPositionNoLock();
                 logItems = GetItems(singleLogItem, manyLogItems);
 
                 WriteBaseNoPin(logItems, isWriteLine,
@@ -705,11 +674,7 @@ public static class XConsole
 
             lock (_syncLock)
             {
-#if NET
-                (logBeginLeft, logBeginTop) = Console.GetCursorPosition();
-#else
-                (logBeginLeft, logBeginTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
+                (logBeginLeft, logBeginTop) = GetCursorPositionNoLock();
                 logItems = GetItems(singleLogItem, manyLogItems);
 
                 if (_getPinValues == null)
@@ -741,11 +706,8 @@ public static class XConsole
             Console.CursorVisible = false;
 
         WriteItems(logItems);
-#if NET
-        (logEndLeft, logEndTop) = Console.GetCursorPosition();
-#else
-        (logEndLeft, logEndTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
+        (logEndLeft, logEndTop) = GetCursorPositionNoLock();
+
         if (isWriteLine)
             Console.WriteLine();
 
@@ -774,17 +736,12 @@ public static class XConsole
         if (logItems != null)
         {
             WriteItems(logItems);
-#if NET
-            (logEndLeft, logEndTop) = Console.GetCursorPosition();
-#else
-            (logEndLeft, logEndTop) = (Console.CursorLeft, Console.CursorTop);
-#endif
+            (logEndLeft, logEndTop) = GetCursorPositionNoLock();
         }
         else
             (logEndLeft, logEndTop) = (logBeginLeft, logBeginTop);
 
         Console.WriteLine(isWriteLine ? _newLine : string.Empty);
-
         WriteItems(pinItems);
         var pinEndTop = Console.CursorTop;
         var logEndLineWrap = isWriteLine ? 1 : 0;
@@ -1349,6 +1306,16 @@ public static class XConsole
     #region Internal utils
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static (int Left, int Top) GetCursorPositionNoLock()
+    {
+#if NET
+        return Console.GetCursorPosition();
+#else
+        return (Console.CursorLeft, Console.CursorTop);
+#endif
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static ConsoleItem[] GetItems(ConsoleItem? singleItem, ConsoleItem[] manyItems)
     {
         if (singleItem != null)
@@ -1873,11 +1840,7 @@ public static class XConsole
     public static (int Left, int Top) GetCursorPosition()
     {
         lock (_syncLock)
-#if NET
-            return Console.GetCursorPosition();
-#else
-            return (Console.CursorLeft, Console.CursorTop);
-#endif
+            return GetCursorPositionNoLock();
     }
 
     /// <inheritdoc cref="Console.Title"/>
