@@ -396,26 +396,30 @@ public static class XConsole
         if (!_positioningEnabled)
             return default;
 
-        int beginLeft, beginTop, endLeft, endTop;
-        long shiftTop, positionActualTop;
+        bool isOnViewport;
+        int logLeft, logTop, beginTop, endLeft, endTop;
+        long shiftTop;
+        ConsoleItem[] items;
 
         lock (_syncLock)
         {
-            shiftTop = _shiftTop;
-            positionActualTop = Math.Max(int.MinValue, position.InitialTop + position.ShiftTop - shiftTop);
 #if NET
-            (beginLeft, beginTop) = Console.GetCursorPosition();
+            (logLeft, logTop) = Console.GetCursorPosition();
 #else
-            (beginLeft, beginTop) = (Console.CursorLeft, Console.CursorTop);
+            (logLeft, logTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
-            if (viewportOnly && beginTop + _pinHeight - positionActualTop >= Console.WindowHeight)
+            shiftTop = _shiftTop;
+            beginTop = unchecked((int)Math.Max(int.MinValue, position.InitialTop + position.ShiftTop - shiftTop));
+            isOnViewport = logTop + _pinHeight - beginTop < Console.WindowHeight;
+
+            if (viewportOnly && !isOnViewport)
                 throw new ArgumentOutOfRangeException(nameof(position));
 
             Console.CursorVisible = false;
 
             try
             {
-                Console.SetCursorPosition(position.Left, unchecked((int)positionActualTop));
+                Console.SetCursorPosition(position.Left, beginTop);
             }
             catch
             {
@@ -423,7 +427,7 @@ public static class XConsole
                 throw;
             }
 
-            var items = GetItems(singleItem, manyItems);
+            items = GetItems(singleItem, manyItems);
             WriteItems(items);
 #if NET
             (endLeft, endTop) = Console.GetCursorPosition();
@@ -432,16 +436,16 @@ public static class XConsole
 #endif
             if (endTop == _maxTop)
             {
-                var lineWrapCount = GetLineWrapCount(items, beginLeft);
+                var lineWrapCount = GetLineWrapCount(items, position.Left);
                 var shift = beginTop - endTop + lineWrapCount;
                 shiftTop += shift;
-                beginTop -= shift;
+                logTop -= shift;
                 _shiftTop = shiftTop;
             }
-            else if (_pinHeight > 0) //todo WindowHeight
-                Console.SetCursorPosition(left: 0, beginTop + _pinHeight);
+            else if (_pinHeight > 0 && !isOnViewport)
+                Console.SetCursorPosition(left: 0, logTop + _pinHeight);
 
-            Console.SetCursorPosition(beginLeft, beginTop);
+            Console.SetCursorPosition(logLeft, logTop);
             Console.CursorVisible = _cursorVisible;
         }
 
@@ -654,11 +658,13 @@ public static class XConsole
     private static (ConsolePosition Begin, ConsolePosition End) WriteBase(
         ConsoleItem? singleLogItem, ConsoleItem[] manyLogItems, bool isWriteLine)
     {
+        ConsoleItem[] logItems;
+
         if (!_positioningEnabled)
         {
             lock (_syncLock)
             {
-                var logItems = GetItems(singleLogItem, manyLogItems);
+                logItems = GetItems(singleLogItem, manyLogItems);
                 WriteItems(logItems);
 
                 if (isWriteLine)
@@ -681,7 +687,7 @@ public static class XConsole
 #else
                 (logBeginLeft, logBeginTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
-                var logItems = GetItems(singleLogItem, manyLogItems);
+                logItems = GetItems(singleLogItem, manyLogItems);
 
                 WriteBaseNoPin(logItems, isWriteLine,
                     logBeginLeft, logBeginTop, out logEndLeft, out logEndTop);
@@ -704,7 +710,7 @@ public static class XConsole
 #else
                 (logBeginLeft, logBeginTop) = (Console.CursorLeft, Console.CursorTop);
 #endif
-                var logItems = GetItems(singleLogItem, manyLogItems);
+                logItems = GetItems(singleLogItem, manyLogItems);
 
                 if (_getPinValues == null)
                 {
@@ -781,7 +787,6 @@ public static class XConsole
 
         WriteItems(pinItems);
         var pinEndTop = Console.CursorTop;
-
         var logEndLineWrap = isWriteLine ? 1 : 0;
 
         if (pinEndTop == _maxTop)
