@@ -758,7 +758,10 @@ public static partial class XConsole
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-    public static TextReader In => Console.In;
+    public static TextReader In
+    {
+        get => Console.In;
+    }
 
     /// <inheritdoc cref="Console.InputEncoding"/>
     [UnsupportedOSPlatform("android")]
@@ -790,7 +793,10 @@ public static partial class XConsole
     }
 
     /// <inheritdoc cref="Console.KeyAvailable"/>
-    public static bool KeyAvailable => Console.KeyAvailable;
+    public static bool KeyAvailable
+    {
+        get => Console.KeyAvailable;
+    }
 
     /// <inheritdoc cref="Console.ReadKey()"/>
     [UnsupportedOSPlatform("android")]
@@ -818,19 +824,34 @@ public static partial class XConsole
     }
 
     /// <inheritdoc cref="Console.Out"/>
-    public static TextWriter Out => Console.Out;
+    public static TextWriter Out
+    {
+        get => Console.Out;
+    }
 
     /// <inheritdoc cref="Console.Error"/>
-    public static TextWriter Error => Console.Error;
+    public static TextWriter Error
+    {
+        get => Console.Error;
+    }
 
     /// <inheritdoc cref="Console.IsInputRedirected"/>
-    public static bool IsInputRedirected => Console.IsInputRedirected;
+    public static bool IsInputRedirected
+    {
+        get => Console.IsInputRedirected;
+    }
 
     /// <inheritdoc cref="Console.IsOutputRedirected"/>
-    public static bool IsOutputRedirected => Console.IsOutputRedirected;
+    public static bool IsOutputRedirected
+    {
+        get => Console.IsOutputRedirected;
+    }
 
     /// <inheritdoc cref="Console.IsErrorRedirected"/>
-    public static bool IsErrorRedirected => Console.IsErrorRedirected;
+    public static bool IsErrorRedirected
+    {
+        get => Console.IsErrorRedirected;
+    }
 
     /// <inheritdoc cref="Console.CursorSize"/>
     public static int CursorSize
@@ -846,11 +867,17 @@ public static partial class XConsole
 
     /// <inheritdoc cref="Console.NumberLock"/>
     [SupportedOSPlatform("windows")]
-    public static bool NumberLock => Console.NumberLock;
+    public static bool NumberLock
+    {
+        get => Console.NumberLock;
+    }
 
     /// <inheritdoc cref="Console.CapsLock"/>
     [SupportedOSPlatform("windows")]
-    public static bool CapsLock => Console.CapsLock;
+    public static bool CapsLock
+    {
+        get => Console.CapsLock;
+    }
 
     /// <inheritdoc cref="Console.BackgroundColor"/>
     [UnsupportedOSPlatform("android")]
@@ -1014,14 +1041,20 @@ public static partial class XConsole
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-    public static int LargestWindowWidth => Console.LargestWindowWidth;
+    public static int LargestWindowWidth
+    {
+        get => Console.LargestWindowWidth;
+    }
 
     /// <inheritdoc cref="Console.LargestWindowHeight"/>
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-    public static int LargestWindowHeight => Console.LargestWindowHeight;
+    public static int LargestWindowHeight
+    {
+        get => Console.LargestWindowHeight;
+    }
 
     /// <inheritdoc cref="Console.CursorVisible"/>
     public static bool CursorVisible
@@ -1127,11 +1160,17 @@ public static partial class XConsole
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-    public static void Beep() => Console.Beep();
+    public static void Beep()
+    {
+        Console.Beep();
+    }
 
     /// <inheritdoc cref="Console.Beep(int, int)"/>
     [SupportedOSPlatform("windows")]
-    public static void Beep(int frequency, int duration) => Console.Beep(frequency: frequency, duration: duration);
+    public static void Beep(int frequency, int duration)
+    {
+        Console.Beep(frequency: frequency, duration: duration);
+    }
 
     /// <inheritdoc cref="Console.MoveBufferArea(int, int, int, int, int, int)"/>
     [SupportedOSPlatform("windows")]
