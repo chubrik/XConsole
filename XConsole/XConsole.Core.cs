@@ -306,6 +306,32 @@ public static partial class XConsole
 
     #region Writing
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static (ConsolePosition Begin, ConsolePosition End) WriteParced(
+        string? value, bool isWriteLine)
+    {
+        return WriteBase(singleLogItem: ConsoleItem.Parse(value), manyLogItems: [], isWriteLine);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static (ConsolePosition Begin, ConsolePosition End) WriteParced(
+        IReadOnlyList<string?> values, bool isWriteLine)
+    {
+        var logItems = new ConsoleItem[values.Count];
+
+        for (var i = 0; i < values.Count; i++)
+            logItems[i] = ConsoleItem.Parse(values[i]);
+
+        return WriteBase(singleLogItem: null, manyLogItems: logItems, isWriteLine);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static (ConsolePosition Begin, ConsolePosition End) WritePlain(
+        string value, bool isWriteLine)
+    {
+        return WriteBase(singleLogItem: new ConsoleItem(value), manyLogItems: [], isWriteLine);
+    }
+
     internal static (ConsolePosition Begin, ConsolePosition End) WriteLineImpl()
     {
         if (!_positioningEnabled)

@@ -321,7 +321,7 @@ public static partial class XConsole
     /// <inheritdoc cref="Console.Write(string?)"/>
     public static (ConsolePosition Begin, ConsolePosition End) Write(string? value)
     {
-        return WriteBase(ConsoleItem.Parse(value), [], isWriteLine: false);
+        return WriteParced(value, isWriteLine: false);
     }
 
     /// <summary>
@@ -335,12 +335,7 @@ public static partial class XConsole
     /// <inheritdoc cref="Write(string?)"/>
     public static (ConsolePosition Begin, ConsolePosition End) Write(IReadOnlyList<string?> values)
     {
-        var logItems = new ConsoleItem[values.Count];
-
-        for (var i = 0; i < values.Count; i++)
-            logItems[i] = ConsoleItem.Parse(values[i]);
-
-        return WriteBase(null, logItems, isWriteLine: false);
+        return WriteParced(values, isWriteLine: false);
     }
 
     /// <summary>
@@ -359,13 +354,7 @@ public static partial class XConsole
 #endif
         string format, object? arg0)
     {
-        if (format.Length == 0)
-        {
-            var position = CursorPositionImpl;
-            return (position, position);
-        }
-
-        return WriteBase(ConsoleItem.Parse(string.Format(format, arg0)), [], isWriteLine: false);
+        return WriteParced(string.Format(format, arg0), isWriteLine: false);
     }
 
     /// <summary>
@@ -384,13 +373,7 @@ public static partial class XConsole
 #endif
         string format, object? arg0, object? arg1)
     {
-        if (format.Length == 0)
-        {
-            var position = CursorPositionImpl;
-            return (position, position);
-        }
-
-        return WriteBase(ConsoleItem.Parse(string.Format(format, arg0, arg1)), [], isWriteLine: false);
+        return WriteParced(string.Format(format, arg0, arg1), isWriteLine: false);
     }
 
     /// <summary>
@@ -409,13 +392,7 @@ public static partial class XConsole
 #endif
         string format, object? arg0, object? arg1, object? arg2)
     {
-        if (format.Length == 0)
-        {
-            var position = CursorPositionImpl;
-            return (position, position);
-        }
-
-        return WriteBase(ConsoleItem.Parse(string.Format(format, arg0, arg1, arg2)), [], isWriteLine: false);
+        return WriteParced(string.Format(format, arg0, arg1, arg2), isWriteLine: false);
     }
 
     /// <summary>
@@ -434,13 +411,7 @@ public static partial class XConsole
 #endif
         string format, params object?[]? arg)
     {
-        if (format.Length == 0)
-        {
-            var position = CursorPositionImpl;
-            return (position, position);
-        }
-
-        return WriteBase(ConsoleItem.Parse(string.Format(format, arg ?? [])), [], isWriteLine: false);
+        return WriteParced(string.Format(format, arg ?? []), isWriteLine: false);
     }
 
 #if NET9_0_OR_GREATER
@@ -457,13 +428,7 @@ public static partial class XConsole
     public static (ConsolePosition Begin, ConsolePosition End) Write(
         [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string format, params ReadOnlySpan<object?> arg)
     {
-        if (format.Length == 0)
-        {
-            var position = CursorPositionImpl;
-            return (position, position);
-        }
-
-        return WriteBase(ConsoleItem.Parse(string.Format(format, arg)), [], isWriteLine: false);
+        return WriteParced(string.Format(format, arg), isWriteLine: false);
     }
 #endif
 
@@ -471,40 +436,28 @@ public static partial class XConsole
     /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(bool value)
     {
-        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: false);
+        return WritePlain(value.ToString(), isWriteLine: false);
     }
 
     /// <inheritdoc cref="Console.Write(char)"/>
     /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(char value)
     {
-        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: false);
+        return WritePlain(value.ToString(), isWriteLine: false);
     }
 
     /// <inheritdoc cref="Console.Write(char[])"/>
     /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(char[]? buffer)
     {
-        if (buffer == null || buffer.Length == 0)
-        {
-            var position = CursorPositionImpl;
-            return (position, position);
-        }
-
-        return WriteBase(new ConsoleItem(new string(buffer)), [], isWriteLine: false);
+        return WritePlain(new string(buffer), isWriteLine: false);
     }
 
     /// <inheritdoc cref="Console.Write(char[], int, int)"/>
     /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(char[] buffer, int index, int count)
     {
-        if (count == 0)
-        {
-            var position = CursorPositionImpl;
-            return (position, position);
-        }
-
-        return WriteBase(new ConsoleItem(new string(buffer, index, count)), [], isWriteLine: false);
+        return WritePlain(new string(buffer, index, count), isWriteLine: false);
     }
 
 #if NET10_0_OR_GREATER
@@ -512,7 +465,7 @@ public static partial class XConsole
     /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(ReadOnlySpan<char> value)
     {
-        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: false);
+        return WritePlain(value.ToString(), isWriteLine: false);
     }
 #endif
 
@@ -520,69 +473,56 @@ public static partial class XConsole
     /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(decimal value)
     {
-        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: false);
+        return WritePlain(value.ToString(), isWriteLine: false);
     }
 
     /// <inheritdoc cref="Console.Write(double)"/>
     /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(double value)
     {
-        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: false);
+        return WritePlain(value.ToString(), isWriteLine: false);
     }
 
     /// <inheritdoc cref="Console.Write(float)"/>
     /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(float value)
     {
-        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: false);
+        return WritePlain(value.ToString(), isWriteLine: false);
     }
 
     /// <inheritdoc cref="Console.Write(int)"/>
     /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(int value)
     {
-        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: false);
+        return WritePlain(value.ToString(), isWriteLine: false);
     }
 
     /// <inheritdoc cref="Console.Write(uint)"/>
     /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(uint value)
     {
-        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: false);
+        return WritePlain(value.ToString(), isWriteLine: false);
     }
 
     /// <inheritdoc cref="Console.Write(long)"/>
     /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(long value)
     {
-        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: false);
+        return WritePlain(value.ToString(), isWriteLine: false);
     }
 
     /// <inheritdoc cref="Console.Write(ulong)"/>
     /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(ulong value)
     {
-        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: false);
+        return WritePlain(value.ToString(), isWriteLine: false);
     }
 
     /// <inheritdoc cref="Console.Write(object?)"/>
     /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(object? value)
     {
-        var valueStr = value?.ToString();
-
-        if (string.IsNullOrEmpty(valueStr))
-        {
-            var position = CursorPositionImpl;
-            return (position, position);
-        }
-#if !NET
-#pragma warning disable CS8604 // Possible null reference argument.
-#endif
-        return WriteBase(new ConsoleItem(valueStr), [], isWriteLine: false);
-#if !NET
-#pragma warning restore CS8604 // Possible null reference argument.
-#endif
+        return WritePlain(value?.ToString() ?? string.Empty, isWriteLine: false);
     }
 
     #endregion
@@ -604,7 +544,7 @@ public static partial class XConsole
     /// <inheritdoc cref="Write(string?)"/>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(string? value)
     {
-        return WriteBase(ConsoleItem.Parse(value), [], isWriteLine: true);
+        return WriteParced(value, isWriteLine: true);
     }
 
     /// <summary>
@@ -619,12 +559,7 @@ public static partial class XConsole
     /// <inheritdoc cref="WriteLine(string?)"/>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(IReadOnlyList<string?> values)
     {
-        var logItems = new ConsoleItem[values.Count];
-
-        for (var i = 0; i < values.Count; i++)
-            logItems[i] = ConsoleItem.Parse(values[i]);
-
-        return WriteBase(null, logItems, isWriteLine: true);
+        return WriteParced(values, isWriteLine: true);
     }
 
     /// <summary>
@@ -643,10 +578,7 @@ public static partial class XConsole
 #endif
         string format, object? arg0)
     {
-        if (format.Length == 0)
-            return WriteLineImpl();
-
-        return WriteBase(ConsoleItem.Parse(string.Format(format, arg0)), [], isWriteLine: true);
+        return WriteParced(string.Format(format, arg0), isWriteLine: true);
     }
 
     /// <summary>
@@ -665,10 +597,7 @@ public static partial class XConsole
 #endif
         string format, object? arg0, object? arg1)
     {
-        if (format.Length == 0)
-            return WriteLineImpl();
-
-        return WriteBase(ConsoleItem.Parse(string.Format(format, arg0, arg1)), [], isWriteLine: true);
+        return WriteParced(string.Format(format, arg0, arg1), isWriteLine: true);
     }
 
     /// <summary>
@@ -687,10 +616,7 @@ public static partial class XConsole
 #endif
         string format, object? arg0, object? arg1, object? arg2)
     {
-        if (format.Length == 0)
-            return WriteLineImpl();
-
-        return WriteBase(ConsoleItem.Parse(string.Format(format, arg0, arg1, arg2)), [], isWriteLine: true);
+        return WriteParced(string.Format(format, arg0, arg1, arg2), isWriteLine: true);
     }
 
     /// <summary>
@@ -709,10 +635,7 @@ public static partial class XConsole
 #endif
         string format, params object?[]? arg)
     {
-        if (format.Length == 0)
-            return WriteLineImpl();
-
-        return WriteBase(ConsoleItem.Parse(string.Format(format, arg ?? [])), [], isWriteLine: true);
+        return WriteParced(string.Format(format, arg ?? []), isWriteLine: true);
     }
 
 #if NET9_0_OR_GREATER
@@ -729,10 +652,7 @@ public static partial class XConsole
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(
         [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string format, params ReadOnlySpan<object?> arg)
     {
-        if (format.Length == 0)
-            return WriteLineImpl();
-
-        return WriteBase(ConsoleItem.Parse(string.Format(format, arg)), [], isWriteLine: true);
+        return WriteParced(string.Format(format, arg), isWriteLine: true);
     }
 #endif
 
@@ -740,34 +660,28 @@ public static partial class XConsole
     /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(bool value)
     {
-        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: true);
+        return WritePlain(value.ToString(), isWriteLine: true);
     }
 
     /// <inheritdoc cref="Console.WriteLine(char)"/>
     /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(char value)
     {
-        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: true);
+        return WritePlain(value.ToString(), isWriteLine: true);
     }
 
     /// <inheritdoc cref="Console.WriteLine(char[])"/>
     /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(char[]? buffer)
     {
-        if (buffer == null || buffer.Length == 0)
-            return WriteLineImpl();
-
-        return WriteBase(new ConsoleItem(new string(buffer)), [], isWriteLine: true);
+        return WritePlain(new string(buffer), isWriteLine: true);
     }
 
     /// <inheritdoc cref="Console.WriteLine(char[], int, int)"/>
     /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(char[] buffer, int index, int count)
     {
-        if (count == 0)
-            return WriteLineImpl();
-
-        return WriteBase(new ConsoleItem(new string(buffer, index, count)), [], isWriteLine: true);
+        return WritePlain(new string(buffer, index, count), isWriteLine: true);
     }
 
 #if NET10_0_OR_GREATER
@@ -775,7 +689,7 @@ public static partial class XConsole
     /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(ReadOnlySpan<char> value)
     {
-        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: true);
+        return WritePlain(value.ToString(), isWriteLine: true);
     }
 #endif
 
@@ -783,66 +697,56 @@ public static partial class XConsole
     /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(decimal value)
     {
-        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: true);
+        return WritePlain(value.ToString(), isWriteLine: true);
     }
 
     /// <inheritdoc cref="Console.WriteLine(double)"/>
     /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(double value)
     {
-        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: true);
+        return WritePlain(value.ToString(), isWriteLine: true);
     }
 
     /// <inheritdoc cref="Console.WriteLine(float)"/>
     /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(float value)
     {
-        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: true);
+        return WritePlain(value.ToString(), isWriteLine: true);
     }
 
     /// <inheritdoc cref="Console.WriteLine(int)"/>
     /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(int value)
     {
-        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: true);
+        return WritePlain(value.ToString(), isWriteLine: true);
     }
 
     /// <inheritdoc cref="Console.WriteLine(uint)"/>
     /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(uint value)
     {
-        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: true);
+        return WritePlain(value.ToString(), isWriteLine: true);
     }
 
     /// <inheritdoc cref="Console.WriteLine(long)"/>
     /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(long value)
     {
-        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: true);
+        return WritePlain(value.ToString(), isWriteLine: true);
     }
 
     /// <inheritdoc cref="Console.WriteLine(ulong)"/>
     /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(ulong value)
     {
-        return WriteBase(new ConsoleItem(value.ToString()), [], isWriteLine: true);
+        return WritePlain(value.ToString(), isWriteLine: true);
     }
 
     /// <inheritdoc cref="Console.WriteLine(object?)"/>
     /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(object? value)
     {
-        var valueStr = value?.ToString();
-
-        if (string.IsNullOrEmpty(valueStr))
-            return WriteLineImpl();
-#if !NET
-#pragma warning disable CS8604 // Possible null reference argument.
-#endif
-        return WriteBase(new ConsoleItem(valueStr), [], isWriteLine: true);
-#if !NET
-#pragma warning restore CS8604 // Possible null reference argument.
-#endif
+        return WritePlain(value?.ToString() ?? string.Empty, isWriteLine: true);
     }
 
     #endregion
