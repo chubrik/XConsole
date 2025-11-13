@@ -78,7 +78,7 @@ public static class ConsoleExtensions
                     case ConsoleKey.Enter:
                         if (result != null)
                         {
-                            XConsole.WriteLine();
+                            XConsole.WriteLineImpl();
                             return result.Value;
                         }
                         continue;

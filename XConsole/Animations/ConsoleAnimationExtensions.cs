@@ -18,7 +18,7 @@ public static class ConsoleAnimationExtensions
     public static IConsoleAnimation AnimateEllipsis(
         this ConsoleExtras _, CancellationToken? cancellationToken = null)
     {
-        return XConsole.CursorPosition.AnimateEllipsis(cancellationToken);
+        return XConsole.CursorPositionImpl.AnimateEllipsis(cancellationToken);
     }
 
     /// <summary>
@@ -27,6 +27,6 @@ public static class ConsoleAnimationExtensions
     public static IConsoleAnimation AnimateSpinner(
         this ConsoleExtras _, CancellationToken? cancellationToken = null)
     {
-        return XConsole.CursorPosition.AnimateSpinner(cancellationToken);
+        return XConsole.CursorPositionImpl.AnimateSpinner(cancellationToken);
     }
 }
