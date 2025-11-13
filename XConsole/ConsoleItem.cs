@@ -5,18 +5,18 @@ using System;
 internal readonly struct ConsoleItem(
     string value,
     ConsoleItemType type = ConsoleItemType.Plain,
-    ConsoleColor foreColor = default,
-    ConsoleColor backColor = default)
+    ConsoleColor foreColor = (ConsoleColor)(-1),
+    ConsoleColor backColor = (ConsoleColor)(-1))
 {
     public string Value { get; } = value;
     public ConsoleItemType Type { get; } = type;
     public ConsoleColor ForeColor { get; } = foreColor;
     public ConsoleColor BackColor { get; } = backColor;
 
-    public static ConsoleItem Parse(string? value)
+    public static ConsoleItem Parse(string value)
     {
-        if (value == null || value.Length < 2)
-            return new(value ?? string.Empty);
+        if (value.Length < 2)
+            return new(value);
 
         var char0 = (int)value[0];
         var char1 = (int)value[1];

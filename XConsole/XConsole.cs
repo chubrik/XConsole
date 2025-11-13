@@ -205,9 +205,6 @@ public static partial class XConsole
     [UnsupportedOSPlatform("tvos")]
     public static void UpdatePin()
     {
-        if (!_positioningEnabled)
-            return;
-
         UpdatePinImpl();
     }
 
@@ -228,9 +225,6 @@ public static partial class XConsole
     [UnsupportedOSPlatform("tvos")]
     public static void Unpin()
     {
-        if (!_positioningEnabled)
-            return;
-
         UnpinImpl();
     }
 
@@ -321,7 +315,7 @@ public static partial class XConsole
     /// <inheritdoc cref="Console.Write(string?)"/>
     public static (ConsolePosition Begin, ConsolePosition End) Write(string? value)
     {
-        return WriteParced(value, isWriteLine: false);
+        return WriteParced(value ?? string.Empty, isWriteLine: false);
     }
 
     /// <summary>
@@ -544,7 +538,7 @@ public static partial class XConsole
     /// <inheritdoc cref="Write(string?)"/>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(string? value)
     {
-        return WriteParced(value, isWriteLine: true);
+        return WriteParced(value ?? string.Empty, isWriteLine: true);
     }
 
     /// <summary>
@@ -1124,6 +1118,7 @@ public static partial class XConsole
         }
     }
 
+#if NET
     /// <summary>
     /// Gets the position of the cursor.
     /// </summary>
@@ -1142,6 +1137,7 @@ public static partial class XConsole
         lock (_syncLock)
             return GetCursorPositionNoLock();
     }
+#endif
 
     /// <inheritdoc cref="Console.Title"/>
     public static string Title
@@ -1205,7 +1201,11 @@ public static partial class XConsole
     public static void Clear()
     {
         lock (_syncLock)
+        {
+            _shiftTop = 0;
             Console.Clear();
+            UpdatePinImpl();
+        }
     }
 
     /// <inheritdoc cref="Console.SetCursorPosition(int, int)"/>

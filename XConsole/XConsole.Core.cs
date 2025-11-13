@@ -26,15 +26,29 @@ public static partial class XConsole
     private static int _maxTop;
     private static long _shiftTop = 0;
 
+#if DEBUG
+    private static readonly bool _isVsConsole; // The VS console has unexpected behavior on the right edge
+#endif
+
     static XConsole()
     {
         Console.OutputEncoding = Encoding.UTF8;
 
         try
         {
+#if NET
+            _cursorVisible = OperatingSystem.IsWindows() && Console.CursorVisible;
+#else
             _cursorVisible = Console.CursorVisible;
+#endif
             _maxTop = Console.BufferHeight - 1;
             _positioningEnabled = _maxTop > 0;
+#if DEBUG
+            Console.CursorLeft = Console.BufferWidth - 1;
+            Console.Write(' ');
+            _isVsConsole = Console.CursorLeft != 0;
+            Console.SetCursorPosition(0, 0);
+#endif
         }
         catch { }
     }
@@ -65,7 +79,7 @@ public static partial class XConsole
         var pinItems = new ConsoleItem[pinValues.Count];
 
         for (var i = 0; i < pinValues.Count; i++)
-            pinItems[i] = ConsoleItem.Parse(pinValues[i]);
+            pinItems[i] = ConsoleItem.Parse(pinValues[i] ?? string.Empty);
 
         int logLeft, logTop;
 
@@ -93,7 +107,7 @@ public static partial class XConsole
             if (_getPinValues == null)
                 return;
 
-            var pinClear = GetPinClear();
+            var pinClear = GetPinClear(Console.BufferWidth);
             (logLeft, logTop) = GetCursorPositionNoLock();
             Console.CursorVisible = false;
             Console.Write(pinClear);
@@ -105,16 +119,15 @@ public static partial class XConsole
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static string GetPinClear()
+    private static string GetPinClear(int bufferWidth)
     {
-        var pinClearWidth = Console.BufferWidth;
-        var pinClearHeight = _pinHeight;
+        var pinHeight = _pinHeight;
 
-        if (_pinClearWidth != pinClearWidth || _pinClearHeight != pinClearHeight)
+        if (_pinClearWidth != bufferWidth || _pinClearHeight != pinHeight)
         {
-            _pinClearWidth = pinClearWidth;
-            _pinClearHeight = pinClearHeight;
-            _pinClear = _newLine + new string(' ', pinClearWidth * pinClearHeight - 1);
+            _pinClearWidth = bufferWidth;
+            _pinClearHeight = pinHeight;
+            _pinClear = _newLine + new string(' ', bufferWidth * pinHeight - 1);
         }
 
         return _pinClear;
@@ -198,14 +211,14 @@ public static partial class XConsole
 
             if (endTop == _maxTop)
             {
-                var lineWrapCount = GetLineWrapCount(items, position.Left);
+                var lineWrapCount = GetLineWrapCount(items, position.Left, bufferWidth: Console.BufferWidth);
                 var shift = beginTop - endTop + lineWrapCount;
                 shiftTop += shift;
                 logTop -= shift;
                 _shiftTop = shiftTop;
             }
             else if (_pinHeight > 0 && !isOnViewport)
-                Console.SetCursorPosition(left: 0, logTop + _pinHeight);
+                Console.CursorTop = logTop + _pinHeight;
 
             Console.SetCursorPosition(logLeft, logTop);
             Console.CursorVisible = _cursorVisible;
@@ -233,7 +246,7 @@ public static partial class XConsole
                 var pinItems = new ConsoleItem[pinValues.Count];
 
                 for (var i = 0; i < pinValues.Count; i++)
-                    pinItems[i] = ConsoleItem.Parse(pinValues[i]);
+                    pinItems[i] = ConsoleItem.Parse(pinValues[i] ?? string.Empty);
 
                 WriteBaseWithPin(logItems: null, isWriteLine: false, pinItems,
                     logBeginLeft, ref logBeginTop, out _, out _);
@@ -308,7 +321,7 @@ public static partial class XConsole
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static (ConsolePosition Begin, ConsolePosition End) WriteParced(
-        string? value, bool isWriteLine)
+        string value, bool isWriteLine)
     {
         return WriteBase(singleLogItem: ConsoleItem.Parse(value), manyLogItems: [], isWriteLine);
     }
@@ -320,7 +333,7 @@ public static partial class XConsole
         var logItems = new ConsoleItem[values.Count];
 
         for (var i = 0; i < values.Count; i++)
-            logItems[i] = ConsoleItem.Parse(values[i]);
+            logItems[i] = ConsoleItem.Parse(values[i] ?? string.Empty);
 
         return WriteBase(singleLogItem: null, manyLogItems: logItems, isWriteLine);
     }
@@ -368,7 +381,7 @@ public static partial class XConsole
             var pinItems = new ConsoleItem[pinValues.Count];
 
             for (var i = 0; i < pinValues.Count; i++)
-                pinItems[i] = ConsoleItem.Parse(pinValues[i]);
+                pinItems[i] = ConsoleItem.Parse(pinValues[i] ?? string.Empty);
 
             lock (_syncLock)
             {
@@ -431,7 +444,7 @@ public static partial class XConsole
                 logItems = GetItems(singleLogItem, manyLogItems);
 
                 WriteBaseNoPin(logItems, isWriteLine,
-                    logBeginLeft, logBeginTop, out logEndLeft, out logEndTop);
+                    logBeginLeft, ref logBeginTop, out logEndLeft, out logEndTop);
 
                 shiftTop = _shiftTop;
             }
@@ -442,7 +455,7 @@ public static partial class XConsole
             var pinItems = new ConsoleItem[pinValues.Count];
 
             for (var i = 0; i < pinValues.Count; i++)
-                pinItems[i] = ConsoleItem.Parse(pinValues[i]);
+                pinItems[i] = ConsoleItem.Parse(pinValues[i] ?? string.Empty);
 
             lock (_syncLock)
             {
@@ -452,7 +465,7 @@ public static partial class XConsole
                 if (_getPinValues == null)
                 {
                     WriteBaseNoPin(logItems, isWriteLine,
-                        logBeginLeft, logBeginTop, out logEndLeft, out logEndTop);
+                        logBeginLeft, ref logBeginTop, out logEndLeft, out logEndTop);
                 }
                 else
                 {
@@ -472,7 +485,7 @@ public static partial class XConsole
 
     private static void WriteBaseNoPin(
         ConsoleItem[] logItems, bool isWriteLine,
-        int logBeginLeft, int logBeginTop, out int logEndLeft, out int logEndTop)
+        int logBeginLeft, ref int logBeginTop, out int logEndLeft, out int logEndTop)
     {
         if (isWriteLine || logItems.Length > 1)
             Console.CursorVisible = false;
@@ -488,7 +501,7 @@ public static partial class XConsole
         if (logEndTop == _maxTop)
         {
             var logEndLineWrap = isWriteLine ? 1 : 0;
-            var logLineWrapCount = GetLineWrapCount(logItems, logBeginLeft);
+            var logLineWrapCount = GetLineWrapCount(logItems, logBeginLeft, bufferWidth: Console.BufferWidth);
             var shift = logBeginTop - logEndTop + logLineWrapCount + logEndLineWrap;
             _shiftTop += shift;
             logBeginTop -= shift;
@@ -500,7 +513,8 @@ public static partial class XConsole
         ConsoleItem[]? logItems, bool isWriteLine, ConsoleItem[] pinItems,
         int logBeginLeft, ref int logBeginTop, out int logEndLeft, out int logEndTop)
     {
-        var pinClear = GetPinClear();
+        var bufferWidth = Console.BufferWidth;
+        var pinClear = GetPinClear(bufferWidth);
         Console.CursorVisible = false;
         Console.Write(pinClear);
         Console.SetCursorPosition(logBeginLeft, logBeginTop);
@@ -520,8 +534,8 @@ public static partial class XConsole
 
         if (pinEndTop == _maxTop)
         {
-            var logLineWrapCount = logItems != null ? GetLineWrapCount(logItems, logBeginLeft) : 0;
-            _pinHeight = 1 + GetLineWrapCount(pinItems, beginLeft: 0);
+            var logLineWrapCount = logItems != null ? GetLineWrapCount(logItems, logBeginLeft, bufferWidth) : 0;
+            _pinHeight = 1 + GetLineWrapCount(pinItems, beginLeft: 0, bufferWidth);
             var shift = logBeginTop - pinEndTop + logLineWrapCount + logEndLineWrap + _pinHeight;
             _shiftTop += shift;
             logBeginTop -= shift;
@@ -530,10 +544,10 @@ public static partial class XConsole
         else
             _pinHeight = pinEndTop - logEndTop - logEndLineWrap;
 
-        Console.SetCursorPosition(logEndLeft, logEndTop);
-
         if (isWriteLine)
-            Console.WriteLine();
+            Console.SetCursorPosition(left: 0, logEndTop + 1);
+        else
+            Console.SetCursorPosition(logEndLeft, logEndTop);
 
         Console.CursorVisible = _cursorVisible;
     }
@@ -643,10 +657,9 @@ public static partial class XConsole
         }
     }
 
-    private static int GetLineWrapCount(ConsoleItem[] items, int beginLeft)
+    private static int GetLineWrapCount(ConsoleItem[] items, int beginLeft, int bufferWidth)
     {
         var left = beginLeft;
-        var bufferWidth = Console.BufferWidth;
         var result = 0;
         string chars;
         int charCount, charIndex, @char;
