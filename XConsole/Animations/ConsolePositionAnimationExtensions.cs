@@ -1,19 +1,15 @@
 ﻿namespace Chubrik.XConsole;
 
 using System.Threading;
-#if NET
 using System.Runtime.Versioning;
-#endif
 
 /// <summary>
 /// Animation extensions for <see cref="ConsolePosition"/>.
 /// </summary>
-#if NET
 [UnsupportedOSPlatform("android")]
 [UnsupportedOSPlatform("browser")]
 [UnsupportedOSPlatform("ios")]
 [UnsupportedOSPlatform("tvos")]
-#endif
 public static class ConsolePositionAnimationExtensions
 {
     /// <summary>

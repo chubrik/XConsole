@@ -9,15 +9,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Runtime.Versioning;
 using System.Text;
 #if NET9_0_OR_GREATER
 using System.Threading;
 #endif
 #if NET7_0_OR_GREATER
 using System.Diagnostics.CodeAnalysis;
-#endif
-#if NET
-using System.Runtime.Versioning;
 #endif
 
 /// <summary>
@@ -134,12 +132,10 @@ public static class XConsole
     /// <remarks>
     /// See also:<br/>• <seealso cref="Unpin()"/>
     /// </remarks>
-#if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-#endif
     public static void Pin(string? value)
     {
         if (!_positioningEnabled)
@@ -162,12 +158,10 @@ public static class XConsole
     /// <remarks>
     /// See also:<br/>• <seealso cref="Unpin()"/>
     /// </remarks>
-#if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-#endif
     public static void Pin(IReadOnlyList<string?> values)
     {
         if (!_positioningEnabled)
@@ -192,12 +186,10 @@ public static class XConsole
     /// <br/>• <seealso cref="UpdatePin()"/>
     /// <br/>• <seealso cref="Unpin()"/>
     /// </remarks>
-#if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-#endif
     public static void Pin(Func<string?> getValue)
     {
         if (!_positioningEnabled)
@@ -225,12 +217,10 @@ public static class XConsole
     /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
     /// </param>
     /// <inheritdoc cref="Pin(Func{string?})"/>
-#if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-#endif
     public static void Pin(Func<IReadOnlyList<string?>> getValues)
     {
         if (!_positioningEnabled)
@@ -249,12 +239,10 @@ public static class XConsole
     /// <br/>• <seealso cref="Pin(Func{IReadOnlyList{string?}})"/>
     /// <br/>• <seealso cref="Unpin()"/>
     /// </remarks>
-#if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-#endif
     public static void UpdatePin()
     {
         if (!_positioningEnabled)
@@ -301,12 +289,10 @@ public static class XConsole
     /// <br/>• <seealso cref="Pin(Func{IReadOnlyList{string?}})"/>
     /// <br/>• <seealso cref="UpdatePin()"/>
     /// </remarks>
-#if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-#endif
     public static void Unpin()
     {
         if (!_positioningEnabled)
@@ -361,12 +347,10 @@ public static class XConsole
     /// and always points to the correct position within the console buffer area.
     /// </returns>
     /// <inheritdoc cref="Console.SetCursorPosition(int, int)"/>
-#if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-#endif
     public static ConsolePosition CursorPosition
     {
         get
@@ -473,10 +457,8 @@ public static class XConsole
     /// See also:
     /// <br/>• <seealso cref="ReadLine(ConsoleReadLineMode, char)"/> – reads the line in masked or hidden modes.
     /// </remarks>
-#if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
-#endif
     public static string? ReadLine()
     {
         lock (_syncLock)
@@ -525,10 +507,8 @@ public static class XConsole
     /// </param>
     /// <param name="maskChar">Char used for mask each character in masked <paramref name="mode"/>.</param>
     /// <inheritdoc cref="Console.ReadLine()"/>
-#if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
-#endif
     public static string? ReadLine(ConsoleReadLineMode mode, char maskChar = '\u2022')
     {
         switch (mode)
@@ -1535,21 +1515,17 @@ public static class XConsole
     #region Remaining API
 
     /// <inheritdoc cref="Console.In"/>
-#if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-#endif
     public static TextReader In => Console.In;
 
     /// <inheritdoc cref="Console.InputEncoding"/>
-#if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-#endif
     public static Encoding InputEncoding
     {
         get => Console.InputEncoding;
@@ -1564,11 +1540,9 @@ public static class XConsole
     public static Encoding OutputEncoding
     {
         get => Console.OutputEncoding;
-#if NET
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
-#endif
         set
         {
             lock (_syncLock)
@@ -1580,24 +1554,20 @@ public static class XConsole
     public static bool KeyAvailable => Console.KeyAvailable;
 
     /// <inheritdoc cref="Console.ReadKey()"/>
-#if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-#endif
     public static ConsoleKeyInfo ReadKey()
     {
         return ReadKey(intercept: false);
     }
 
     /// <inheritdoc cref="Console.ReadKey(bool)"/>
-#if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-#endif
     public static ConsoleKeyInfo ReadKey(bool intercept)
     {
         var key = Console.ReadKey(intercept: true);
@@ -1626,38 +1596,28 @@ public static class XConsole
     /// <inheritdoc cref="Console.CursorSize"/>
     public static int CursorSize
     {
-#if NET
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
-#endif
         get => Console.CursorSize;
-#if NET
         [SupportedOSPlatform("windows")]
-#endif
         set => Console.CursorSize = value;
     }
 
     /// <inheritdoc cref="Console.NumberLock"/>
-#if NET
     [SupportedOSPlatform("windows")]
-#endif
     public static bool NumberLock => Console.NumberLock;
 
     /// <inheritdoc cref="Console.CapsLock"/>
-#if NET
     [SupportedOSPlatform("windows")]
-#endif
     public static bool CapsLock => Console.CapsLock;
 
     /// <inheritdoc cref="Console.BackgroundColor"/>
-#if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-#endif
     public static ConsoleColor BackgroundColor
     {
         get
@@ -1674,12 +1634,10 @@ public static class XConsole
     }
 
     /// <inheritdoc cref="Console.ForegroundColor"/>
-#if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-#endif
     public static ConsoleColor ForegroundColor
     {
         get
@@ -1696,12 +1654,10 @@ public static class XConsole
     }
 
     /// <inheritdoc cref="Console.ResetColor()"/>
-#if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-#endif
     public static void ResetColor()
     {
         lock (_syncLock)
@@ -1711,16 +1667,12 @@ public static class XConsole
     /// <inheritdoc cref="Console.BufferWidth"/>
     public static int BufferWidth
     {
-#if NET
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
-#endif
         get => Console.BufferWidth;
-#if NET
         [SupportedOSPlatform("windows")]
-#endif
         set
         {
             lock (_syncLock)
@@ -1731,16 +1683,12 @@ public static class XConsole
     /// <inheritdoc cref="Console.BufferHeight"/>
     public static int BufferHeight
     {
-#if NET
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
-#endif
         get => Console.BufferHeight;
-#if NET
         [SupportedOSPlatform("windows")]
-#endif
         set
         {
             lock (_syncLock)
@@ -1752,9 +1700,7 @@ public static class XConsole
     }
 
     /// <inheritdoc cref="Console.SetBufferSize(int, int)"/>
-#if NET
     [SupportedOSPlatform("windows")]
-#endif
     public static void SetBufferSize(int width, int height)
     {
         lock (_syncLock)
@@ -1765,9 +1711,7 @@ public static class XConsole
     public static int WindowLeft
     {
         get => Console.WindowLeft;
-#if NET
         [SupportedOSPlatform("windows")]
-#endif
         set => Console.WindowLeft = value;
     }
 
@@ -1775,25 +1719,19 @@ public static class XConsole
     public static int WindowTop
     {
         get => Console.WindowTop;
-#if NET
         [SupportedOSPlatform("windows")]
-#endif
         set => Console.WindowTop = value;
     }
 
     /// <inheritdoc cref="Console.WindowWidth"/>
     public static int WindowWidth
     {
-#if NET
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
-#endif
         get => Console.WindowWidth;
-#if NET
         [SupportedOSPlatform("windows")]
-#endif
         set
         {
             lock (_syncLock)
@@ -1804,16 +1742,12 @@ public static class XConsole
     /// <inheritdoc cref="Console.WindowHeight"/>
     public static int WindowHeight
     {
-#if NET
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
-#endif
         get => Console.WindowHeight;
-#if NET
         [SupportedOSPlatform("windows")]
-#endif
         set
         {
             lock (_syncLock)
@@ -1822,18 +1756,14 @@ public static class XConsole
     }
 
     /// <inheritdoc cref="Console.SetWindowPosition(int, int)"/>
-#if NET
     [SupportedOSPlatform("windows")]
-#endif
     public static void SetWindowPosition(int left, int top)
     {
         Console.SetWindowPosition(left: left, top: top);
     }
 
     /// <inheritdoc cref="Console.SetWindowSize(int, int)"/>
-#if NET
     [SupportedOSPlatform("windows")]
-#endif
     public static void SetWindowSize(int width, int height)
     {
         lock (_syncLock)
@@ -1841,40 +1771,32 @@ public static class XConsole
     }
 
     /// <inheritdoc cref="Console.LargestWindowWidth"/>
-#if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-#endif
     public static int LargestWindowWidth => Console.LargestWindowWidth;
 
     /// <inheritdoc cref="Console.LargestWindowHeight"/>
-#if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-#endif
     public static int LargestWindowHeight => Console.LargestWindowHeight;
 
     /// <inheritdoc cref="Console.CursorVisible"/>
     public static bool CursorVisible
     {
-#if NET
         [SupportedOSPlatform("windows")]
-#endif
         get
         {
             lock (_syncLock)
                 return Console.CursorVisible;
         }
-#if NET
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
-#endif
         set
         {
             lock (_syncLock)
@@ -1888,12 +1810,10 @@ public static class XConsole
     /// • <seealso cref="CursorPosition"/> – smart <seealso cref="ConsolePosition"/> structure,
     /// resistant to console buffer overflow and always points to the correct position within the console buffer area.
     /// </remarks>
-#if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-#endif
     public static int CursorLeft
     {
         get
@@ -1914,12 +1834,10 @@ public static class XConsole
     /// • <seealso cref="CursorPosition"/> – smart <seealso cref="ConsolePosition"/> structure,
     /// resistant to console buffer overflow and always points to the correct position within the console buffer area.
     /// </remarks>
-#if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-#endif
     public static int CursorTop
     {
         get
@@ -1943,12 +1861,10 @@ public static class XConsole
     /// resistant to console buffer overflow and always points to the correct position within the console buffer area.
     /// </remarks>
     /// <returns>The column and row position of the cursor.</returns>
-#if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-#endif
     public static (int Left, int Top) GetCursorPosition()
     {
         lock (_syncLock)
@@ -1962,38 +1878,28 @@ public static class XConsole
     /// <inheritdoc cref="Console.Title"/>
     public static string Title
     {
-#if NET
         [SupportedOSPlatform("windows")]
-#endif
         get => Console.Title;
-#if NET
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]
         [UnsupportedOSPlatform("ios")]
         [UnsupportedOSPlatform("tvos")]
-#endif
         set => Console.Title = value;
     }
 
     /// <inheritdoc cref="Console.Beep()"/>
-#if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-#endif
     public static void Beep() => Console.Beep();
 
     /// <inheritdoc cref="Console.Beep(int, int)"/>
-#if NET
     [SupportedOSPlatform("windows")]
-#endif
     public static void Beep(int frequency, int duration) => Console.Beep(frequency: frequency, duration: duration);
 
     /// <inheritdoc cref="Console.MoveBufferArea(int, int, int, int, int, int)"/>
-#if NET
     [SupportedOSPlatform("windows")]
-#endif
     public static void MoveBufferArea(
         int sourceLeft, int sourceTop, int sourceWidth, int sourceHeight, int targetLeft, int targetTop)
     {
@@ -2005,9 +1911,7 @@ public static class XConsole
     }
 
     /// <inheritdoc cref="Console.MoveBufferArea(int, int, int, int, int, int, char, ConsoleColor, ConsoleColor)"/>
-#if NET
     [SupportedOSPlatform("windows")]
-#endif
     public static void MoveBufferArea(
         int sourceLeft, int sourceTop, int sourceWidth, int sourceHeight, int targetLeft, int targetTop,
         char sourceChar, ConsoleColor sourceForeColor, ConsoleColor sourceBackColor)
@@ -2021,11 +1925,9 @@ public static class XConsole
     }
 
     /// <inheritdoc cref="Console.Clear()"/>
-#if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-#endif
     public static void Clear()
     {
         lock (_syncLock)
@@ -2038,12 +1940,10 @@ public static class XConsole
     /// • <seealso cref="CursorPosition"/> – smart <seealso cref="ConsolePosition"/> structure,
     /// resistant to console buffer overflow and always points to the correct position within the console buffer area.
     /// </remarks>
-#if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-#endif
     public static void SetCursorPosition(int left, int top)
     {
         lock (_syncLock)
@@ -2051,12 +1951,10 @@ public static class XConsole
     }
 
     /// <inheritdoc cref="Console.CancelKeyPress"/>
-#if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-#endif
     public static event ConsoleCancelEventHandler? CancelKeyPress
     {
         add => Console.CancelKeyPress += value;
@@ -2064,12 +1962,10 @@ public static class XConsole
     }
 
     /// <inheritdoc cref="Console.TreatControlCAsInput"/>
-#if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-#endif
     public static bool TreatControlCAsInput
     {
         get => Console.TreatControlCAsInput;
@@ -2077,12 +1973,10 @@ public static class XConsole
     }
 
     /// <inheritdoc cref="Console.OpenStandardInput()"/>
-#if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-#endif
     public static Stream OpenStandardInput()
     {
         lock (_syncLock)
@@ -2090,10 +1984,8 @@ public static class XConsole
     }
 
     /// <inheritdoc cref="Console.OpenStandardInput(int)"/>
-#if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
-#endif
     public static Stream OpenStandardInput(int bufferSize)
     {
         lock (_syncLock)
@@ -2127,12 +2019,10 @@ public static class XConsole
     }
 
     /// <inheritdoc cref="Console.SetIn(TextReader)"/>
-#if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-#endif
     public static void SetIn(TextReader newIn)
     {
         lock (_syncLock)
@@ -2153,10 +2043,8 @@ public static class XConsole
     }
 
     /// <inheritdoc cref="Console.Read()"/>
-#if NET
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
-#endif
     public static int Read()
     {
         lock (_syncLock)

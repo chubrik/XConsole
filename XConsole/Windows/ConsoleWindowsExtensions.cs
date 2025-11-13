@@ -2,16 +2,12 @@
 
 using System;
 using System.Runtime.InteropServices;
-#if NET
 using System.Runtime.Versioning;
-#endif
 
 /// <summary>
 /// The most useful Windows extensions for <see cref="ConsoleExtras"/>.
 /// </summary>
-#if NET
 [SupportedOSPlatform("windows")]
-#endif
 #if NET7_0_OR_GREATER
 public static partial class ConsoleWindowsExtensions
 #else

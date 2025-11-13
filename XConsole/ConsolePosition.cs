@@ -2,9 +2,7 @@
 
 using System;
 using System.Collections.Generic;
-#if NET
 using System.Runtime.Versioning;
-#endif
 
 /// <summary>
 /// Smart structure, resistant to console buffer overflow
@@ -23,12 +21,10 @@ using System.Runtime.Versioning;
 /// <br/>• <seealso cref="Write(string?)"/>
 /// <br/>• <seealso cref="TryWrite(string?)"/>
 /// </remarks>
-#if NET
 [UnsupportedOSPlatform("android")]
 [UnsupportedOSPlatform("browser")]
 [UnsupportedOSPlatform("ios")]
 [UnsupportedOSPlatform("tvos")]
-#endif
 public readonly struct ConsolePosition
 {
     #region Common

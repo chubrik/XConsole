@@ -1,15 +1,11 @@
 ﻿namespace Chubrik.XConsole;
 
-#if NET
 using System.Runtime.Versioning;
-#endif
 
 /// <summary>
 /// The appearance type of the taskbar button when in progress.
 /// </summary>
-#if NET
 [SupportedOSPlatform("windows")]
-#endif
 public enum TaskbarProgressLevel
 {
     /// <summary>

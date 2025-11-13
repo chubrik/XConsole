@@ -1,15 +1,11 @@
 ﻿namespace Chubrik.XConsole;
 
-#if NET
 using System.Runtime.Versioning;
-#endif
 
 /// <summary>
 /// Sets what will be highlighted.
 /// </summary>
-#if NET
 [SupportedOSPlatform("windows")]
-#endif
 public enum AppHighlightKind
 {
     /// <summary>
