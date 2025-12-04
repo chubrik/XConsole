@@ -540,15 +540,6 @@ public static partial class XConsole
         return WritePlain(new string(buffer, index, count), isWriteLine: false);
     }
 
-#if NET10_0_OR_GREATER
-    /// <inheritdoc cref="Console.Write(ReadOnlySpan{char})"/>
-    /// <returns><inheritdoc cref="Write(string?)"/></returns>
-    public static (ConsolePosition Begin, ConsolePosition End) Write(ReadOnlySpan<char> value)
-    {
-        return WritePlain(value.ToString(), isWriteLine: false);
-    }
-#endif
-
     /// <inheritdoc cref="Console.Write(decimal)"/>
     /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(decimal value)
@@ -604,6 +595,15 @@ public static partial class XConsole
     {
         return WritePlain(value?.ToString() ?? string.Empty, isWriteLine: false);
     }
+
+#if NET10_0_OR_GREATER
+    /// <inheritdoc cref="Console.Write(ReadOnlySpan{char})"/>
+    /// <returns><inheritdoc cref="Write(string?)"/></returns>
+    public static (ConsolePosition Begin, ConsolePosition End) Write(ReadOnlySpan<char> value)
+    {
+        return WritePlain(value.ToString(), isWriteLine: false);
+    }
+#endif
 
     #endregion
 
@@ -785,15 +785,6 @@ public static partial class XConsole
         return WritePlain(new string(buffer, index, count), isWriteLine: true);
     }
 
-#if NET10_0_OR_GREATER
-    /// <inheritdoc cref="Console.WriteLine(ReadOnlySpan{char})"/>
-    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
-    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(ReadOnlySpan<char> value)
-    {
-        return WritePlain(value.ToString(), isWriteLine: true);
-    }
-#endif
-
     /// <inheritdoc cref="Console.WriteLine(decimal)"/>
     /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(decimal value)
@@ -849,6 +840,15 @@ public static partial class XConsole
     {
         return WritePlain(value?.ToString() ?? string.Empty, isWriteLine: true);
     }
+
+#if NET10_0_OR_GREATER
+    /// <inheritdoc cref="Console.WriteLine(ReadOnlySpan{char})"/>
+    /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(ReadOnlySpan<char> value)
+    {
+        return WritePlain(value.ToString(), isWriteLine: true);
+    }
+#endif
 
     #endregion
 

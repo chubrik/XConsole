@@ -1,6 +1,6 @@
-﻿#if NET
+﻿namespace Chubrik.XConsole;
 
-namespace Chubrik.XConsole;
+#if NET
 
 using System;
 using System.Runtime.InteropServices;
@@ -62,4 +62,9 @@ internal static class VirtualTerminal
 #endif
 }
 
+#else
+internal static class VirtualTerminal
+{
+    public static readonly bool IsEnabled = false;
+}
 #endif

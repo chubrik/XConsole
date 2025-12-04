@@ -14,16 +14,15 @@ internal sealed class EllipsisAnimation(ConsolePosition position, CancellationTo
         var position = Position;
         var delay = TimeSpan.FromMilliseconds(Random.Next(100, 151));
         var delayX2 = delay + delay;
-        ConsoleItem frame6 = new("   ");
+        var frame6 = new ConsoleItem(Clear);
 
-#if NET
         if (VirtualTerminal.IsEnabled)
         {
-            var frame1 = new ConsoleItem("\x1b[90m.\x1b[39m", type: ConsoleItemType.Ansi);
-            var frame2 = new ConsoleItem("\x1b[37m.\x1b[90m.\x1b[39m", type: ConsoleItemType.Ansi);
-            var frame3 = new ConsoleItem("\x1b[90m.\x1b[37m.\x1b[90m.\x1b[39m", type: ConsoleItemType.Ansi);
-            var frame4 = new ConsoleItem(" \x1b[90m.\x1b[37m.\x1b[39m", type: ConsoleItemType.Ansi);
-            var frame5 = new ConsoleItem("  \x1b[90m.\x1b[39m", type: ConsoleItemType.Ansi);
+            var frame1 = new ConsoleItem("\x1b[90m.\x1b[39m", ConsoleItemType.Ansi);
+            var frame2 = new ConsoleItem("\x1b[37m.\x1b[90m.\x1b[39m", ConsoleItemType.Ansi);
+            var frame3 = new ConsoleItem("\x1b[90m.\x1b[37m.\x1b[90m.\x1b[39m", ConsoleItemType.Ansi);
+            var frame4 = new ConsoleItem(" \x1b[90m.\x1b[37m.\x1b[39m", ConsoleItemType.Ansi);
+            var frame5 = new ConsoleItem("  \x1b[90m.\x1b[39m", ConsoleItemType.Ansi);
 
             for (; ; )
             {
@@ -42,7 +41,6 @@ internal sealed class EllipsisAnimation(ConsolePosition position, CancellationTo
             }
         }
         else
-#endif
         {
             var darkDot = new ConsoleItem(".", ConsoleItemType.ForeColor, foreColor: ConsoleColor.DarkGray);
             var grayDot = new ConsoleItem(".", ConsoleItemType.ForeColor, foreColor: ConsoleColor.Gray);

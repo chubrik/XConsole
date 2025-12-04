@@ -94,7 +94,6 @@ internal readonly struct ConsoleItem(
 
             if (@char < ' ')
             {
-#if NET
                 if (@char == '\x1b' && VirtualTerminal.IsEnabled)
                 {
                     i++;
@@ -113,7 +112,6 @@ internal readonly struct ConsoleItem(
                     continue;
                 }
                 else
-#endif
                 {
                     return -1;
                 }

@@ -122,7 +122,7 @@ public static partial class XConsole
     {
         var pinHeight = _pinHeight;
 
-        if (_pinClearWidth != bufferWidth || _pinClearHeight != pinHeight)
+        if (_pinClearHeight != pinHeight || _pinClearWidth != bufferWidth)
         {
             _pinClearWidth = bufferWidth;
             _pinClearHeight = pinHeight;
@@ -709,7 +709,6 @@ public static partial class XConsole
                             continue;
 
                         case '\x1b':
-#if NET
                             if (VirtualTerminal.IsEnabled)
                             {
                                 for (charIndex++; charIndex < charCount; charIndex++)
@@ -723,7 +722,6 @@ public static partial class XConsole
                                 continue;
                             }
                             else
-#endif
                             {
                                 left++;
                                 break;
