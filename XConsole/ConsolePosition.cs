@@ -19,7 +19,9 @@ using System.Runtime.Versioning;
 /// See also these methods that write text directly to a position
 /// and return the new <see cref="ConsolePosition"/> structure:
 /// <br/>• <seealso cref="Write(string?)"/>
+/// <br/>• <seealso cref="Write(string?[])"/>
 /// <br/>• <seealso cref="TryWrite(string?)"/>
+/// <br/>• <seealso cref="TryWrite(string?[])"/>
 /// </remarks>
 [UnsupportedOSPlatform("android")]
 [UnsupportedOSPlatform("browser")]
@@ -181,7 +183,7 @@ public readonly struct ConsolePosition
     /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
     /// </summary>
     /// <param name="values">
-    /// The set of values to write.
+    /// A set of values to write.
     /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
     /// </param>
     /// <inheritdoc cref="TryWrite(string?)"/>
