@@ -93,7 +93,24 @@ public readonly struct ConsolePosition
 
     /// <returns>The new end <see cref="ConsolePosition"/> structure.</returns>
     /// <exception cref="ArgumentOutOfRangeException"/>
+    /// <inheritdoc cref="TryWrite(string?[])"/>
+    public ConsolePosition Write(string?[]? values)
+    {
+        if (values == null)
+            return this;
+
+        var items = new ConsoleItem[values.Length];
+
+        for (var i = 0; i < values.Length; i++)
+            items[i] = ConsoleItem.Parse(values[i] ?? string.Empty);
+
+        return XConsole.WriteToPosition(this, singleItem: null, items);
+    }
+
+    /// <returns>The new end <see cref="ConsolePosition"/> structure.</returns>
+    /// <exception cref="ArgumentOutOfRangeException"/>
     /// <inheritdoc cref="TryWrite(IReadOnlyList{string?})"/>
+    [Obsolete("Use string?[]? overload instead.")]
     public ConsolePosition Write(IReadOnlyList<string?> values)
     {
         var items = new ConsoleItem[values.Count];
@@ -131,6 +148,35 @@ public readonly struct ConsolePosition
     }
 
     /// <summary>
+    /// Wtites the specified array of string values directly to a position.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </summary>
+    /// <param name="values">
+    /// An array of values to write.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </param>
+    /// <inheritdoc cref="TryWrite(string?)"/>
+    public ConsolePosition? TryWrite(string?[]? values)
+    {
+        if (values == null)
+            return this;
+
+        var items = new ConsoleItem[values.Length];
+
+        for (var i = 0; i < values.Length; i++)
+            items[i] = ConsoleItem.Parse(values[i] ?? string.Empty);
+
+        try
+        {
+            return XConsole.WriteToPosition(this, singleItem: null, items);
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
     /// Wtites the specified set of string values directly to a position.
     /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
     /// </summary>
@@ -139,6 +185,7 @@ public readonly struct ConsolePosition
     /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
     /// </param>
     /// <inheritdoc cref="TryWrite(string?)"/>
+    [Obsolete("Use string?[]? overload instead.")]
     public ConsolePosition? TryWrite(IReadOnlyList<string?> values)
     {
         var items = new ConsoleItem[values.Count];

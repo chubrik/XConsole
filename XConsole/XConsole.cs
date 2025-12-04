@@ -107,6 +107,31 @@ public static partial class XConsole
     }
 
     /// <summary>
+    /// Pins the specified array of string values as a static text below the regular log messages.
+    /// Text can be multiline and <see href="https://github.com/chubrik/XConsole#coloring">colored</see>.
+    /// Pin is resistant to console buffer overflow.
+    /// </summary>
+    /// <param name="values">
+    /// An array of values for pin below the regular log messages.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </param>
+    /// <remarks>
+    /// See also:<br/>• <seealso cref="Unpin()"/>
+    /// </remarks>
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+    public static void Pin(string?[]? values)
+    {
+        if (!_positioningEnabled)
+            return;
+
+        _getPinValues = () => values;
+        UpdatePinImpl();
+    }
+
+    /// <summary>
     /// Pins the specified set of string values as a static text below the regular log messages.
     /// Text can be multiline and <see href="https://github.com/chubrik/XConsole#coloring">colored</see>.
     /// Pin is resistant to console buffer overflow.
@@ -118,6 +143,7 @@ public static partial class XConsole
     /// <remarks>
     /// See also:<br/>• <seealso cref="Unpin()"/>
     /// </remarks>
+    [Obsolete("Use string?[]? overload instead.")]
     [UnsupportedOSPlatform("android")]
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
@@ -127,7 +153,12 @@ public static partial class XConsole
         if (!_positioningEnabled)
             return;
 
-        _getPinValues = () => values;
+        var array = new string?[values.Count];
+
+        for (var i = 0; i < values.Count; i++)
+            array[i] = values[i];
+
+        _getPinValues = () => array;
         UpdatePinImpl();
     }
 
@@ -181,12 +212,47 @@ public static partial class XConsole
     [UnsupportedOSPlatform("browser")]
     [UnsupportedOSPlatform("ios")]
     [UnsupportedOSPlatform("tvos")]
-    public static void Pin(Func<IReadOnlyList<string?>> getValues)
+    public static void Pin(Func<string?[]?> getValues)
     {
         if (!_positioningEnabled)
             return;
 
         _getPinValues = getValues;
+        UpdatePinImpl();
+    }
+
+    /// <summary>
+    /// Pins a set of string values from <paramref name="getValues"/> callback as a dynamic text below the regular
+    /// log messages. Text can be multiline and <see href="https://github.com/chubrik/XConsole#coloring">colored</see>,
+    /// it updates every time <see cref="Write(string?)"/> or <see cref="WriteLine(string?)"/> method are called.
+    /// Pin is resistant to console buffer overflow.
+    /// </summary>
+    /// <param name="getValues">
+    /// The set of values callback to pin as a dynamic text below the regular log messages.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </param>
+    /// <inheritdoc cref="Pin(Func{string?})"/>
+    [Obsolete("Use Func<string?[]?> overload instead.")]
+    [UnsupportedOSPlatform("android")]
+    [UnsupportedOSPlatform("browser")]
+    [UnsupportedOSPlatform("ios")]
+    [UnsupportedOSPlatform("tvos")]
+    public static void Pin(Func<IReadOnlyList<string?>> getValues)
+    {
+        if (!_positioningEnabled)
+            return;
+
+        _getPinValues = () =>
+        {
+            var values = getValues();
+            var array = new string?[values.Count];
+
+            for (var i = 0; i < values.Count; i++)
+                array[i] = values[i];
+
+            return array;
+        };
+
         UpdatePinImpl();
     }
 
@@ -319,6 +385,20 @@ public static partial class XConsole
     }
 
     /// <summary>
+    /// Writes the specified array of string values to the standard output stream.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </summary>
+    /// <param name="values">
+    /// An array of values to write.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </param>
+    /// <inheritdoc cref="Write(string?)"/>
+    public static (ConsolePosition Begin, ConsolePosition End) Write(string?[]? values)
+    {
+        return WriteParced(values ?? [], isWriteLine: false);
+    }
+
+    /// <summary>
     /// Writes the specified set of string values to the standard output stream.
     /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
     /// </summary>
@@ -327,9 +407,15 @@ public static partial class XConsole
     /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
     /// </param>
     /// <inheritdoc cref="Write(string?)"/>
+    [Obsolete("Use string?[]? overload instead.")]
     public static (ConsolePosition Begin, ConsolePosition End) Write(IReadOnlyList<string?> values)
     {
-        return WriteParced(values, isWriteLine: false);
+        var array = new string?[values.Count];
+
+        for (var i = 0; i < values.Count; i++)
+            array[i] = values[i];
+
+        return WriteParced(array, isWriteLine: false);
     }
 
     /// <summary>
@@ -542,6 +628,21 @@ public static partial class XConsole
     }
 
     /// <summary>
+    /// Writes the specified array of string values, followed by the current line terminator,
+    /// to the standard output stream.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </summary>
+    /// <param name="values">
+    /// An array of values to write.
+    /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
+    /// </param>
+    /// <inheritdoc cref="WriteLine(string?)"/>
+    public static (ConsolePosition Begin, ConsolePosition End) WriteLine(string?[]? values)
+    {
+        return WriteParced(values ?? [], isWriteLine: true);
+    }
+
+    /// <summary>
     /// Writes the specified set of string values, followed by the current line terminator,
     /// to the standard output stream.
     /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
@@ -551,9 +652,15 @@ public static partial class XConsole
     /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
     /// </param>
     /// <inheritdoc cref="WriteLine(string?)"/>
+    [Obsolete("Use string?[]? overload instead.")]
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(IReadOnlyList<string?> values)
     {
-        return WriteParced(values, isWriteLine: true);
+        var array = new string?[values.Count];
+
+        for (var i = 0; i < values.Count; i++)
+            array[i] = values[i];
+
+        return WriteParced(array, isWriteLine: true);
     }
 
     /// <summary>

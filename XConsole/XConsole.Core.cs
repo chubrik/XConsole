@@ -1,7 +1,6 @@
 ﻿namespace Chubrik.XConsole;
 
 using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 #if NET9_0_OR_GREATER
@@ -62,7 +61,7 @@ public static partial class XConsole
 
     #region Pinning
 
-    private static Func<IReadOnlyList<string?>>? _getPinValues = null;
+    private static Func<string?[]?>? _getPinValues = null;
     private static int _pinHeight = 0;
     private static int _pinClearWidth = 0;
     private static int _pinClearHeight = 0;
@@ -75,10 +74,10 @@ public static partial class XConsole
         if (getPinValues == null)
             return;
 
-        var pinValues = getPinValues();
-        var pinItems = new ConsoleItem[pinValues.Count];
+        var pinValues = getPinValues() ?? [];
+        var pinItems = new ConsoleItem[pinValues.Length];
 
-        for (var i = 0; i < pinValues.Count; i++)
+        for (var i = 0; i < pinValues.Length; i++)
             pinItems[i] = ConsoleItem.Parse(pinValues[i] ?? string.Empty);
 
         int logLeft, logTop;
@@ -242,10 +241,10 @@ public static partial class XConsole
             {
                 Console.CursorVisible = false;
                 Console.CursorTop--; //todo calculate
-                var pinValues = _getPinValues();
-                var pinItems = new ConsoleItem[pinValues.Count];
+                var pinValues = _getPinValues() ?? [];
+                var pinItems = new ConsoleItem[pinValues.Length];
 
-                for (var i = 0; i < pinValues.Count; i++)
+                for (var i = 0; i < pinValues.Length; i++)
                     pinItems[i] = ConsoleItem.Parse(pinValues[i] ?? string.Empty);
 
                 WriteBaseWithPin(logItems: null, isWriteLine: false, pinItems,
@@ -328,11 +327,11 @@ public static partial class XConsole
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static (ConsolePosition Begin, ConsolePosition End) WriteParced(
-        IReadOnlyList<string?> values, bool isWriteLine)
+        string?[] values, bool isWriteLine)
     {
-        var logItems = new ConsoleItem[values.Count];
+        var logItems = new ConsoleItem[values.Length];
 
-        for (var i = 0; i < values.Count; i++)
+        for (var i = 0; i < values.Length; i++)
             logItems[i] = ConsoleItem.Parse(values[i] ?? string.Empty);
 
         return WriteBase(singleLogItem: null, manyLogItems: logItems, isWriteLine);
@@ -377,10 +376,10 @@ public static partial class XConsole
         }
         else
         {
-            var pinValues = getPinValues();
-            var pinItems = new ConsoleItem[pinValues.Count];
+            var pinValues = getPinValues() ?? [];
+            var pinItems = new ConsoleItem[pinValues.Length];
 
-            for (var i = 0; i < pinValues.Count; i++)
+            for (var i = 0; i < pinValues.Length; i++)
                 pinItems[i] = ConsoleItem.Parse(pinValues[i] ?? string.Empty);
 
             lock (_syncLock)
@@ -451,10 +450,10 @@ public static partial class XConsole
         }
         else
         {
-            var pinValues = getPinValues();
-            var pinItems = new ConsoleItem[pinValues.Count];
+            var pinValues = getPinValues() ?? [];
+            var pinItems = new ConsoleItem[pinValues.Length];
 
-            for (var i = 0; i < pinValues.Count; i++)
+            for (var i = 0; i < pinValues.Length; i++)
                 pinItems[i] = ConsoleItem.Parse(pinValues[i] ?? string.Empty);
 
             lock (_syncLock)
