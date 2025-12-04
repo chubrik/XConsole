@@ -78,7 +78,7 @@ public static partial class XConsole
         var pinItems = new ConsoleItem[pinValues.Length];
 
         for (var i = 0; i < pinValues.Length; i++)
-            pinItems[i] = ConsoleItem.Parse(pinValues[i] ?? string.Empty);
+            pinItems[i] = ConsoleItem.Parse(pinValues[i]);
 
         int logLeft, logTop;
 
@@ -90,7 +90,7 @@ public static partial class XConsole
             if (_pinHeight == 0)
                 _pinHeight = 1;
 
-            (logLeft, logTop) = GetCursorPositionNoLock();
+            (logLeft, logTop) = Console_GetCursorPosition();
 
             WriteBaseWithPin(logItems: null, isWriteLine: false, pinItems,
                 logBeginLeft: logLeft, logBeginTop: ref logTop, out _, out _);
@@ -107,7 +107,7 @@ public static partial class XConsole
                 return;
 
             var pinClear = GetPinClear(Console.BufferWidth);
-            (logLeft, logTop) = GetCursorPositionNoLock();
+            (logLeft, logTop) = Console_GetCursorPosition();
             Console.CursorVisible = false;
             Console.Write(pinClear);
             Console.SetCursorPosition(logLeft, logTop);
@@ -142,7 +142,7 @@ public static partial class XConsole
         {
             lock (_syncLock)
             {
-                var (left, top) = GetCursorPositionNoLock();
+                var (left, top) = Console_GetCursorPosition();
                 return new(left: left, top: top, shiftTop: _shiftTop);
             }
         }
@@ -185,7 +185,7 @@ public static partial class XConsole
         lock (_syncLock)
         {
             shiftTop = _shiftTop;
-            (logLeft, logTop) = GetCursorPositionNoLock();
+            (logLeft, logTop) = Console_GetCursorPosition();
             beginTop = unchecked((int)Math.Max(int.MinValue, position.InitialTop + position.ShiftTop - shiftTop));
             isOnViewport = logTop + _pinHeight - beginTop < Console.WindowHeight;
 
@@ -206,7 +206,7 @@ public static partial class XConsole
 
             items = GetItems(singleItem, manyItems);
             WriteItems(items);
-            (endLeft, endTop) = GetCursorPositionNoLock();
+            (endLeft, endTop) = Console_GetCursorPosition();
 
             if (endTop == _maxTop)
             {
@@ -234,7 +234,7 @@ public static partial class XConsole
     {
         lock (_syncLock)
         {
-            var (logBeginLeft, logBeginTop) = GetCursorPositionNoLock();
+            var (logBeginLeft, logBeginTop) = Console_GetCursorPosition();
             var result = Console.ReadLine();
 
             if (_getPinValues != null)
@@ -245,7 +245,7 @@ public static partial class XConsole
                 var pinItems = new ConsoleItem[pinValues.Length];
 
                 for (var i = 0; i < pinValues.Length; i++)
-                    pinItems[i] = ConsoleItem.Parse(pinValues[i] ?? string.Empty);
+                    pinItems[i] = ConsoleItem.Parse(pinValues[i]);
 
                 WriteBaseWithPin(logItems: null, isWriteLine: false, pinItems,
                     logBeginLeft, ref logBeginTop, out _, out _);
@@ -287,7 +287,7 @@ public static partial class XConsole
                             keyInfo.KeyChar == '\x1a')
                         {
 #if NET
-                            if (!OperatingSystem.IsWindows() && keyInfo.KeyChar == '\x1a')
+                            if (keyInfo.KeyChar == '\x1a' && !OperatingSystem.IsWindows())
                             {
                                 WriteLineImpl();
                                 return null;
@@ -320,7 +320,7 @@ public static partial class XConsole
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static (ConsolePosition Begin, ConsolePosition End) WriteParced(
-        string value, bool isWriteLine)
+        string? value, bool isWriteLine)
     {
         return WriteBase(singleLogItem: ConsoleItem.Parse(value), manyLogItems: [], isWriteLine);
     }
@@ -332,7 +332,7 @@ public static partial class XConsole
         var logItems = new ConsoleItem[values.Length];
 
         for (var i = 0; i < values.Length; i++)
-            logItems[i] = ConsoleItem.Parse(values[i] ?? string.Empty);
+            logItems[i] = ConsoleItem.Parse(values[i]);
 
         return WriteBase(singleLogItem: null, manyLogItems: logItems, isWriteLine);
     }
@@ -362,7 +362,7 @@ public static partial class XConsole
         {
             lock (_syncLock)
             {
-                (logLeft, logTop) = GetCursorPositionNoLock();
+                (logLeft, logTop) = Console_GetCursorPosition();
                 Console.WriteLine();
 
                 if (logTop == _maxTop)
@@ -380,11 +380,11 @@ public static partial class XConsole
             var pinItems = new ConsoleItem[pinValues.Length];
 
             for (var i = 0; i < pinValues.Length; i++)
-                pinItems[i] = ConsoleItem.Parse(pinValues[i] ?? string.Empty);
+                pinItems[i] = ConsoleItem.Parse(pinValues[i]);
 
             lock (_syncLock)
             {
-                (logLeft, logTop) = GetCursorPositionNoLock();
+                (logLeft, logTop) = Console_GetCursorPosition();
 
                 if (_getPinValues == null)
                 {
@@ -439,7 +439,7 @@ public static partial class XConsole
         {
             lock (_syncLock)
             {
-                (logBeginLeft, logBeginTop) = GetCursorPositionNoLock();
+                (logBeginLeft, logBeginTop) = Console_GetCursorPosition();
                 logItems = GetItems(singleLogItem, manyLogItems);
 
                 WriteBaseNoPin(logItems, isWriteLine,
@@ -454,11 +454,11 @@ public static partial class XConsole
             var pinItems = new ConsoleItem[pinValues.Length];
 
             for (var i = 0; i < pinValues.Length; i++)
-                pinItems[i] = ConsoleItem.Parse(pinValues[i] ?? string.Empty);
+                pinItems[i] = ConsoleItem.Parse(pinValues[i]);
 
             lock (_syncLock)
             {
-                (logBeginLeft, logBeginTop) = GetCursorPositionNoLock();
+                (logBeginLeft, logBeginTop) = Console_GetCursorPosition();
                 logItems = GetItems(singleLogItem, manyLogItems);
 
                 if (_getPinValues == null)
@@ -490,7 +490,7 @@ public static partial class XConsole
             Console.CursorVisible = false;
 
         WriteItems(logItems);
-        (logEndLeft, logEndTop) = GetCursorPositionNoLock();
+        (logEndLeft, logEndTop) = Console_GetCursorPosition();
 
         if (isWriteLine)
             Console.WriteLine();
@@ -521,7 +521,7 @@ public static partial class XConsole
         if (logItems != null)
         {
             WriteItems(logItems);
-            (logEndLeft, logEndTop) = GetCursorPositionNoLock();
+            (logEndLeft, logEndTop) = Console_GetCursorPosition();
         }
         else
             (logEndLeft, logEndTop) = (logBeginLeft, logBeginTop);
@@ -556,12 +556,22 @@ public static partial class XConsole
     #region Internal utils
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static (int Left, int Top) GetCursorPositionNoLock()
+    private static (int Left, int Top) Console_GetCursorPosition()
     {
 #if NET
         return Console.GetCursorPosition();
 #else
         return (Console.CursorLeft, Console.CursorTop);
+#endif
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void Console_Write(ReadOnlySpan<char> span)
+    {
+#if NET10_0_OR_GREATER
+        Console.Write(span);
+#else
+        Console.Write(span.ToString());
 #endif
     }
 
@@ -596,7 +606,7 @@ public static partial class XConsole
         if (!_coloringEnabled)
         {
             for (var i = 0; i < items.Length; i++)
-                Console.Write(items[i].Value);
+                Console_Write(items[i].Value.Span);
 
             return;
         }
@@ -611,14 +621,14 @@ public static partial class XConsole
             {
                 case ConsoleItemType.Plain:
                 {
-                    Console.Write(item.Value);
+                    Console_Write(item.Value.Span);
                     continue;
                 }
                 case ConsoleItemType.ForeColor:
                 {
                     var origForeColor = Console.ForegroundColor;
                     Console.ForegroundColor = item.ForeColor;
-                    Console.Write(item.Value);
+                    Console_Write(item.Value.Span);
                     Console.ForegroundColor = origForeColor;
                     continue;
                 }
@@ -626,7 +636,7 @@ public static partial class XConsole
                 {
                     var origBackColor = Console.BackgroundColor;
                     Console.BackgroundColor = item.BackColor;
-                    Console.Write(item.Value);
+                    Console_Write(item.Value.Span);
                     Console.BackgroundColor = origBackColor;
                     continue;
                 }
@@ -636,7 +646,7 @@ public static partial class XConsole
                     var origBackColor = Console.BackgroundColor;
                     Console.ForegroundColor = item.ForeColor;
                     Console.BackgroundColor = item.BackColor;
-                    Console.Write(item.Value);
+                    Console_Write(item.Value.Span);
                     Console.ForegroundColor = origForeColor;
                     Console.BackgroundColor = origBackColor;
                     continue;
@@ -645,7 +655,7 @@ public static partial class XConsole
                 {
                     var origForeColor = Console.ForegroundColor;
                     var origBackColor = Console.BackgroundColor;
-                    Console.Write(item.Value);
+                    Console_Write(item.Value.Span);
                     Console.ForegroundColor = origForeColor;
                     Console.BackgroundColor = origBackColor;
                     continue;
@@ -660,17 +670,18 @@ public static partial class XConsole
     {
         var left = beginLeft;
         var result = 0;
-        string chars;
-        int charCount, charIndex, @char;
+        ReadOnlySpan<char> span;
+        int charCount, charIndex;
+        char @char;
 
         for (var itemIndex = 0; itemIndex < items.Length; itemIndex++)
         {
-            chars = items[itemIndex].Value;
-            charCount = chars.Length;
+            span = items[itemIndex].Value.Span;
+            charCount = span.Length;
 
             for (charIndex = 0; charIndex < charCount; charIndex++)
             {
-                @char = chars[charIndex];
+                @char = span[charIndex];
 
                 if (@char >= ' ')
                     left++;
@@ -703,7 +714,7 @@ public static partial class XConsole
                             {
                                 for (charIndex++; charIndex < charCount; charIndex++)
                                 {
-                                    @char = chars[charIndex];
+                                    @char = span[charIndex];
 
                                     if ((@char >= 'A' && @char <= 'Z') || (@char >= 'a' && @char <= 'z'))
                                         break;

@@ -88,7 +88,7 @@ public readonly struct ConsolePosition
     /// <inheritdoc cref="TryWrite(string?)"/>
     public ConsolePosition Write(string? value)
     {
-        return XConsole.WriteToPosition(this, ConsoleItem.Parse(value ?? string.Empty), []);
+        return XConsole.WriteToPosition(this, ConsoleItem.Parse(value), []);
     }
 
     /// <returns>The new end <see cref="ConsolePosition"/> structure.</returns>
@@ -102,7 +102,7 @@ public readonly struct ConsolePosition
         var items = new ConsoleItem[values.Length];
 
         for (var i = 0; i < values.Length; i++)
-            items[i] = ConsoleItem.Parse(values[i] ?? string.Empty);
+            items[i] = ConsoleItem.Parse(values[i]);
 
         return XConsole.WriteToPosition(this, singleItem: null, items);
     }
@@ -116,7 +116,7 @@ public readonly struct ConsolePosition
         var items = new ConsoleItem[values.Count];
 
         for (var i = 0; i < values.Count; i++)
-            items[i] = ConsoleItem.Parse(values[i] ?? string.Empty);
+            items[i] = ConsoleItem.Parse(values[i]);
 
         return XConsole.WriteToPosition(this, singleItem: null, items);
     }
@@ -139,7 +139,7 @@ public readonly struct ConsolePosition
     {
         try
         {
-            return XConsole.WriteToPosition(this, ConsoleItem.Parse(value ?? string.Empty), []);
+            return XConsole.WriteToPosition(this, ConsoleItem.Parse(value), []);
         }
         catch (ArgumentOutOfRangeException)
         {
@@ -164,7 +164,7 @@ public readonly struct ConsolePosition
         var items = new ConsoleItem[values.Length];
 
         for (var i = 0; i < values.Length; i++)
-            items[i] = ConsoleItem.Parse(values[i] ?? string.Empty);
+            items[i] = ConsoleItem.Parse(values[i]);
 
         try
         {
@@ -191,7 +191,7 @@ public readonly struct ConsolePosition
         var items = new ConsoleItem[values.Count];
 
         for (var i = 0; i < values.Count; i++)
-            items[i] = ConsoleItem.Parse(values[i] ?? string.Empty);
+            items[i] = ConsoleItem.Parse(values[i]);
 
         try
         {

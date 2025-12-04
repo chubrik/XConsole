@@ -29,4 +29,8 @@
     <InternalsVisibleTo Include="XConsole.Tests" Condition=" '$(Configuration)' == 'Debug' " />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="System.Memory" Version="4.6.*" Condition=" '$(TargetFramework)' == 'netstandard2.0' " />
+  </ItemGroup>
+
 </Project>

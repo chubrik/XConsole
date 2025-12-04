@@ -381,7 +381,7 @@ public static partial class XConsole
     /// <inheritdoc cref="Console.Write(string?)"/>
     public static (ConsolePosition Begin, ConsolePosition End) Write(string? value)
     {
-        return WriteParced(value ?? string.Empty, isWriteLine: false);
+        return WriteParced(value, isWriteLine: false);
     }
 
     /// <summary>
@@ -624,7 +624,7 @@ public static partial class XConsole
     /// <inheritdoc cref="Write(string?)"/>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(string? value)
     {
-        return WriteParced(value ?? string.Empty, isWriteLine: true);
+        return WriteParced(value, isWriteLine: true);
     }
 
     /// <summary>
@@ -1242,7 +1242,7 @@ public static partial class XConsole
     public static (int Left, int Top) GetCursorPosition()
     {
         lock (_syncLock)
-            return GetCursorPositionNoLock();
+            return Console.GetCursorPosition();
     }
 #endif
 

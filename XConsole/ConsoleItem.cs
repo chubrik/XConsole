@@ -3,23 +3,43 @@
 using System;
 
 internal readonly struct ConsoleItem(
-    string value,
+    ReadOnlyMemory<char> value,
     ConsoleItemType type = ConsoleItemType.Plain,
     ConsoleColor foreColor = (ConsoleColor)(-1),
     ConsoleColor backColor = (ConsoleColor)(-1))
 {
-    public string Value { get; } = value;
+    public ReadOnlyMemory<char> Value { get; } = value;
     public ConsoleItemType Type { get; } = type;
     public ConsoleColor ForeColor { get; } = foreColor;
     public ConsoleColor BackColor { get; } = backColor;
 
-    public static ConsoleItem Parse(string value)
-    {
-        if (value.Length < 2)
-            return new(value);
+    public ConsoleItem(
+        string value,
+        ConsoleItemType type = ConsoleItemType.Plain,
+        ConsoleColor foreColor = (ConsoleColor)(-1),
+        ConsoleColor backColor = (ConsoleColor)(-1)
+    )
+        : this(
+            value: value.AsMemory(),
+            type: type,
+            foreColor: foreColor,
+            backColor: backColor)
+    { }
 
-        var char0 = (int)value[0];
-        var char1 = (int)value[1];
+    private static readonly ConsoleItem _empty = new(ReadOnlyMemory<char>.Empty);
+
+    public static ConsoleItem Parse(string? value)
+    {
+        if (value == null)
+            return _empty;
+
+        var memory = value.AsMemory();
+
+        if (value.Length < 2)
+            return new(memory);
+
+        var char0 = value[0];
+        var char1 = value[1];
 
         if (char1 == '`')
         {
@@ -28,10 +48,10 @@ internal readonly struct ConsoleItem(
                 var foreColor = _colorMap[char0];
 
                 if (foreColor != -1)
-                    return new(value[2..], ConsoleItemType.ForeColor, foreColor: (ConsoleColor)foreColor);
+                    return new(memory[2..], ConsoleItemType.ForeColor, foreColor: (ConsoleColor)foreColor);
             }
 
-            return new(value);
+            return new(memory);
         }
 
         if (value.Length >= 3 && value[2] == '`')
@@ -45,33 +65,32 @@ internal readonly struct ConsoleItem(
                     var foreColor = _colorMap[char0];
 
                     if (foreColor != -1)
-                        return new(value[3..], ConsoleItemType.BothColors,
+                        return new(memory[3..], ConsoleItemType.BothColors,
                             foreColor: (ConsoleColor)foreColor, backColor: (ConsoleColor)backColor);
 
                     if (char0 == ' ')
-                        return new(value[3..], ConsoleItemType.BackColor, backColor: (ConsoleColor)backColor);
+                        return new(memory[3..], ConsoleItemType.BackColor, backColor: (ConsoleColor)backColor);
                 }
             }
 
-            return new(value);
+            return new(memory);
         }
 
         if (char0 == '\x1b')
-            return new(value, ConsoleItemType.Ansi);
+            return new(memory, ConsoleItemType.Ansi);
 
-        return new(value);
+        return new(memory);
     }
 
     public int GetSingleLineLengthOrMinusOne()
     {
-        var value = Value;
-        var valueLength = value.Length;
+        var span = Value.Span;
         var result = 0;
         int @char;
 
-        for (var i = 0; i < valueLength; i++)
+        for (var i = 0; i < span.Length; i++)
         {
-            @char = value[i];
+            @char = span[i];
 
             if (@char < ' ')
             {
@@ -80,9 +99,9 @@ internal readonly struct ConsoleItem(
                 {
                     i++;
 
-                    for (; i < valueLength; i++)
+                    for (; i < span.Length; i++)
                     {
-                        @char = value[i];
+                        @char = span[i];
 
                         if (@char < ' ')
                             return -1;
