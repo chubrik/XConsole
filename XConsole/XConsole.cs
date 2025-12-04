@@ -137,7 +137,7 @@ public static partial class XConsole
     /// Pin is resistant to console buffer overflow.
     /// </summary>
     /// <param name="values">
-    /// The set of values for pin below the regular log messages.
+    /// A set of values for pin below the regular log messages.
     /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
     /// </param>
     /// <remarks>
@@ -163,8 +163,8 @@ public static partial class XConsole
     }
 
     /// <summary>
-    /// Pins the value from <paramref name="getValue"/> callback as a dynamic text below the regular log messages.
-    /// Text can be multiline and <see href="https://github.com/chubrik/XConsole#coloring">colored</see>,
+    /// Pins the string value from <paramref name="getValue"/> callback as a dynamic text below the regular
+    /// log messages. Text can be multiline and <see href="https://github.com/chubrik/XConsole#coloring">colored</see>,
     /// it updates every time <see cref="Write(string?)"/> or <see cref="WriteLine(string?)"/> method are called.
     /// Pin is resistant to console buffer overflow.
     /// </summary>
@@ -198,13 +198,13 @@ public static partial class XConsole
     }
 
     /// <summary>
-    /// Pins the values from <paramref name="getValues"/> callback as a dynamic text below the regular log messages.
-    /// Text can be multiline and <see href="https://github.com/chubrik/XConsole#coloring">colored</see>,
+    /// Pins an array of string values from <paramref name="getValues"/> callback as a dynamic text below the regular
+    /// log messages. Text can be multiline and <see href="https://github.com/chubrik/XConsole#coloring">colored</see>,
     /// it updates every time <see cref="Write(string?)"/> or <see cref="WriteLine(string?)"/> method are called.
     /// Pin is resistant to console buffer overflow.
     /// </summary>
     /// <param name="getValues">
-    /// The values callback to pin as a dynamic text below the regular log messages.
+    /// The array of values callback to pin as a dynamic text below the regular log messages.
     /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
     /// </param>
     /// <inheritdoc cref="Pin(Func{string?})"/>
@@ -262,7 +262,7 @@ public static partial class XConsole
     /// <remarks>
     /// See also:
     /// <br/>• <seealso cref="Pin(Func{string?})"/>
-    /// <br/>• <seealso cref="Pin(Func{IReadOnlyList{string?}})"/>
+    /// <br/>• <seealso cref="Pin(Func{string?[]})"/>
     /// <br/>• <seealso cref="Unpin()"/>
     /// </remarks>
     [UnsupportedOSPlatform("android")]
@@ -280,9 +280,9 @@ public static partial class XConsole
     /// <remarks>
     /// See also:
     /// <br/>• <seealso cref="Pin(string?)"/>
-    /// <br/>• <seealso cref="Pin(IReadOnlyList{string?})"/>
+    /// <br/>• <seealso cref="Pin(string?[])"/>
     /// <br/>• <seealso cref="Pin(Func{string?})"/>
-    /// <br/>• <seealso cref="Pin(Func{IReadOnlyList{string?}})"/>
+    /// <br/>• <seealso cref="Pin(Func{string?[]})"/>
     /// <br/>• <seealso cref="UpdatePin()"/>
     /// </remarks>
     [UnsupportedOSPlatform("android")]
@@ -403,7 +403,7 @@ public static partial class XConsole
     /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
     /// </summary>
     /// <param name="values">
-    /// The set of values to write.
+    /// A set of values to write.
     /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
     /// </param>
     /// <inheritdoc cref="Write(string?)"/>
@@ -597,7 +597,11 @@ public static partial class XConsole
     }
 
 #if NET10_0_OR_GREATER
-    /// <inheritdoc cref="Console.Write(ReadOnlySpan{char})"/>
+    //todo System.Write(ReadOnlySpan<char>) unexpectedly does not provide summary
+    /// <summary>
+    /// Writes the specified read-only span of characters to the standard output stream.
+    /// </summary>
+    /// <param name="value">The span of characters to write.</param>
     /// <returns><inheritdoc cref="Write(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) Write(ReadOnlySpan<char> value)
     {
@@ -648,7 +652,7 @@ public static partial class XConsole
     /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
     /// </summary>
     /// <param name="values">
-    /// The set of values to write.
+    /// A set of values to write.
     /// Text can be colored using a simple <see href="https://github.com/chubrik/XConsole#coloring">microsyntax</see>.
     /// </param>
     /// <inheritdoc cref="WriteLine(string?)"/>
@@ -842,7 +846,11 @@ public static partial class XConsole
     }
 
 #if NET10_0_OR_GREATER
-    /// <inheritdoc cref="Console.WriteLine(ReadOnlySpan{char})"/>
+    //todo System.WriteLine(ReadOnlySpan<char>) unexpectedly does not provide summary
+    /// <summary>
+    /// Writes the specified read-only span of characters to the standard output stream.
+    /// </summary>
+    /// <param name="value">The span of characters to write.</param>
     /// <returns><inheritdoc cref="WriteLine(string?)"/></returns>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(ReadOnlySpan<char> value)
     {
