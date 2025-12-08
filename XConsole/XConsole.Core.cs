@@ -319,14 +319,14 @@ public static partial class XConsole
     #region Writing
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static (ConsolePosition Begin, ConsolePosition End) WriteParced(
+    private static (ConsolePosition Begin, ConsolePosition End) WriteParsed(
         string? value, bool isWriteLine)
     {
         return WriteBase(singleLogItem: ConsoleItem.Parse(value), manyLogItems: [], isWriteLine);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static (ConsolePosition Begin, ConsolePosition End) WriteParced(
+    private static (ConsolePosition Begin, ConsolePosition End) WriteParsed(
         string?[] values, bool isWriteLine)
     {
         var logItems = new ConsoleItem[values.Length];
