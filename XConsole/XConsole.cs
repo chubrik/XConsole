@@ -37,7 +37,7 @@ using System.Diagnostics.CodeAnalysis;
 /// <see cref="Write(string?)"/> and <see cref="WriteLine(string?)"/> overloads
 /// return begin and end <see cref="ConsolePosition"/> within the console buffer area.
 /// </item>
-/// <item><see cref="ReadLine()"/> has additional modes that mask or hides the typed characters on the screen.</item>
+/// <item><see cref="ReadLine()"/> has additional modes that mask or hide the typed characters on the screen.</item>
 /// <item><see cref="Extras"/> is singleton instance for pre-built and custom extensions.</item>
 /// </list>
 /// </para>
@@ -381,7 +381,7 @@ public static partial class XConsole
     /// <inheritdoc cref="Console.Write(string?)"/>
     public static (ConsolePosition Begin, ConsolePosition End) Write(string? value)
     {
-        return WriteParced(value, isWriteLine: false);
+        return WriteParsed(value, isWriteLine: false);
     }
 
     /// <summary>
@@ -395,7 +395,7 @@ public static partial class XConsole
     /// <inheritdoc cref="Write(string?)"/>
     public static (ConsolePosition Begin, ConsolePosition End) Write(string?[]? values)
     {
-        return WriteParced(values ?? [], isWriteLine: false);
+        return WriteParsed(values ?? [], isWriteLine: false);
     }
 
     /// <summary>
@@ -415,7 +415,7 @@ public static partial class XConsole
         for (var i = 0; i < values.Count; i++)
             array[i] = values[i];
 
-        return WriteParced(array, isWriteLine: false);
+        return WriteParsed(array, isWriteLine: false);
     }
 
     /// <summary>
@@ -434,7 +434,7 @@ public static partial class XConsole
 #endif
         string format, object? arg0)
     {
-        return WriteParced(string.Format(format, arg0), isWriteLine: false);
+        return WriteParsed(string.Format(format, arg0), isWriteLine: false);
     }
 
     /// <summary>
@@ -453,7 +453,7 @@ public static partial class XConsole
 #endif
         string format, object? arg0, object? arg1)
     {
-        return WriteParced(string.Format(format, arg0, arg1), isWriteLine: false);
+        return WriteParsed(string.Format(format, arg0, arg1), isWriteLine: false);
     }
 
     /// <summary>
@@ -472,7 +472,7 @@ public static partial class XConsole
 #endif
         string format, object? arg0, object? arg1, object? arg2)
     {
-        return WriteParced(string.Format(format, arg0, arg1, arg2), isWriteLine: false);
+        return WriteParsed(string.Format(format, arg0, arg1, arg2), isWriteLine: false);
     }
 
     /// <summary>
@@ -491,7 +491,7 @@ public static partial class XConsole
 #endif
         string format, params object?[]? arg)
     {
-        return WriteParced(string.Format(format, arg ?? []), isWriteLine: false);
+        return WriteParsed(string.Format(format, arg ?? []), isWriteLine: false);
     }
 
 #if NET9_0_OR_GREATER
@@ -508,7 +508,7 @@ public static partial class XConsole
     public static (ConsolePosition Begin, ConsolePosition End) Write(
         [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string format, params ReadOnlySpan<object?> arg)
     {
-        return WriteParced(string.Format(format, arg), isWriteLine: false);
+        return WriteParsed(string.Format(format, arg), isWriteLine: false);
     }
 #endif
 
@@ -597,7 +597,7 @@ public static partial class XConsole
     }
 
 #if NET10_0_OR_GREATER
-    //todo System.Write(ReadOnlySpan<char>) unexpectedly does not provide summary
+    //todo System.Console.WriteLine(ReadOnlySpan{char}) unexpectedly does not provide summary
     /// <summary>
     /// Writes the specified read-only span of characters to the standard output stream.
     /// </summary>
@@ -628,7 +628,7 @@ public static partial class XConsole
     /// <inheritdoc cref="Write(string?)"/>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(string? value)
     {
-        return WriteParced(value, isWriteLine: true);
+        return WriteParsed(value, isWriteLine: true);
     }
 
     /// <summary>
@@ -643,7 +643,7 @@ public static partial class XConsole
     /// <inheritdoc cref="WriteLine(string?)"/>
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(string?[]? values)
     {
-        return WriteParced(values ?? [], isWriteLine: true);
+        return WriteParsed(values ?? [], isWriteLine: true);
     }
 
     /// <summary>
@@ -664,7 +664,7 @@ public static partial class XConsole
         for (var i = 0; i < values.Count; i++)
             array[i] = values[i];
 
-        return WriteParced(array, isWriteLine: true);
+        return WriteParsed(array, isWriteLine: true);
     }
 
     /// <summary>
@@ -683,7 +683,7 @@ public static partial class XConsole
 #endif
         string format, object? arg0)
     {
-        return WriteParced(string.Format(format, arg0), isWriteLine: true);
+        return WriteParsed(string.Format(format, arg0), isWriteLine: true);
     }
 
     /// <summary>
@@ -702,7 +702,7 @@ public static partial class XConsole
 #endif
         string format, object? arg0, object? arg1)
     {
-        return WriteParced(string.Format(format, arg0, arg1), isWriteLine: true);
+        return WriteParsed(string.Format(format, arg0, arg1), isWriteLine: true);
     }
 
     /// <summary>
@@ -721,7 +721,7 @@ public static partial class XConsole
 #endif
         string format, object? arg0, object? arg1, object? arg2)
     {
-        return WriteParced(string.Format(format, arg0, arg1, arg2), isWriteLine: true);
+        return WriteParsed(string.Format(format, arg0, arg1, arg2), isWriteLine: true);
     }
 
     /// <summary>
@@ -740,7 +740,7 @@ public static partial class XConsole
 #endif
         string format, params object?[]? arg)
     {
-        return WriteParced(string.Format(format, arg ?? []), isWriteLine: true);
+        return WriteParsed(string.Format(format, arg ?? []), isWriteLine: true);
     }
 
 #if NET9_0_OR_GREATER
@@ -757,7 +757,7 @@ public static partial class XConsole
     public static (ConsolePosition Begin, ConsolePosition End) WriteLine(
         [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string format, params ReadOnlySpan<object?> arg)
     {
-        return WriteParced(string.Format(format, arg), isWriteLine: true);
+        return WriteParsed(string.Format(format, arg), isWriteLine: true);
     }
 #endif
 
@@ -846,7 +846,7 @@ public static partial class XConsole
     }
 
 #if NET10_0_OR_GREATER
-    //todo System.WriteLine(ReadOnlySpan<char>) unexpectedly does not provide summary
+    //todo System.Console.WriteLine(ReadOnlySpan{char}) unexpectedly does not provide summary
     /// <summary>
     /// Writes the specified read-only span of characters to the standard output stream.
     /// </summary>
@@ -924,12 +924,12 @@ public static partial class XConsole
     [UnsupportedOSPlatform("tvos")]
     public static ConsoleKeyInfo ReadKey(bool intercept)
     {
-        var key = Console.ReadKey(intercept: true);
+        var keyInfo = Console.ReadKey(intercept: true);
 
         if (!intercept)
-            Write(key.KeyChar);
+            Write(keyInfo.KeyChar);
 
-        return key;
+        return keyInfo;
     }
 
     /// <inheritdoc cref="Console.Out"/>
