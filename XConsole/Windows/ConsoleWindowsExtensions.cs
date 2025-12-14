@@ -169,7 +169,8 @@ public static class ConsoleWindowsExtensions
             extras.TaskbarProgressReset();
     }
 
-    private static readonly bool _isTaskbarProgressSupported = IsOSWindows() && IsOSMinVersion(6, 1); // Windows 7
+    private static readonly bool _isTaskbarProgressSupported =
+        XConsole.OperatingSystem_IsWindows() && IsOSMinVersion(6, 1); // Windows 7
 
     private static readonly ITaskbarInstance _taskbarInstance = (ITaskbarInstance)new TaskbarInstance();
 
@@ -261,15 +262,6 @@ public static class ConsoleWindowsExtensions
     #endregion
 
     #region Private utils
-
-    private static bool IsOSWindows()
-    {
-#if NET
-        return OperatingSystem.IsWindows();
-#else
-        return RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-#endif
-    }
 
     private static bool IsOSMinVersion(int major, int minor)
     {

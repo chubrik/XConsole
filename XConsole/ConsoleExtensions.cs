@@ -45,6 +45,7 @@ public static class ConsoleExtensions
             for (; ; )
             {
                 var key = Console.ReadKey(intercept: true).Key;
+                XConsole.ThrowIfShuttingDown();
 
                 switch (key)
                 {

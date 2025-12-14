@@ -53,7 +53,14 @@ public static partial class XConsole
     public static bool NO_COLOR
     {
         get => !_coloringEnabled;
-        set => _coloringEnabled = !value;
+        set
+        {
+            lock (_syncLock)
+            {
+                ThrowIfShuttingDown();
+                _coloringEnabled = !value;
+            }
+        }
     }
 
     /// <inheritdoc cref="ConsoleExtras"/>
@@ -66,14 +73,20 @@ public static partial class XConsole
     public static void Sync(Action action)
     {
         lock (_syncLock)
+        {
+            ThrowIfShuttingDown();
             action();
+        }
     }
 
     /// <inheritdoc cref="Sync(Action)"/>
     public static T Sync<T>(Func<T> action)
     {
         lock (_syncLock)
+        {
+            ThrowIfShuttingDown();
             return action();
+        }
     }
 
     #endregion
@@ -883,7 +896,10 @@ public static partial class XConsole
         set
         {
             lock (_syncLock)
+            {
+                ThrowIfShuttingDown();
                 Console.InputEncoding = value;
+            }
         }
     }
 
@@ -897,7 +913,10 @@ public static partial class XConsole
         set
         {
             lock (_syncLock)
+            {
+                ThrowIfShuttingDown();
                 Console.OutputEncoding = value;
+            }
         }
     }
 
@@ -1004,7 +1023,10 @@ public static partial class XConsole
         {
             if (_coloringEnabled)
                 lock (_syncLock)
+                {
+                    ThrowIfShuttingDown();
                     Console.BackgroundColor = value;
+                }
         }
     }
 
@@ -1024,7 +1046,10 @@ public static partial class XConsole
         {
             if (_coloringEnabled)
                 lock (_syncLock)
+                {
+                    ThrowIfShuttingDown();
                     Console.ForegroundColor = value;
+                }
         }
     }
 
@@ -1036,7 +1061,10 @@ public static partial class XConsole
     public static void ResetColor()
     {
         lock (_syncLock)
+        {
+            ThrowIfShuttingDown();
             Console.ResetColor();
+        }
     }
 
     /// <inheritdoc cref="Console.BufferWidth"/>
@@ -1051,7 +1079,10 @@ public static partial class XConsole
         set
         {
             lock (_syncLock)
+            {
+                ThrowIfShuttingDown();
                 Console.BufferWidth = value;
+            }
         }
     }
 
@@ -1068,6 +1099,7 @@ public static partial class XConsole
         {
             lock (_syncLock)
             {
+                ThrowIfShuttingDown();
                 Console.BufferHeight = value;
                 _maxTop = value - 1;
             }
@@ -1079,7 +1111,10 @@ public static partial class XConsole
     public static void SetBufferSize(int width, int height)
     {
         lock (_syncLock)
+        {
+            ThrowIfShuttingDown();
             Console.SetBufferSize(width: width, height: height);
+        }
     }
 
     /// <inheritdoc cref="Console.WindowLeft"/>
@@ -1107,11 +1142,7 @@ public static partial class XConsole
         [UnsupportedOSPlatform("tvos")]
         get => Console.WindowWidth;
         [SupportedOSPlatform("windows")]
-        set
-        {
-            lock (_syncLock)
-                Console.WindowWidth = value;
-        }
+        set => Console.WindowWidth = value;
     }
 
     /// <inheritdoc cref="Console.WindowHeight"/>
@@ -1123,11 +1154,7 @@ public static partial class XConsole
         [UnsupportedOSPlatform("tvos")]
         get => Console.WindowHeight;
         [SupportedOSPlatform("windows")]
-        set
-        {
-            lock (_syncLock)
-                Console.WindowHeight = value;
-        }
+        set => Console.WindowHeight = value;
     }
 
     /// <inheritdoc cref="Console.SetWindowPosition(int, int)"/>
@@ -1141,8 +1168,7 @@ public static partial class XConsole
     [SupportedOSPlatform("windows")]
     public static void SetWindowSize(int width, int height)
     {
-        lock (_syncLock)
-            Console.SetWindowSize(width: width, height: height);
+        Console.SetWindowSize(width: width, height: height);
     }
 
     /// <inheritdoc cref="Console.LargestWindowWidth"/>
@@ -1172,7 +1198,10 @@ public static partial class XConsole
         get
         {
             lock (_syncLock)
-                return Console.CursorVisible;
+            {
+                ThrowIfShuttingDown();
+                return _cursorVisible = Console.CursorVisible;
+            }
         }
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]
@@ -1181,7 +1210,10 @@ public static partial class XConsole
         set
         {
             lock (_syncLock)
-                Console.CursorVisible = _cursorVisible = value;
+            {
+                ThrowIfShuttingDown();
+                _cursorVisible = Console.CursorVisible = value;
+            }
         }
     }
 
@@ -1205,7 +1237,10 @@ public static partial class XConsole
         set
         {
             lock (_syncLock)
+            {
+                ThrowIfShuttingDown();
                 Console.CursorLeft = value;
+            }
         }
     }
 
@@ -1229,7 +1264,10 @@ public static partial class XConsole
         set
         {
             lock (_syncLock)
+            {
+                ThrowIfShuttingDown();
                 Console.CursorTop = value;
+            }
         }
     }
 
@@ -1273,14 +1311,22 @@ public static partial class XConsole
     [UnsupportedOSPlatform("tvos")]
     public static void Beep()
     {
-        Console.Beep();
+        lock (_syncLock)
+        {
+            ThrowIfShuttingDown();
+            Console.Beep();
+        }
     }
 
     /// <inheritdoc cref="Console.Beep(int, int)"/>
     [SupportedOSPlatform("windows")]
     public static void Beep(int frequency, int duration)
     {
-        Console.Beep(frequency: frequency, duration: duration);
+        lock (_syncLock)
+        {
+            ThrowIfShuttingDown();
+            Console.Beep(frequency: frequency, duration: duration);
+        }
     }
 
     /// <inheritdoc cref="Console.MoveBufferArea(int, int, int, int, int, int)"/>
@@ -1289,10 +1335,14 @@ public static partial class XConsole
         int sourceLeft, int sourceTop, int sourceWidth, int sourceHeight, int targetLeft, int targetTop)
     {
         lock (_syncLock)
+        {
+            ThrowIfShuttingDown();
+
             Console.MoveBufferArea(
                 sourceLeft: sourceLeft, sourceTop: sourceTop,
                 sourceWidth: sourceWidth, sourceHeight: sourceHeight,
                 targetLeft: targetLeft, targetTop: targetTop);
+        }
     }
 
     /// <inheritdoc cref="Console.MoveBufferArea(int, int, int, int, int, int, char, ConsoleColor, ConsoleColor)"/>
@@ -1302,11 +1352,15 @@ public static partial class XConsole
         char sourceChar, ConsoleColor sourceForeColor, ConsoleColor sourceBackColor)
     {
         lock (_syncLock)
+        {
+            ThrowIfShuttingDown();
+
             Console.MoveBufferArea(
                 sourceLeft: sourceLeft, sourceTop: sourceTop,
                 sourceWidth: sourceWidth, sourceHeight: sourceHeight,
                 targetLeft: targetLeft, targetTop: targetTop,
                 sourceChar: sourceChar, sourceForeColor: sourceForeColor, sourceBackColor: sourceBackColor);
+        }
     }
 
     /// <inheritdoc cref="Console.Clear()"/>
@@ -1317,6 +1371,7 @@ public static partial class XConsole
     {
         lock (_syncLock)
         {
+            ThrowIfShuttingDown();
             _shiftTop = 0;
             Console.Clear();
             UpdatePinImpl();
@@ -1336,7 +1391,10 @@ public static partial class XConsole
     public static void SetCursorPosition(int left, int top)
     {
         lock (_syncLock)
+        {
+            ThrowIfShuttingDown();
             Console.SetCursorPosition(left: left, top: top);
+        }
     }
 
     /// <inheritdoc cref="Console.CancelKeyPress"/>
@@ -1346,7 +1404,7 @@ public static partial class XConsole
     [UnsupportedOSPlatform("tvos")]
     public static event ConsoleCancelEventHandler? CancelKeyPress
     {
-        add => Console.CancelKeyPress += value;
+        add => AddCancelKeyPressHandler(value);
         remove => Console.CancelKeyPress -= value;
     }
 
@@ -1369,7 +1427,10 @@ public static partial class XConsole
     public static Stream OpenStandardInput()
     {
         lock (_syncLock)
+        {
+            ThrowIfShuttingDown();
             return Console.OpenStandardInput();
+        }
     }
 
     /// <inheritdoc cref="Console.OpenStandardInput(int)"/>
@@ -1378,33 +1439,50 @@ public static partial class XConsole
     public static Stream OpenStandardInput(int bufferSize)
     {
         lock (_syncLock)
+        {
+            ThrowIfShuttingDown();
             return Console.OpenStandardInput(bufferSize: bufferSize);
+        }
     }
 
     /// <inheritdoc cref="Console.OpenStandardOutput()"/>
     public static Stream OpenStandardOutput()
     {
         lock (_syncLock)
+        {
+            ThrowIfShuttingDown();
             return Console.OpenStandardOutput();
+        }
     }
 
     /// <inheritdoc cref="Console.OpenStandardOutput(int)"/>
     public static Stream OpenStandardOutput(int bufferSize)
     {
         lock (_syncLock)
+        {
+            ThrowIfShuttingDown();
             return Console.OpenStandardOutput(bufferSize: bufferSize);
+        }
     }
 
     /// <inheritdoc cref="Console.OpenStandardError()"/>
     public static Stream OpenStandardError()
     {
-        return Console.OpenStandardError();
+        lock (_syncLock)
+        {
+            ThrowIfShuttingDown();
+            return Console.OpenStandardError();
+        }
     }
 
     /// <inheritdoc cref="Console.OpenStandardError(int)"/>
     public static Stream OpenStandardError(int bufferSize)
     {
-        return Console.OpenStandardError(bufferSize: bufferSize);
+        lock (_syncLock)
+        {
+            ThrowIfShuttingDown();
+            return Console.OpenStandardError(bufferSize: bufferSize);
+        }
     }
 
     /// <inheritdoc cref="Console.SetIn(TextReader)"/>
@@ -1415,20 +1493,30 @@ public static partial class XConsole
     public static void SetIn(TextReader newIn)
     {
         lock (_syncLock)
+        {
+            ThrowIfShuttingDown();
             Console.SetIn(newIn: newIn);
+        }
     }
 
     /// <inheritdoc cref="Console.SetOut(TextWriter)"/>
     public static void SetOut(TextWriter newOut)
     {
         lock (_syncLock)
+        {
+            ThrowIfShuttingDown();
             Console.SetOut(newOut: newOut);
+        }
     }
 
     /// <inheritdoc cref="Console.SetError(TextWriter)"/>
     public static void SetError(TextWriter newError)
     {
-        Console.SetError(newError: newError);
+        lock (_syncLock)
+        {
+            ThrowIfShuttingDown();
+            Console.SetError(newError: newError);
+        }
     }
 
     /// <inheritdoc cref="Console.Read()"/>
@@ -1437,7 +1525,10 @@ public static partial class XConsole
     public static int Read()
     {
         lock (_syncLock)
+        {
+            ThrowIfShuttingDown();
             return Console.Read();
+        }
     }
 
     #endregion

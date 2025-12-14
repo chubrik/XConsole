@@ -1,10 +1,15 @@
 ﻿namespace Chubrik.XConsole;
 
 using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
-#if NET9_0_OR_GREATER
 using System.Threading;
+using System.Threading.Tasks;
+#if NET
+using System.Diagnostics.CodeAnalysis;
+#else
+using System.Runtime.InteropServices;
 #endif
 
 public static partial class XConsole
@@ -38,7 +43,7 @@ public static partial class XConsole
 #if NET
             _cursorVisible = OperatingSystem.IsWindows() && Console.CursorVisible;
 #else
-            _cursorVisible = Console.CursorVisible;
+            _cursorVisible = OperatingSystem_IsWindows() && Console.CursorVisible;
 #endif
             _maxTop = Console.BufferHeight - 1;
             _positioningEnabled = _maxTop > 0;
@@ -50,6 +55,8 @@ public static partial class XConsole
 #endif
         }
         catch { }
+
+        SubscribeToShutdown();
     }
 
     internal static long ShiftTop => _shiftTop;
@@ -84,6 +91,8 @@ public static partial class XConsole
 
         lock (_syncLock)
         {
+            ThrowIfShuttingDown();
+
             if (_getPinValues == null)
                 return;
 
@@ -103,6 +112,8 @@ public static partial class XConsole
 
         lock (_syncLock)
         {
+            ThrowIfShuttingDown();
+
             if (_getPinValues == null)
                 return;
 
@@ -150,6 +161,7 @@ public static partial class XConsole
         {
             lock (_syncLock)
             {
+                ThrowIfShuttingDown();
                 var actualTop = Math.Max(int.MinValue, value.InitialTop + value.ShiftTop - _shiftTop);
                 Console.SetCursorPosition(value.Left, unchecked((int)actualTop));
             }
@@ -184,6 +196,7 @@ public static partial class XConsole
 
         lock (_syncLock)
         {
+            ThrowIfShuttingDown();
             shiftTop = _shiftTop;
             (logLeft, logTop) = Console_GetCursorPosition();
             beginTop = unchecked((int)Math.Max(int.MinValue, position.InitialTop + position.ShiftTop - shiftTop));
@@ -234,8 +247,10 @@ public static partial class XConsole
     {
         lock (_syncLock)
         {
+            ThrowIfShuttingDown();
             var (logBeginLeft, logBeginTop) = Console_GetCursorPosition();
             var result = Console.ReadLine();
+            ThrowIfShuttingDown();
 
             if (_getPinValues != null)
             {
@@ -270,9 +285,12 @@ public static partial class XConsole
 
                 lock (_syncLock)
                 {
+                    ThrowIfShuttingDown();
+
                     do
                     {
                         keyInfo = Console.ReadKey(intercept: true);
+                        ThrowIfShuttingDown();
 
                         if (keyInfo.Key == ConsoleKey.Backspace && result.Length > 0)
                         {
@@ -349,7 +367,10 @@ public static partial class XConsole
         if (!_positioningEnabled)
         {
             lock (_syncLock)
+            {
+                ThrowIfShuttingDown();
                 Console.WriteLine();
+            }
 
             return (default, default);
         }
@@ -362,6 +383,7 @@ public static partial class XConsole
         {
             lock (_syncLock)
             {
+                ThrowIfShuttingDown();
                 (logLeft, logTop) = Console_GetCursorPosition();
                 Console.WriteLine();
 
@@ -384,6 +406,7 @@ public static partial class XConsole
 
             lock (_syncLock)
             {
+                ThrowIfShuttingDown();
                 (logLeft, logTop) = Console_GetCursorPosition();
 
                 if (_getPinValues == null)
@@ -421,6 +444,7 @@ public static partial class XConsole
         {
             lock (_syncLock)
             {
+                ThrowIfShuttingDown();
                 logItems = GetItems(singleLogItem, manyLogItems);
                 WriteItems(logItems);
 
@@ -439,6 +463,7 @@ public static partial class XConsole
         {
             lock (_syncLock)
             {
+                ThrowIfShuttingDown();
                 (logBeginLeft, logBeginTop) = Console_GetCursorPosition();
                 logItems = GetItems(singleLogItem, manyLogItems);
 
@@ -458,6 +483,7 @@ public static partial class XConsole
 
             lock (_syncLock)
             {
+                ThrowIfShuttingDown();
                 (logBeginLeft, logBeginTop) = Console_GetCursorPosition();
                 logItems = GetItems(singleLogItem, manyLogItems);
 
@@ -554,6 +580,16 @@ public static partial class XConsole
     #endregion
 
     #region Internal utils
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static bool OperatingSystem_IsWindows()
+    {
+#if NET
+        return OperatingSystem.IsWindows();
+#else
+        return RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+#endif
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static (int Left, int Top) Console_GetCursorPosition()
@@ -741,6 +777,105 @@ public static partial class XConsole
 
         return result;
     }
+
+    #region Shutdown
+
+    private static volatile int _shuttingDown = 0;
+
+    private static void SubscribeToShutdown()
+    {
+        try
+        {
+            Console.CancelKeyPress += OnCancelKeyPress;
+        }
+        catch { }
+
+        AppDomain.CurrentDomain.ProcessExit += (_, _) =>
+        {
+            if (Interlocked.Exchange(ref _shuttingDown, 1) == 1)
+                return;
+
+            StepOverPin();
+        };
+    }
+
+    private static void OnCancelKeyPress(object? sender, ConsoleCancelEventArgs e)
+    {
+        if (Interlocked.Exchange(ref _shuttingDown, 1) == 1)
+            return;
+
+        // A small delay to allow all short-lived locks that affect the console to complete. We
+        // can't use our own locks in this code because it would create a deadlock with long-lived
+        // locks, for example Sync(...). This is not an issue, however, as long-lived locks should
+        // no longer directly interact with the console.
+        Task.Delay(50).GetAwaiter().GetResult();
+
+        StepOverPin();
+
+        // Under the debugger, any subscription to CancelKeyPress causes the application to freeze.
+        // Therefore, if previous subscriptions haven't set Cancel = true, we manually terminate
+        // the application with an exit code. We also ensure that this handler is called last.
+        if (Debugger.IsAttached && !e.Cancel)
+        {
+            const int STATUS_CONTROL_C_EXIT = unchecked((int)0xC000013A);
+            const int SIGINT = 128 + 2;
+            var exitCode = OperatingSystem_IsWindows() ? STATUS_CONTROL_C_EXIT : SIGINT;
+            Environment.Exit(exitCode);
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void StepOverPin()
+    {
+        var pinHeight = _pinHeight;
+
+        if (pinHeight > 0)
+        {
+            var newLines = _newLine;
+
+            for (var i = 1; i < pinHeight; i++)
+                newLines += _newLine;
+
+            Console.WriteLine(newLines);
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static void AddCancelKeyPressHandler(ConsoleCancelEventHandler? handler)
+    {
+        // Ensure that our handler is called last
+        lock (_syncLock)
+        {
+            ThrowIfShuttingDown();
+            Console.CancelKeyPress -= OnCancelKeyPress;
+            Console.CancelKeyPress += handler;
+            Console.CancelKeyPress += OnCancelKeyPress;
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static void ThrowIfShuttingDown()
+    {
+        if (_shuttingDown == 1)
+            ThrowOperationCanceled();
+    }
+
+#if NET
+    [DoesNotReturn]
+#endif
+    private static void ThrowOperationCanceled()
+    {
+        // Suspend the thread for a period longer than the delay in the CancelKeyPress handler.
+        // This is to ensure the application has time to terminate before an
+        // OperationCanceledException can be written to the console.
+        Task.Delay(100).GetAwaiter().GetResult();
+
+        // This code should not be reached, as the application will exit before it can be executed
+        throw new OperationCanceledException(
+            "The operation was canceled because the application is shutting down.");
+    }
+
+    #endregion
 
     #endregion
 }
