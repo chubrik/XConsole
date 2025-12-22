@@ -27,7 +27,6 @@ public static partial class XConsole
 
     private static bool _coloringEnabled = string.IsNullOrEmpty(Environment.GetEnvironmentVariable("NO_COLOR"));
     private static bool _cursorVisible;
-    private static int _maxTop;
     private static long _shiftTop = 0;
 
 #if DEBUG
@@ -45,8 +44,7 @@ public static partial class XConsole
 #else
             _cursorVisible = OperatingSystem_IsWindows() && Console.CursorVisible;
 #endif
-            _maxTop = Console.BufferHeight - 1;
-            _positioningEnabled = _maxTop > 0;
+            _positioningEnabled = Console.BufferHeight > 0;
 #if DEBUG
             Console.CursorLeft = Console.BufferWidth - 1;
             Console.Write(' ');
@@ -87,6 +85,7 @@ public static partial class XConsole
         for (var i = 0; i < pinValues.Length; i++)
             pinItems[i] = ConsoleItem.Parse(pinValues[i]);
 
+        var maxTop = Console.BufferHeight - 1;
         int logLeft, logTop;
 
         lock (_syncLock)
@@ -101,7 +100,7 @@ public static partial class XConsole
 
             (logLeft, logTop) = Console_GetCursorPosition();
 
-            WriteBaseWithPin(logItems: null, isWriteLine: false, pinItems,
+            WriteBaseWithPin(logItems: null, isWriteLine: false, maxTop, pinItems,
                 logBeginLeft: logLeft, logBeginTop: ref logTop, out _, out _);
         }
     }
@@ -189,6 +188,7 @@ public static partial class XConsole
         if (!_positioningEnabled)
             return default;
 
+        var maxTop = Console.BufferHeight - 1;
         bool isOnViewport;
         int logLeft, logTop, beginTop, endLeft, endTop;
         long shiftTop;
@@ -221,7 +221,7 @@ public static partial class XConsole
             WriteItems(items);
             (endLeft, endTop) = Console_GetCursorPosition();
 
-            if (endTop == _maxTop)
+            if (endTop == maxTop)
             {
                 var lineWrapCount = GetLineWrapCount(items, position.Left, bufferWidth: Console.BufferWidth);
                 var shift = beginTop - endTop + lineWrapCount;
@@ -256,13 +256,14 @@ public static partial class XConsole
             {
                 Console.CursorVisible = false;
                 Console.CursorTop--; //todo calculate
+                var maxTop = Console.BufferHeight - 1;
                 var pinValues = _getPinValues() ?? [];
                 var pinItems = new ConsoleItem[pinValues.Length];
 
                 for (var i = 0; i < pinValues.Length; i++)
                     pinItems[i] = ConsoleItem.Parse(pinValues[i]);
 
-                WriteBaseWithPin(logItems: null, isWriteLine: false, pinItems,
+                WriteBaseWithPin(logItems: null, isWriteLine: false, maxTop, pinItems,
                     logBeginLeft, ref logBeginTop, out _, out _);
             }
 
@@ -376,6 +377,7 @@ public static partial class XConsole
         }
 
         var getPinValues = _getPinValues;
+        var maxTop = Console.BufferHeight - 1;
         int logLeft, logTop;
         long shiftTop;
 
@@ -387,7 +389,7 @@ public static partial class XConsole
                 (logLeft, logTop) = Console_GetCursorPosition();
                 Console.WriteLine();
 
-                if (logTop == _maxTop)
+                if (logTop == maxTop)
                 {
                     _shiftTop++;
                     logTop--;
@@ -413,7 +415,7 @@ public static partial class XConsole
                 {
                     Console.WriteLine();
 
-                    if (logTop == _maxTop)
+                    if (logTop == maxTop)
                     {
                         _shiftTop++;
                         logTop--;
@@ -421,7 +423,7 @@ public static partial class XConsole
                 }
                 else
                 {
-                    WriteBaseWithPin(logItems: null, isWriteLine: true, pinItems,
+                    WriteBaseWithPin(logItems: null, isWriteLine: true, maxTop, pinItems,
                         logBeginLeft: logLeft, logBeginTop: ref logTop, out _, out _);
                 }
 
@@ -456,6 +458,7 @@ public static partial class XConsole
         }
 
         var getPinValues = _getPinValues;
+        var maxTop = Console.BufferHeight - 1;
         int logBeginLeft, logBeginTop, logEndLeft, logEndTop;
         long shiftTop;
 
@@ -467,7 +470,7 @@ public static partial class XConsole
                 (logBeginLeft, logBeginTop) = Console_GetCursorPosition();
                 logItems = GetItems(singleLogItem, manyLogItems);
 
-                WriteBaseNoPin(logItems, isWriteLine,
+                WriteBaseNoPin(logItems, isWriteLine, maxTop,
                     logBeginLeft, ref logBeginTop, out logEndLeft, out logEndTop);
 
                 shiftTop = _shiftTop;
@@ -489,12 +492,12 @@ public static partial class XConsole
 
                 if (_getPinValues == null)
                 {
-                    WriteBaseNoPin(logItems, isWriteLine,
+                    WriteBaseNoPin(logItems, isWriteLine, maxTop,
                         logBeginLeft, ref logBeginTop, out logEndLeft, out logEndTop);
                 }
                 else
                 {
-                    WriteBaseWithPin(logItems, isWriteLine, pinItems,
+                    WriteBaseWithPin(logItems, isWriteLine, maxTop, pinItems,
                         logBeginLeft, ref logBeginTop, out logEndLeft, out logEndTop);
                 }
 
@@ -509,7 +512,7 @@ public static partial class XConsole
     }
 
     private static void WriteBaseNoPin(
-        ConsoleItem[] logItems, bool isWriteLine,
+        ConsoleItem[] logItems, bool isWriteLine, int maxTop,
         int logBeginLeft, ref int logBeginTop, out int logEndLeft, out int logEndTop)
     {
         if (isWriteLine || logItems.Length > 1)
@@ -523,7 +526,7 @@ public static partial class XConsole
 
         Console.CursorVisible = _cursorVisible;
 
-        if (logEndTop == _maxTop)
+        if (logEndTop == maxTop)
         {
             var logEndLineWrap = isWriteLine ? 1 : 0;
             var logLineWrapCount = GetLineWrapCount(logItems, logBeginLeft, bufferWidth: Console.BufferWidth);
@@ -535,7 +538,7 @@ public static partial class XConsole
     }
 
     private static void WriteBaseWithPin(
-        ConsoleItem[]? logItems, bool isWriteLine, ConsoleItem[] pinItems,
+        ConsoleItem[]? logItems, bool isWriteLine, int maxTop, ConsoleItem[] pinItems,
         int logBeginLeft, ref int logBeginTop, out int logEndLeft, out int logEndTop)
     {
         var bufferWidth = Console.BufferWidth;
@@ -557,7 +560,7 @@ public static partial class XConsole
         var pinEndTop = Console.CursorTop;
         var logEndLineWrap = isWriteLine ? 1 : 0;
 
-        if (pinEndTop == _maxTop)
+        if (pinEndTop == maxTop)
         {
             var logLineWrapCount = logItems != null ? GetLineWrapCount(logItems, logBeginLeft, bufferWidth) : 0;
             _pinHeight = 1 + GetLineWrapCount(pinItems, beginLeft: 0, bufferWidth);

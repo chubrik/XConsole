@@ -1101,7 +1101,6 @@ public static partial class XConsole
             {
                 ThrowIfShuttingDown();
                 Console.BufferHeight = value;
-                _maxTop = value - 1;
             }
         }
     }
