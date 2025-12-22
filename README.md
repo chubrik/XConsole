@@ -2,6 +2,7 @@
 [![NuGet package](https://img.shields.io/nuget/v/XConsole)](https://www.nuget.org/packages/XConsole/)
 [![MIT license](https://img.shields.io/github/license/chubrik/XConsole)](https://github.com/chubrik/XConsole/blob/main/LICENSE)
 [![NuGet downloads](https://img.shields.io/nuget/dt/XConsole)](https://www.nuget.org/packages/XConsole/)
+[![GitHub stars](https://img.shields.io/github/stars/chubrik/XConsole?style=social)](https://github.com/chubrik/XConsole/stargazers)
 
 Extended .NET console with coloring microsyntax, multiline pinning, write-to-position and most useful utils.
 It’s designed with a focus on performance for professional use in complex tasks:

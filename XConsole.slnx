@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Build.props" />
+  </Folder>
+  <Project Path="XConsole/XConsole.csproj" />
+  <Project Path="XConsole.Demo/XConsole.Demo.csproj" />
+  <Project Path="XConsole.Tests/XConsole.Tests.csproj" />
+</Solution>

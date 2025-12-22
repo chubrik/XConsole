@@ -40,9 +40,9 @@ public static partial class XConsole
         try
         {
 #if NET
-            _cursorVisible = OperatingSystem.IsWindows() && Console.CursorVisible;
+            _cursorVisible = !OperatingSystem.IsWindows() || Console.CursorVisible;
 #else
-            _cursorVisible = OperatingSystem_IsWindows() && Console.CursorVisible;
+            _cursorVisible = !OperatingSystem_IsWindows() || Console.CursorVisible;
 #endif
             _positioningEnabled = Console.BufferHeight > 0;
 #if DEBUG
@@ -150,11 +150,16 @@ public static partial class XConsole
     {
         get
         {
+            int left, top;
+            long shiftTop;
+
             lock (_syncLock)
             {
-                var (left, top) = Console_GetCursorPosition();
-                return new(left: left, top: top, shiftTop: _shiftTop);
+                (left, top) = Console_GetCursorPosition();
+                shiftTop = _shiftTop;
             }
+
+            return new(left: left, top: top, shiftTop: shiftTop);
         }
         set
         {
@@ -827,7 +832,6 @@ public static partial class XConsole
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void StepOverPin()
     {
         var pinHeight = _pinHeight;
@@ -843,7 +847,6 @@ public static partial class XConsole
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static void AddCancelKeyPressHandler(ConsoleCancelEventHandler? handler)
     {
         // Ensure that our handler is called last
@@ -866,6 +869,7 @@ public static partial class XConsole
 #if NET
     [DoesNotReturn]
 #endif
+    [MethodImpl(MethodImplOptions.NoInlining)]
     private static void ThrowOperationCanceled()
     {
         // Suspend the thread for a period longer than the delay in the CancelKeyPress handler.
