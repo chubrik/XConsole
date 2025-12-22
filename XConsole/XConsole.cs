@@ -1197,10 +1197,7 @@ public static partial class XConsole
         get
         {
             lock (_syncLock)
-            {
-                ThrowIfShuttingDown();
                 return _cursorVisible = Console.CursorVisible;
-            }
         }
         [UnsupportedOSPlatform("android")]
         [UnsupportedOSPlatform("browser")]

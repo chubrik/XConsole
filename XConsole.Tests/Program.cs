@@ -9,22 +9,20 @@ internal class Program
 
     private static void Main()
     {
-        Console.WindowWidth = BufferWidth;
-        Console.WindowHeight = WindowHeight;
-        Console.BufferWidth = BufferWidth;
-        Console.BufferHeight = BufferHeight;
+        Console.SetWindowSize(BufferWidth, WindowHeight);
+        Console.SetBufferSize(BufferWidth, BufferHeight);
 
         Simple();
         PinOneLine();
         PinTwoLines();
 
-        Console.Clear();
+        Reset();
         Console.WriteLine("G`All tests passed");
     }
 
     private static void Simple()
     {
-        Console.Clear();
+        Reset();
         var line = 0;
 
         for (; line < MaxTop - 2; line++)
@@ -59,7 +57,7 @@ internal class Program
 
     private static void PinOneLine()
     {
-        Console.Clear();
+        Reset();
         Console.Pin("Line Pinned");
         var line = 0;
 
@@ -95,7 +93,7 @@ internal class Program
 
     private static void PinTwoLines()
     {
-        Console.Clear();
+        Reset();
         Console.Pin("Line Pinned 1\nLine Pinned 2");
         var line = 0;
 
@@ -127,5 +125,12 @@ internal class Program
         Debug.Assert(begin4.InitialTop == MaxTop - 3);
         Debug.Assert(begin4.ActualTop == MaxTop - 3);
         Debug.Assert(begin4.ShiftTop == 2);
+    }
+
+    private static void Reset()
+    {
+        Console.ResetColor();
+        Console.Unpin();
+        Console.Clear();
     }
 }
